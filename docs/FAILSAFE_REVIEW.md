@@ -61,6 +61,7 @@ Severity:
 | B3 | Queue levels (Chapters 4 and 7) where the given number order can't actually be completed. | Critical | The validator must also simulate the queue. To be added before those chapters are generated. | 📐 |
 | B4 | Tilt and Locks rules are not fully defined yet. | Medium | Write exact rules and validator checks before generating Chapters 3 and 6. | 📐 |
 | B5 | A 9×9 board on iPhone SE or mini: 9 columns at about 38pt is under Apple's 44pt touch target, and 9 tray tiles don't fit. | High | Full-height column hit areas, a 2-row tray, an enlarged highlight under the finger. Test on the smallest supported iPhone. | 📐 |
+| B6 | Gap ceiling: with bottom-stacked givens, uniqueness breaks above about 8 gaps (4×4) and 17 gaps (6×6), so "harder by removing more numbers" stops working. (Found while generating levels.) | High | Difficulty comes from a measured score (fewer logical moves per step), the timer and later-chapter clues. Generator gap targets are set inside the limits. | ✅ |
 
 ## C. Economy (Sparks)
 

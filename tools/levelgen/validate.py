@@ -35,22 +35,43 @@ def count_solutions(g, n, limit=2):
                 return total
     return 1
 
+def units(n):
+    br, bc = boxes(n)
+    rows = [[(r, c) for c in range(n)] for r in range(n)]
+    cols = [[(r, c) for r in range(n)] for c in range(n)]
+    bxs = [[(r, c) for r in range(R, R + br) for c in range(C, C + bc)] for R in range(0, n, br) for C in range(0, n, bc)]
+    return rows + cols + bxs
+
+def playable_deductions(g, n):
+    """Logical moves a player can make right now: (row, col, value) for lowest gaps that are
+    a naked single (only one number fits) or a hidden single (the only place for a number in
+    some row, column or box, counting every gap in that unit)."""
+    cand = {(r, c): {v for v in range(1, n + 1) if ok(g, n, r, c, v)} for r in range(n) for c in range(n) if g[r][c] == 0}
+    lowest = {}
+    for c in range(n):
+        rs = [r for r in range(n) if g[r][c] == 0]
+        if rs:
+            lowest[(max(rs), c)] = True
+    moves = {}
+    for cell in lowest:
+        if len(cand[cell]) == 1:
+            moves[cell] = next(iter(cand[cell]))
+    for unit in units(n):
+        for v in range(1, n + 1):
+            spots = [cell for cell in unit if cell in cand and v in cand[cell]]
+            if len(spots) == 1 and spots[0] in lowest:
+                moves[spots[0]] = v
+    return [(r, c, v) for (r, c), v in moves.items()]
+
 def gravity_solvable(g, n):
-    """Naked singles, but only on the lowest gap of each column (the only playable cells)."""
+    """Solvable by logic (naked and hidden singles) placing only on the lowest gap of each column."""
     g = [row[:] for row in g]
     while True:
-        moved = False
-        lowest = {}
-        for c in range(n):
-            rs = [r for r in range(n) if g[r][c] == 0]
-            if rs:
-                lowest[c] = max(rs)
-        for c, r in lowest.items():
-            cand = [v for v in range(1, n + 1) if ok(g, n, r, c, v)]
-            if len(cand) == 1:
-                g[r][c] = cand[0]; moved = True
-        if not moved:
+        moves = playable_deductions(g, n)
+        if not moves:
             break
+        r, c, v = moves[0]
+        g[r][c] = v
     return all(all(row) for row in g)
 
 def valid_solution(s, n):
@@ -117,6 +138,24 @@ if __name__ == '__main__':
         end = min(start + 4, 99)
         print(f'  Levels {start:>3}-{end:<3} {time_limit(start)}s')
     print(f'  Level  100     {time_limit(100)}s')
+    # The shipped level file: every level, plus file-level checks.
+    import json, os
+    lf = os.path.join(os.path.dirname(__file__), '..', '..', 'levels', 'levels.json')
+    if os.path.exists(lf):
+        data = json.load(open(lf))
+        print(f'\nlevels/levels.json ({len(data["levels"])} levels):')
+        ids, boards = set(), set()
+        for i, L in enumerate(data['levels']):
+            problems = []
+            if L['id'] in ids: problems.append('duplicate id')
+            if json.dumps(L['givens']) in boards: problems.append('duplicate board')
+            if L['number'] != i + 1: problems.append('levels out of order')
+            if L['timeLimit'] != time_limit(L['number']): problems.append(f"time limit {L['timeLimit']}s does not match the table ({time_limit(L['number'])}s)")
+            ids.add(L['id']); boards.add(json.dumps(L['givens']))
+            good = validate(f"Level {L['number']:>3} {L['id']}", L['solution'], L['givens'], L['timeLimit']) and not problems
+            for p_ in problems: print('   - ' + p_)
+            results.append(good)
+
     # Self-check: the validator must reject each of these deliberately broken levels.
     print('\nSelf-check (each of these must be rejected):')
     broken = [

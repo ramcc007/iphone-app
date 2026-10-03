@@ -215,6 +215,13 @@ Because v1 players will have earned everything by playing, any later purchases m
 
 Hand-made levels: tutorials, the first level of each chapter and the milestone levels. The rest are generated, then hand-picked and ordered by difficulty score.
 
+**Design finding from generating the real levels (3 October 2026):** because every column is a stack (givens sit at the bottom), a level can only have so many gaps before it stops having exactly one solution: about **8 on 4×4** and **17 on 6×6**. So difficulty does not come from removing ever more numbers. It comes from:
+- **fewer obvious moves per step:** the difficulty score counts how many logical drops are available at each step
+- **the timer**
+- **the later chapters' extra clues.** Sum clues and locks add information, which allows more gaps.
+
+Levels 1–20 are generated (`tools/levelgen/build_levels.py` → `levels/levels.json`). Each is validated, and they're ordered so each normal level is a small step harder, with an easier breather at x6, the hardest at x0, and an easy first 6×6 level at 11.
+
 ---
 
 ## 8. Look and feel

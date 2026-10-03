@@ -56,6 +56,7 @@ def make(n, empties, tries=4000):
         solv,steps=singles_solvable(g,n)
         if not solv: continue
         return s,g
-random.seed(11)
-s,g=make(6,16)
-print("SOL",s); print("GIV",g)
+if __name__ == '__main__':
+    random.seed(11)
+    s,g=make(6,16)
+    print("SOL",s); print("GIV",g)
