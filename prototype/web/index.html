@@ -48,8 +48,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
 .wide .status-row2 { display: flex; justify-content: space-between; align-items: center; }
 .status-row2 { display: contents; }
 
-.guide { text-align: center; font-size: 14px; font-weight: 500; color: var(--soft); min-height: 20px; line-height: 1.35; }
-.wide .guide { text-align: left; font-size: 16px; min-height: 44px; }
+.guide { text-align: center; font-size: 14px; font-weight: 500; color: var(--soft); min-height: 38px; line-height: 1.35; display: flex; align-items: center; justify-content: center; }
+.guide.flash { font-size: 16px; font-weight: 700; }
+.wide .guide { text-align: left; font-size: 16px; min-height: 44px; justify-content: flex-start; }
 .flash { text-align: center; min-height: 26px; font-size: 18px; font-weight: 700; }
 .flash.good { color: var(--good); } .flash.bad { color: var(--bad); } .flash.gold { color: var(--spark); } .flash.info { color: var(--muted); } .flash.pink { color: var(--pink); }
 
@@ -78,6 +79,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
 .tray .num { flex: 1 1 0; min-width: 0; max-width: 56px; }
 .tray.two-rows { display: grid; grid-template-columns: repeat(5, minmax(0, 56px)); justify-content: center; }
 .tray.two-rows .num { max-width: none; height: 54px; }
+.tray.nine { gap: 4px; } .tray.nine .num { max-width: none; height: 52px; border-radius: 12px; } .tray.nine .num b { font-size: 22px; }
 .wide .tray, .wide .tray.two-rows { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .wide .tray .num { max-width: none; }
 .num { width: 52px; height: 62px; border-radius: 15px; border: 3px solid transparent; color: #13161F; background: linear-gradient(180deg, var(--t-light) 0%, var(--t-base) 58%); box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), 0 5px 0 var(--t-edge); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.12s; }
@@ -135,6 +137,17 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
 .lv.skipped { background: transparent; border: 1.5px solid rgba(255,181,71,0.5); color: var(--spark); }
 .lv.locked { background: transparent; border: 1.5px dashed rgba(255,255,255,0.15); color: var(--faint); cursor: default; }
 .lv.mile { border: 2px solid var(--spark); }
+.boards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.bd { min-height: 112px; border-radius: 20px; border: 2px solid transparent; background: var(--surface); padding: 10px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+.bd svg { margin-bottom: 4px; }
+.bd .nm { font-size: 17px; font-weight: 700; }
+.bd .sz { font-size: 13px; font-weight: 600; color: var(--soft); }
+.bd .pr { font-size: 12px; font-weight: 500; color: var(--muted); }
+.bd.on { border-color: var(--accent-soft); background: rgba(107,92,240,0.2); }
+.wide .bd { min-height: 132px; } .wide .bd .nm { font-size: 20px; }
+.bd-info { text-align: center; font-size: 14px; line-height: 1.4; color: var(--soft); margin-top: -4px; }
+.chapter.closed { flex-direction: row; align-items: center; justify-content: space-between; padding: 14px 16px; color: var(--faint); }
+.chapter.closed .t { font-size: 16px; }
 .note { font-size: 13px; line-height: 1.5; color: var(--muted); text-align: center; padding: 4px 8px 12px; }
 .rules { display: flex; flex-direction: column; gap: 8px; }
 .rule { display: flex; gap: 12px; align-items: center; background: var(--surface); border-radius: 16px; padding: 10px 12px; }
@@ -155,7 +168,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
 <script>
 (function () {
   'use strict';
-  var D = window.Dropku, LEVELS = window.DROPKU_LEVELS || [];
+  var D = window.Dropku, BOARDS = window.DROPKU_BOARDS || [], LEVELS = [];
   var TILE = { 1: ['#FF6B7A', '#FF97A2', '#C94656'], 2: ['#FFB547', '#FFCF85', '#C9862A'], 3: ['#F5E663', '#FAF29A', '#BFB244'],
     4: ['#6EE7A8', '#A0F2C6', '#3FB27A'], 5: ['#4FC3F7', '#8ADAFB', '#2E8DB8'], 6: ['#9D8CFF', '#BDB2FF', '#6F5ED1'],
     7: ['#FF8AD8', '#FFB3E6', '#C25CA6'], 8: ['#2DD4BF', '#7EE6D7', '#1E9E8E'], 9: ['#C0C7D6', '#DDE1EA', '#8A91A3'] };
@@ -163,14 +176,18 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
   var HEART = '<path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.3 5 6.8 5c2 0 3.6 1.1 5.2 3 1.6-1.9 3.2-3 5.2-3 3.5 0 5.6 3.6 4.3 6.8C19.5 16.4 12 21 12 21z"/>';
   var STAR = '<polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21.5 12,17.3 5.5,21.5 7.5,14 2,9.3 9,9"/>';
   var SPARK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#FFB547" aria-hidden="true"><path d="M12 1l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"/></svg>';
-  var CHAPTERS = { 1: 'First Drops', 2: 'Planning' };
+  var BOARD_TEXT = { quick: 'Short and snappy. Great for a coffee break.', classic: 'The full Dropku workout, and the best place to start.', master: 'Big 9×9 boards, tight clocks. For Sudoku fans.' };
+  function boardById(id) { for (var i = 0; i < BOARDS.length; i++) if (BOARDS[i].id === id) return BOARDS[i]; return BOARDS[0]; }
+  function minutes(s) { return s < 120 ? s + 's' : Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
 
   // ---------- saved progress (this browser only; the real app uses iCloud) ----------
-  var KEY = 'dropku.web.v1';
-  function fresh() { return { wallet: 0, best: {}, skipped: {}, fails: {}, chests: {}, tutorialDone: false, muted: false }; }
+  var KEY = 'dropku.web.v2';
+  function fresh() { return { wallet: 0, best: {}, skipped: {}, fails: {}, chests: {}, tutorialDone: false, muted: false, board: 'classic' }; }
   function load() { try { var raw = localStorage.getItem(KEY); if (raw) { var p = JSON.parse(raw); var f = fresh(); for (var k in f) if (p[k] !== undefined) f[k] = p[k]; return f; } } catch (e) {} return fresh(); }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} }
   var P = load();
+  function setBoard(id) { var b = boardById(id); P.board = b.id; LEVELS = b.levels; }
+  setBoard(P.board);
 
   // ---------- tutorial lessons (4x4, no timer) ----------
   var S4 = [[1, 2, 3, 4], [3, 4, 1, 2], [2, 1, 4, 3], [4, 3, 2, 1]];
@@ -178,7 +195,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
   var LESSONS = [
     { title: 'Drop a number', text: 'The top row is missing a 2 and a 4. Column 2 already has a 4, so it needs the 2. Tap 2, then tap column 2.', empties: [[0, 1], [0, 3]], hearts: false, steps: [{ v: 2, c: 1 }, { v: 4, c: 3 }], stepText: ['Tap 2, then the glowing column', 'Now the 4 into the last gap'], win: 'That’s the basic move: pick a number, tap a column, and it drops in.' },
     { title: 'Order matters', text: 'Column 4 has two gaps. The TOP one needs a 4, but numbers fall to the LOWEST gap first. Try dropping the 4 first if you’re curious.', empties: [[0, 3], [1, 3], [0, 2]], hearts: false, steps: [{ v: 2, c: 3 }, { v: 4, c: 3 }, { v: 3, c: 2 }], stepText: ['Fill the lower gap first: drop the 2', 'Now the 4 lands on top', 'Last one: which number does column 3 need?'], win: 'You planned the order: lower gaps first. That’s the heart of Dropku.' },
-    { title: 'On your own', text: 'No more help. A wrong drop cracks and costs a heart. Lose all 3 and you start again. Fill the grid!', empties: [[0, 0], [1, 0], [0, 2], [0, 3], [1, 3]], hearts: true, steps: null, win: 'Real levels add a countdown: 60 seconds at first, more as grids grow. Seconds left turn into Sparks.' }
+    { title: 'On your own', text: 'No more help. A wrong drop cracks and costs a heart. Lose all 3 and you start again. Fill the grid!', empties: [[0, 0], [1, 0], [0, 2], [0, 3], [1, 3]], hearts: true, steps: null, win: 'Real levels add a countdown, and seconds left turn into Sparks. Now pick a board: Quick 4×4, Classic 6×6 or Master 9×9.' }
   ];
 
   // ---------- app state ----------
@@ -297,16 +314,28 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
   function hearts(g, size) { var h = ''; for (var i = 0; i < D.HEARTS; i++) h += '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + (i < g.hearts ? '#FF6B7A' : 'none') + '" stroke="#FF6B7A" stroke-width="2" aria-hidden="true">' + HEART + '</svg>'; return '<div class="hearts" role="img" aria-label="' + g.hearts + ' hearts left">' + h + '</div>'; }
   function starsSvg(n, size) { var h = ''; for (var i = 0; i < 3; i++) h += '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + (i < n ? '#FFB547' : 'none') + '" stroke="#FFB547" stroke-width="1.6" aria-hidden="true">' + STAR + '</svg>'; return '<div class="stars" role="img" aria-label="' + n + ' of 3 stars">' + h + '</div>'; }
 
-  function sizeBoard(n) {
+  // Tile size from the space the board really has: everything else is laid out first, then the board
+  // fills what is left (the .boardwrap box). Before the first layout, a fair estimate is used.
+  function sizeBoard(n, availW, availH) {
     var wide = isWide(), body = document.body;
-    var W = Math.min(body.clientWidth - 32, wide ? body.clientWidth : 540), H = body.clientHeight;
     var gap = n >= 9 ? 4 : wide ? 10 : 6, boxgap = n >= 9 ? 6 : wide ? 14 : 8, boxes = n === 9 ? 2 : 1;
-    var availW = wide ? W - 380 - 36 : W, availH = wide ? H - 140 : H - (n >= 9 ? 400 : 348);
+    if (availW === undefined) {
+      var W = Math.min(body.clientWidth - 32, wide ? body.clientWidth : 540), H = body.clientHeight;
+      availW = wide ? W - 380 - 36 : W; availH = wide ? H - 140 : H - (n >= 9 && H >= 750 ? 370 : 318);
+    }
     var gapsW = (n - 1) * gap + boxes * boxgap + 20, gapsH = (n - 1) * gap + (n / (n === 9 ? 3 : 2) - 1) * boxgap + 20;
     var t = Math.floor(Math.min((availW - gapsW) / n, (availH - gapsH) / n));
-    t = Math.max(26, Math.min(wide ? 96 : 92, t));
+    t = Math.max(24, Math.min(wide ? 96 : 92, t));
     var root = document.documentElement.style;
     root.setProperty('--tile', t + 'px'); root.setProperty('--gap', gap + 'px'); root.setProperty('--boxgap', boxgap + 'px');
+  }
+  function fitBoard() {
+    var wrap = document.querySelector('.boardwrap'), board = document.querySelector('.board');
+    if (!wrap || !board || !S.game) return;
+    board.style.display = 'none';                       // measure the space without the board in it
+    var w = wrap.clientWidth, h = wrap.clientHeight;
+    board.style.display = '';
+    if (w > 0 && h > 0) sizeBoard(S.game.n, w, h);
   }
 
   function boardHtml(g) {
@@ -341,7 +370,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
       var extra = guideStep && guideStep.v === v && !on ? ';outline:3px solid #FFB547;outline-offset:3px' : '';
       h += '<button class="num' + (on ? ' on' : '') + (left === 0 ? ' out' : '') + '" style="' + tileVars(v) + extra + '" data-act="pick" data-v="' + v + '" aria-pressed="' + on + '" aria-label="Number ' + v + ', ' + left + ' left">' + '<b>' + v + '</b><span>×' + left + '</span></button>';
     }
-    return '<div class="tray' + (g.n >= 9 ? ' two-rows' : '') + '">' + h + '</div>';
+    // 9 numbers: two rows of big tiles when there's height to spare, one row on short phones (iPhone SE) so the board stays usable.
+    return '<div class="tray' + (g.n >= 9 ? (window.innerHeight >= 750 || isWide() ? ' two-rows' : ' nine') : '') + '">' + h + '</div>';
   }
 
   function guideText(g) {
@@ -356,16 +386,18 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
     sizeBoard(g.n);
     var top = '<div class="topbar">' +
       (lesson ? '<button class="iconbtn" data-act="rules" aria-label="How to play">?</button>' : '<button class="iconbtn" data-act="pause" aria-label="Pause"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg></button>') +
-      '<div class="title-block"><div class="t">' + (lesson ? 'Lesson ' + (S.lesson + 1) + ' of 3' : 'Level ' + lv.number) + '</div><div class="s">' + (lesson ? 'No timer while you learn' : 'Chapter ' + lv.chapter + ' · ' + lv.timeLimit + '-second limit') + '</div></div>' +
+      '<div class="title-block"><div class="t">' + (lesson ? 'Lesson ' + (S.lesson + 1) + ' of 3' : boardById(lv.board).name + ' · Level ' + lv.number) + '</div><div class="s">' + (lesson ? 'No timer while you learn' : 'Chapter ' + lv.chapter + ' · ' + lv.timeLimit + '-second limit') + '</div></div>' +
       (lesson ? '<button class="pill" data-act="skipTutorial">Skip</button>' : '<button class="iconbtn" data-act="rules" aria-label="How to play">?</button>') + '</div>';
     var status = lesson ? (lesson.hearts ? '<div class="status">' + hearts(g, 24) + '<span style="color:var(--muted);font-size:14px">3 hearts</span></div>' : '<div class="lesson"><span class="tag">' + esc(lesson.title.toUpperCase()) + '</span><p>' + esc(lesson.text) + '</p></div>') :
       '<div class="status"><div id="timer" class="' + timerClass(g) + '" aria-label="' + g.timeLeft + ' seconds left">' + timerInner(g) + '</div><div class="status-row2">' + hearts(g, isWide() ? 30 : 22) + '<span class="pill spark" style="background:transparent;padding:0" aria-label="' + P.wallet + ' Sparks">' + SPARK + P.wallet + '</span></div></div>';
     if (lesson && lesson.hearts) status = '<div class="lesson"><span class="tag">' + esc(lesson.title.toUpperCase()) + '</span><p>' + esc(lesson.text) + '</p></div>' + status;
     var controls = lesson ? '<div class="controls"><button class="ctl" data-act="undo">Undo</button><button class="ctl" data-act="restart">Restart</button></div>' :
       '<div class="controls"><button class="ctl" data-act="undo" aria-label="Undo, ' + (g.undosLeft > 0 ? g.undosLeft + ' free' : COST.undo + ' Sparks') + '">Undo · ' + (g.undosLeft > 0 ? g.undosLeft : COST.undo + ' ✦') + '</button><button class="ctl gold" data-act="hint">Hint · ' + COST.hint + ' ✦</button><button class="ctl" data-act="restart">Restart</button></div>';
-    var side = '<div class="side">' + status + '<div class="guide">' + esc(guideText(g)) + '</div>' + (isWide() ? trayHtml(g) + '<div class="flash ' + S.flashKind + '">' + esc(S.flash) + '</div>' : '') + (isWide() ? controls : '') + '</div>';
+    // Phones: one line shows the latest feedback (Crack!, DOUBLE!...) or else the guide, so the board gets the room.
+    var line = isWide() || !S.flash ? '<div class="guide">' + esc(guideText(g)) + '</div>' : '<div class="guide flash ' + S.flashKind + '">' + esc(S.flash) + '</div>';
+    var side = '<div class="side">' + status + line + (isWide() ? trayHtml(g) + '<div class="flash ' + S.flashKind + '">' + esc(S.flash) + '</div>' : '') + (isWide() ? controls : '') + '</div>';
     var main = '<div class="boardwrap">' + boardHtml(g) + '</div>';
-    var phoneBottom = isWide() ? '' : '<div class="flash ' + S.flashKind + '">' + esc(S.flash) + '</div>' + trayHtml(g) + controls;
+    var phoneBottom = isWide() ? '' : trayHtml(g) + controls;
     return '<div class="screen game">' + top + (isWide() ? main + side : side + main + phoneBottom) + overlayHtml() + '</div>';
   }
 
@@ -379,19 +411,19 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
     if (o === 'won') {
       var r = S.result, last = S.levelIndex === LEVELS.length - 1;
       var rows = S.replay ? '<div><span>Replay: ' + (S.award ? 'new stars' : 'no new stars') + '</span><b>+' + S.award + ' ✦</b></div>' : r.breakdown.map(function (b) { return '<div><span>' + esc(b.label) + '</span><b>+' + b.n + ' ✦</b></div>'; }).join('');
-      var share = 'Dropku · Level ' + lv.number + ' ' + '★★★'.slice(0, r.stars) + '☆☆☆'.slice(0, 3 - r.stars) + ' · ' + g.timeLeft + 's to spare';
+      var share = 'Dropku ' + boardById(lv.board).name + ' · Level ' + lv.number + ' ' + '★★★'.slice(0, r.stars) + '☆☆☆'.slice(0, 3 - r.stars) + ' · ' + g.timeLeft + 's to spare';
       return '<div class="veil"><div class="sheet win"><h2>' + (r.stars === 3 ? 'Perfect!' : 'Level ' + lv.number + ' complete!') + '</h2>' + starsSvg(r.stars, 46) +
         '<div class="breakdown">' + rows + '</div>' + (S.chest ? '<div class="chest">' + SPARK + 'Chapter ' + lv.chapter + ' milestone chest: +' + S.chest + ' Sparks</div>' : '') +
         '<p style="font-size:14px">Wallet: ' + P.wallet + ' Sparks</p>' +
-        (last ? '<p>That’s every level in this preview. More chapters are coming.</p><button class="primary" data-act="home">Back to the map</button>' : '<button class="primary" data-act="next">Next: Level ' + (lv.number + 1) + '</button>') +
+        (last ? '<p>That’s every ' + boardById(lv.board).name + ' level! Try another board for a new challenge.</p><button class="primary" data-act="home">Choose a board</button>' : '<button class="primary" data-act="next">Next: Level ' + (lv.number + 1) + '</button>') +
         '<button class="secondary" data-act="share" data-text="' + esc(share) + '">' + (S.copied ? 'Copied!' : 'Share result') + '</button>' + (S.copied === 'fail' ? '<div class="sharebox">' + esc(share) + '</div>' : '') +
         (last ? '' : '<button class="link" data-act="home">Back to the map</button>') + '</div></div>';
     }
     if (o === 'timeup') return '<div class="veil"><div class="sheet lose"><h2>Time’s up!</h2><p>You filled ' + g.history.length + ' of ' + lv.gaps + ' gaps. Level ' + lv.number + ' starts again with a fresh board and the full ' + lv.timeLimit + ' seconds.</p><button class="primary" data-act="restart">Start Level ' + lv.number + ' again</button>' + skip + '<button class="link" data-act="home">Back to the map</button></div></div>';
     if (o === 'lost') return '<div class="veil"><div class="sheet lose"><h2>Out of hearts</h2><p>Level ' + lv.number + ' starts again with a fresh board and the full ' + lv.timeLimit + ' seconds.</p><button class="primary" data-act="restart">Start again</button>' +
       (g.heartBought ? '' : '<button class="secondary" data-act="heart"' + (P.wallet < COST.heart ? ' disabled style="opacity:0.45"' : '') + '>+1 heart, keep this board · ' + COST.heart + ' ✦</button>') + skip + '<button class="link" data-act="home">Back to the map</button></div></div>';
-    if (o === 'skipped') return '<div class="veil"><div class="sheet"><h2 style="color:var(--spark)">Level skipped</h2><p>Level ' + (lv.number + 1) + ' is unlocked. Level ' + lv.number + ' stays on your map so you can come back for the stars.</p><button class="primary" data-act="next">Play Level ' + (lv.number + 1) + '</button><button class="link" data-act="home">Back to the map</button></div></div>';
-    if (o === 'lessonWon') { var lastL = S.lesson === LESSONS.length - 1; return '<div class="veil"><div class="sheet win"><h2>' + (lastL ? 'You’re ready!' : 'Lesson ' + (S.lesson + 1) + ' done!') + '</h2><p>' + esc(LESSONS[S.lesson].win) + '</p>' + (lastL ? '<div class="chest">' + SPARK + 'Welcome gift: +' + WELCOME + ' Sparks</div><button class="primary" data-act="level1">Start Level 1</button>' : '<button class="primary" data-act="nextLesson">Next lesson</button>') + '</div></div>'; }
+    if (o === 'skipped') { var end = S.levelIndex === LEVELS.length - 1; return '<div class="veil"><div class="sheet"><h2 style="color:var(--spark)">Level skipped</h2><p>' + (end ? '' : 'Level ' + (lv.number + 1) + ' is unlocked. ') + 'Level ' + lv.number + ' stays on your map so you can come back for the stars.</p>' + (end ? '' : '<button class="primary" data-act="next">Play Level ' + (lv.number + 1) + '</button>') + '<button class="' + (end ? 'primary' : 'link') + '" data-act="home">Back to the map</button></div></div>'; }
+    if (o === 'lessonWon') { var lastL = S.lesson === LESSONS.length - 1; return '<div class="veil"><div class="sheet win"><h2>' + (lastL ? 'You’re ready!' : 'Lesson ' + (S.lesson + 1) + ' done!') + '</h2><p>' + esc(LESSONS[S.lesson].win) + '</p>' + (lastL ? '<div class="chest">' + SPARK + 'Welcome gift: +' + WELCOME + ' Sparks</div><button class="primary" data-act="boards">Choose your board</button>' : '<button class="primary" data-act="nextLesson">Next lesson</button>') + '</div></div>'; }
     if (o === 'lessonLost') return '<div class="veil"><div class="sheet lose"><h2>Out of hearts</h2><p>That’s how a level is lost. No penalty here, so try again!</p><button class="primary" data-act="restart">Try again</button></div></div>';
     if (o === 'rules') return rulesSheet();
     return '';
@@ -399,20 +431,45 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
 
   function rulesSheet() {
     var rules = [['✓', '#6EE7A8', 'The Sudoku rule', 'Each row, column and box holds each number once.'], ['↓', '#4FC3F7', 'Numbers fall', 'Pick a number, tap a column: it drops to the lowest gap. So fill lower gaps first.'],
-      ['60s', '#FFB547', 'Beat the countdown', '60 seconds at first, more as grids grow. Time’s up = start again.'], ['♥', '#FF6B7A', '3 hearts', 'A wrong drop cracks and costs a heart.'],
+      ['3', '#FF8AD8', 'Three boards', 'Quick 4×4, Classic 6×6 or Master 9×9. All open from the start.'], ['30s', '#FFB547', 'Beat the countdown', 'Every level has one: seconds on Quick, minutes on Master. Time’s up = start again.'], ['♥', '#FF6B7A', '3 hearts', 'A wrong drop cracks and costs a heart.'],
       ['★', '#FFB547', 'Up to 3 stars', 'No mistakes, with a quarter of the time still left.'], ['✦', '#9D8CFF', 'Sparks', 'Earned by playing. Spend them on hints, or 400 to skip a level after 2 tries.']];
     var reset = S.confirmReset ? '<p style="color:var(--bad)">This deletes your stars and Sparks in this browser.</p><button class="secondary" style="color:var(--bad)" data-act="resetYes">Yes, reset everything</button><button class="link" data-act="resetNo">Keep my progress</button>' : '<button class="link" style="color:var(--faint)" data-act="reset">Reset progress…</button>';
     return '<div class="veil"><div class="sheet"><h2>How to play</h2><div class="rules">' + rules.map(function (r) { return '<div class="rule"><div class="ic" style="background:' + r[1] + '">' + r[0] + '</div><div><b>' + r[2] + '</b><span>' + r[3] + '</span></div></div>'; }).join('') +
       '</div><button class="primary" data-act="closeRules">Got it</button><button class="secondary" data-act="tutorial">Replay the tutorial</button><button class="link" data-act="mute">' + (P.muted ? 'Sound: off (tap to turn on)' : 'Sound: on (tap to turn off)') + '</button>' + reset + '</div></div>';
   }
 
+  // A small picture of each board: n x n cells split into boxes, with grey stacks topped by a dropped tile.
+  function boardIcon(b) {
+    var n = b.size, cell = n === 9 ? 3.4 : n === 6 ? 5 : 7, gap = n === 9 ? 0.8 : 1.4, box = 2.2, out = '', colors = ['#FF6B7A', '#FFB547', '#6EE7A8', '#4FC3F7', '#9D8CFF'];
+    var span = n * cell + (n - 1) * gap + (n / b.boxCols - 1) * box;
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) {
+      var x = c * (cell + gap) + Math.floor(c / b.boxCols) * box, y = r * (cell + gap) + Math.floor(r / b.boxRows) * box;
+      var top = n - 1 - (c * 5 + 2) % Math.max(2, n / 2 | 0), fill = r < top ? 'rgba(255,255,255,0.10)' : r === top ? colors[c % colors.length] : '#59617F';
+      out += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + cell + '" height="' + cell + '" rx="' + (cell * 0.28).toFixed(1) + '" fill="' + fill + '"/>';
+    }
+    return '<svg width="40" height="40" viewBox="0 0 ' + span.toFixed(1) + ' ' + span.toFixed(1) + '" aria-hidden="true">' + out + '</svg>';
+  }
+
+  function boardStats(b) {
+    var cleared = 0, stars = 0;
+    b.levels.forEach(function (lv) { if (P.best[lv.id]) { cleared++; stars += P.best[lv.id]; } else if (P.skipped[lv.id]) cleared++; });
+    return { cleared: cleared, stars: stars };
+  }
+
   function homeScreen() {
-    var next = nextIndex(), totalStars = 0, chaptersHtml = '';
-    [1, 2].forEach(function (ch) {
+    var board = boardById(P.board), next = nextIndex(), chaptersHtml = '';
+    var picker = BOARDS.map(function (b) {
+      var st = boardStats(b), on = b.id === board.id;
+      return '<button class="bd' + (on ? ' on' : '') + '" data-act="board" data-b="' + b.id + '" aria-pressed="' + on + '" aria-label="' + b.name + ' board, ' + b.size + ' by ' + b.size + ', ' + st.cleared + ' of ' + b.levels.length + ' levels done">' +
+        boardIcon(b) + '<span class="nm">' + b.name + '</span><span class="sz">' + b.size + '×' + b.size + '</span><span class="pr">' + st.cleared + '/' + b.levels.length + '</span></button>';
+    }).join('');
+    var chapters = Math.ceil(LEVELS.length / 10);
+    for (var ch = 1; ch <= chapters; ch++) {
+      var first = (ch - 1) * 10, last = Math.min(LEVELS.length, ch * 10) - 1, range = 'Levels ' + (first + 1) + '–' + (last + 1);
+      if (!unlocked(first)) { chaptersHtml += '<section class="chapter closed" aria-label="Chapter ' + ch + ', ' + range + ', locked"><div class="t">Chapter ' + ch + ' · ' + range + '</div><span>Locked</span></section>'; continue; }
       var tiles = '', stars = 0;
-      LEVELS.forEach(function (lv, i) {
-        if (lv.chapter !== ch) return;
-        var best = P.best[lv.id] || 0; stars += best;
+      for (var i = first; i <= last; i++) {
+        var lv = LEVELS[i], best = P.best[lv.id] || 0; stars += best;
         var cls = 'lv', sub = '', act = 'data-act="play" data-i="' + i + '"', aria;
         if (best) { cls += ' done'; sub = '★★★'.slice(0, best) + '☆☆☆'.slice(0, 3 - best); aria = 'Level ' + lv.number + ', ' + best + ' stars'; }
         else if (P.skipped[lv.id]) { cls += ' skipped'; sub = 'SKIPPED'; aria = 'Level ' + lv.number + ', skipped'; }
@@ -421,16 +478,17 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
         else { aria = 'Level ' + lv.number; }
         if (lv.role === 'milestone' && !best) { cls += ' mile'; if (!sub) sub = 'CHEST'; }
         tiles += '<button class="' + cls + '" ' + act + ' aria-label="' + aria + '">' + lv.number + (sub ? '<small>' + sub + '</small>' : '') + '</button>';
-      });
-      totalStars += stars;
-      chaptersHtml += '<section class="chapter"><div class="chapter-head"><div><div class="n">Chapter ' + ch + ' of 10</div><div class="t">' + CHAPTERS[ch] + '</div></div><div class="st">★ ' + stars + '/30</div></div><div class="levels">' + tiles + '</div></section>';
-    });
+      }
+      chaptersHtml += '<section class="chapter"><div class="chapter-head"><div><div class="n">' + board.name + ' · Chapter ' + ch + ' of ' + chapters + '</div><div class="t">' + range + '</div></div><div class="st">★ ' + stars + '/' + (last - first + 1) * 3 + '</div></div><div class="levels">' + tiles + '</div></section>';
+    }
     var nl = LEVELS[next];
     var logo = '<div class="logo" aria-hidden="true"><i></i><i style="background:linear-gradient(180deg,#FFCF85 0%,#FFB547 58%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 #C9862A"></i><i style="background:linear-gradient(180deg,#8ADAFB 0%,#4FC3F7 58%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 #2E8DB8"></i><i style="background:linear-gradient(180deg,#363D57 0%,#2A3045 60%);box-shadow:0 3px 0 #1C2030"></i></div>';
     return '<div class="screen home scroll"><div class="topbar"><button class="pill" data-act="rules">How to play</button><span class="pill spark" aria-label="' + P.wallet + ' Sparks">' + SPARK + P.wallet + '</span></div>' +
       '<div class="hero">' + logo + '<div><h1>Dropku</h1><p>Sudoku. But the numbers fall.</p></div></div>' +
-      '<button class="primary" data-act="play" data-i="' + next + '" style="height:66px;flex-shrink:0">' + (P.best[nl.id] ? 'Replay' : 'Play') + ' Level ' + nl.number + ' · ' + nl.size + '×' + nl.size + ' · ' + nl.timeLimit + 's</button>' +
-      chaptersHtml + '<div class="note">Preview with the first 20 of 100 levels. No ads, nothing to buy. Progress is saved in this browser only.</div>' + (S.overlay === 'rules' ? rulesSheet() : '') + '</div>';
+      '<div class="boards" role="group" aria-label="Choose a board">' + picker + '</div>' +
+      '<div class="bd-info">' + esc(BOARD_TEXT[board.id] || '') + ' ' + board.levels.length + ' levels, ' + minutes(board.levels[0].timeLimit) + ' to ' + minutes(board.levels[board.levels.length - 1].timeLimit) + ' each.</div>' +
+      '<button class="primary" data-act="play" data-i="' + next + '" style="height:66px;flex-shrink:0">' + (P.best[nl.id] ? 'Replay' : 'Play') + ' ' + board.name + ' Level ' + nl.number + ' · ' + minutes(nl.timeLimit) + '</button>' +
+      chaptersHtml + '<div class="note">' + BOARDS.reduce(function (a, b) { return a + b.levels.length; }, 0) + ' levels on 3 boards. No ads, nothing to buy. Progress is saved in this browser only.</div>' + (S.overlay === 'rules' ? rulesSheet() : '') + '</div>';
   }
 
   function render() {
@@ -438,7 +496,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
     document.body.classList.toggle('wide', isWide());
     app.classList.toggle('wide', isWide());
     if (S.screen === 'home') app.innerHTML = homeScreen();
-    else app.innerHTML = gameScreen();
+    else { app.innerHTML = gameScreen(); fitBoard(); }
   }
 
   // ---------- input ----------
@@ -481,7 +539,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
       case 'tutorial': startLesson(0); break;
       case 'skipTutorial': if (!P.tutorialDone) { P.tutorialDone = true; save(); } goHome(); return;
       case 'nextLesson': startLesson(S.lesson + 1); break;
-      case 'level1': startLevel(0); return;
+      case 'boards': goHome(); return;
+      case 'board': setBoard(b.getAttribute('data-b')); save(); break;
       case 'mute': P.muted = !P.muted; save(); break;
       case 'reset': S.confirmReset = true; break;
       case 'resetNo': S.confirmReset = false; break;

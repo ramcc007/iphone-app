@@ -1,6 +1,6 @@
 # Dropku: iPhone and iPad app (SwiftUI)
 
-**Status: written but not yet compiled.** The cloud environment this was built in has no Swift compiler. The first build on a Mac may surface small compiler errors to fix. The game rules are a line-by-line port of the web engine, which passes 13 engine tests and 49 real-browser checks, and they come with their own unit tests (below).
+**Status:** the game rules package (`DropkuCore`) compiles and passes all its tests with Swift 6.0 on Linux (`tools/swift/linux-swift.sh`). The SwiftUI screens (`Dropku/`) need Apple's SDK, so their first build happens in Xcode on a Mac. They pass a syntax check, but that first build may still surface small type errors to fix. The game rules are a line-by-line port of the web engine, which passes 13 engine tests and 49 real-browser checks, and they come with their own unit tests (below).
 
 ## What you need
 - A Mac with **Xcode 26** (free from the Mac App Store)
@@ -19,9 +19,14 @@ Then in Xcode:
 3. Pick an iPhone or iPad simulator and press **Run** (⌘R).
 
 ## Run the rule tests
+On Linux (fetches Swift 6.0.3 from Ubuntu's package archive once, about 500 MB):
+```sh
+tools/swift/linux-swift.sh
+```
+On a Mac:
 ```sh
 cd ios/DropkuCore
-swift test               # 24 tests: rules on all 20 real levels, timer, hearts, undo, stars, economy, saving, iCloud merge
+swift test               # 25 tests: rules on all 230 levels of the 3 boards, timer, hearts, undo, stars, economy, saving, iCloud merge
 ```
 
 ## How it's organised
@@ -42,4 +47,4 @@ swift test               # 24 tests: rules on all 20 real levels, timer, hearts,
 ## Not in this first version yet
 - Sound effects (the web version has them; native sound files or synthesis come next)
 - Game Center leaderboards, the Daily Drop and the milestone chest animation
-- Chapters 3–10 (they need the Locks, Queue, Sums and Tilt rules first)
+- The chapter twists from the original plan (Locks, Queue, Sums, Tilt) as extra boards or chapters

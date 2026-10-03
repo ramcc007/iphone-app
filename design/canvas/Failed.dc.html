@@ -16,7 +16,7 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
 </helmet>
 <div style="width: 390px; height: 844px; box-sizing: border-box; background: #13161F; color: #F5F6FA; font-family: Fredoka, ui-rounded, system-ui, sans-serif; display: flex; flex-direction: column; padding: 70px 22px 28px; gap: 14px; overflow: hidden">
   <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
-    <div style="font-size: 15px; font-weight: 600; color: #FF6B7A; letter-spacing: 2px">LEVEL 12 · ATTEMPT 2</div>
+    <div style="font-size: 15px; font-weight: 600; color: #FF6B7A; letter-spacing: 2px">CLASSIC · LEVEL 12 · ATTEMPT 2</div>
     <sc-if value="{{isTime}}" hint-placeholder-val="{{true}}">
       <div style="width: 84px; height: 84px; border-radius: 42px; border: 4px solid #FF6B7A; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: #FF6B7A">0s</div>
     </sc-if>
@@ -63,7 +63,7 @@ class Component extends DCLogic {
       emptyHearts: [0, 1, 2].map((i) => ({ i })),
       title: time ? 'Time’s up!' : 'Out of hearts',
       body: time
-        ? 'You filled 12 of 16 gaps in 150 seconds. Level 12 starts again with a fresh board and a full 150 seconds.'
+        ? 'You filled 12 of 16 gaps in 85 seconds. Level 12 starts again with a fresh board and a full 85 seconds.'
         : 'So close: 4 gaps left! Your last drop put a 5 where a 3 belonged.'
     };
   }

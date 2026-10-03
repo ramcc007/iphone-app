@@ -12,11 +12,10 @@ Dropku is a **universal app**: designed iPhone-first, fully supported on iPad, a
 **Rule:** the layout is chosen from the **window size**, never from the device model. That makes Split View, Slide Over and resizable windows work automatically.
 
 ## Tile size
-Tile size is computed from the available width, capped at 96pt:
+Tile size is computed from the space the board really has once the rest of the screen is laid out (a `GeometryReader` in SwiftUI, a measured box on the web), capped at 96pt:
 
 ```
-iPhone:  tile = (window width − 32 margins − 20 board padding − gaps) / columns
-iPad:    same formula with iPad margins; side panel width 420pt in the wide layout
+tile = min((board width − 20 padding − gaps) / columns, (board height − 20 padding − gaps) / rows)
 gaps:    4×4 = 32pt · 6×6 = 38pt · 9×9 = 44pt (tile gaps plus thicker box gaps)
 ```
 
@@ -30,11 +29,11 @@ gaps:    4×4 = 32pt · 6×6 = 38pt · 9×9 = 44pt (tile gaps plus thicker box g
 | iPad Pro 13", portrait | 1032 × 1376 | 96 | 96 | 93 |
 | iPad Pro 13", landscape | 1376 × 1032 | 96 | 96 | 81 |
 
-**Bold** = below Apple's 44pt minimum touch target. On 9×9 iPhone boards:
-- the whole column height is the tap area
+**Bold** = below Apple's 44pt minimum touch target. On 9×9 iPhone boards (the Master board):
+- the whole column height is the tap area, so each target is about 31–38pt wide but 300pt or more tall
 - the column under the finger is highlighted, with the landing ghost shown
-- you can slide along the columns before lifting to drop
-- the number tray uses two rows (5 + 4)
+- the number tray uses two rows (5 + 4) when the screen is tall enough, and one row of 9 on short phones (iPhone SE), so the board keeps its width. Measured on iPhone SE: 31pt board columns and 34pt number tiles
+- the guide line and the feedback line ("Crack!", "DOUBLE!") share one line on phones, which gives the board more height
 
 ## Sharpness rules ("high-quality on every screen")
 1. **Vector or code only.** Tiles, board, buttons, hearts, stars, Sparks, chest and all icons are SwiftUI shapes, SF Symbols or vector PDF/SVG assets ("Preserve Vector Data" on). They're crisp at 2× and 3×, and on any iPad or Mac window size, with no per-resolution image files.

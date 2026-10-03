@@ -2,13 +2,17 @@ import XCTest
 @testable import DropkuCore
 
 /// Mirrors tools/failsafe/engine.test.js so the Swift rules behave exactly like the tested web engine.
-/// Run on a Mac: `cd ios/DropkuCore && swift test`
+/// Run on a Mac: `cd ios/DropkuCore && swift test`, or on Linux: `tools/swift/linux-swift.sh`
 final class GameRulesTests: XCTestCase {
-    let levels = LevelLibrary.bundled()
+    let boards = LevelLibrary.bundled()
+    var levels: [Level] { boards.flatMap(\.levels) }
+    func board(_ kind: BoardKind) -> [Level] { boards.first { $0.id == kind.rawValue }?.levels ?? [] }
+    /// A mid-size 6x6 level used by the rule tests.
+    var classic12: Level { board(.classic)[11] }
 
     private func solveWithHints(_ game: inout Game) -> (won: Bool, usedFallback: Bool) {
         var fallback = false
-        for _ in 0..<200 where game.status == .playing {
+        for _ in 0..<400 where game.status == .playing {
             guard let hint = game.hint() else { return (false, fallback) }
             if hint.reason.hasPrefix("This gap needs") { fallback = true }
             guard case .placed = game.drop(value: hint.value, column: hint.position.column) else { return (false, fallback) }
@@ -25,35 +29,47 @@ final class GameRulesTests: XCTestCase {
         (0..<game.size).first { game.landingRow(column: $0) != nil }!
     }
 
-    func testBundledLevelsLoad() {
-        XCTAssertEqual(levels.count, 20)
-        XCTAssertEqual(levels.map(\.number), Array(1...20))
+    func testBundledBoardsLoad() {
+        XCTAssertEqual(boards.map(\.id), BoardKind.allCases.map(\.rawValue))
+        XCTAssertEqual(boards.map(\.id), ["quick", "classic", "master"])
+        for board in boards {
+            let kind = try! XCTUnwrap(board.kind)
+            XCTAssertEqual(board.levels.count, kind.levelCount, board.id)
+            XCTAssertEqual(board.levels.map(\.number), Array(1...kind.levelCount), board.id)
+            XCTAssertTrue(board.levels.allSatisfy { $0.board == board.id && $0.size == kind.size && $0.size == board.size }, board.id)
+        }
+        XCTAssertEqual(levels.count, 230)
+        XCTAssertEqual(Set(levels.map(\.id)).count, 230, "level ids must be unique across boards")
     }
 
     func testEveryLevelSolvableByLogicalHintsOnly() {
         for level in levels {
             var game = Game(level: level)
             let outcome = solveWithHints(&game)
-            XCTAssertTrue(outcome.won, "Level \(level.number) not solved by hints")
-            XCTAssertFalse(outcome.usedFallback, "Level \(level.number) needed a non-logical hint")
+            XCTAssertTrue(outcome.won, "\(level.id) not solved by hints")
+            XCTAssertFalse(outcome.usedFallback, "\(level.id) needed a non-logical hint")
         }
     }
 
     func testTimeLimitsMatchTable() {
         for level in levels {
-            XCTAssertEqual(level.timeLimit, TimeTable.limit(forLevel: level.number), "Level \(level.number)")
+            let kind = try! XCTUnwrap(BoardKind(rawValue: level.board))
+            XCTAssertEqual(level.timeLimit, TimeTable.limit(board: kind, level: level.number), level.id)
         }
-        XCTAssertEqual(TimeTable.limit(forLevel: 1), 60)
-        XCTAssertEqual(TimeTable.limit(forLevel: 6), 75)
-        XCTAssertEqual(TimeTable.limit(forLevel: 11), 150)
-        XCTAssertEqual(TimeTable.limit(forLevel: 70), 260)
-        XCTAssertEqual(TimeTable.limit(forLevel: 71), 360)
-        XCTAssertEqual(TimeTable.limit(forLevel: 99), 435)
-        XCTAssertEqual(TimeTable.limit(forLevel: 100), 480)
+        XCTAssertEqual(TimeTable.limit(board: .quick, level: 1), 30)
+        XCTAssertEqual(TimeTable.limit(board: .quick, level: 5), 30)
+        XCTAssertEqual(TimeTable.limit(board: .quick, level: 6), 35)
+        XCTAssertEqual(TimeTable.limit(board: .quick, level: 30), 55)
+        XCTAssertEqual(TimeTable.limit(board: .classic, level: 1), 75)
+        XCTAssertEqual(TimeTable.limit(board: .classic, level: 12), 85)
+        XCTAssertEqual(TimeTable.limit(board: .classic, level: 100), 170)
+        XCTAssertEqual(TimeTable.limit(board: .master, level: 1), 240)
+        XCTAssertEqual(TimeTable.limit(board: .master, level: 6), 245)
+        XCTAssertEqual(TimeTable.limit(board: .master, level: 100), 335)
     }
 
     func testTimeUpLocksBoardAndClockNeverNegative() {
-        var game = Game(level: levels[11])
+        var game = Game(level: classic12)
         for _ in 0..<(game.level.timeLimit - 1) { game.tick() }
         XCTAssertEqual(game.status, .playing)
         XCTAssertTrue(game.tick())
@@ -67,13 +83,13 @@ final class GameRulesTests: XCTestCase {
     }
 
     func testClockStopsAfterWinAndLoss() {
-        var won = Game(level: levels[0])
+        var won = Game(level: board(.quick)[0])
         _ = solveWithHints(&won)
         let left = won.timeLeft
         won.tick(seconds: 5)
         XCTAssertEqual(won.timeLeft, left)
 
-        var lost = Game(level: levels[0])
+        var lost = Game(level: board(.quick)[0])
         for _ in 0..<3 { let c = firstOpenColumn(lost); _ = lost.drop(value: wrongValue(lost, column: c), column: c) }
         XCTAssertEqual(lost.status, .lost)
         let lostLeft = lost.timeLeft
@@ -82,7 +98,7 @@ final class GameRulesTests: XCTestCase {
     }
 
     func testWrongDropCostsHeartAndExplains() {
-        var game = Game(level: levels[11])
+        var game = Game(level: classic12)
         let before = game.grid
         let column = firstOpenColumn(game)
         let wrong = wrongValue(game, column: column)
@@ -96,14 +112,14 @@ final class GameRulesTests: XCTestCase {
     }
 
     func testHeartsNeverBelowZero() {
-        var game = Game(level: levels[11])
+        var game = Game(level: classic12)
         for _ in 0..<6 { let c = firstOpenColumn(game); _ = game.drop(value: wrongValue(game, column: c), column: c) }
         XCTAssertEqual(game.hearts, 0)
         XCTAssertEqual(game.status, .lost)
     }
 
     func testHeartContinueOncePerAttempt() {
-        var game = Game(level: levels[11])
+        var game = Game(level: classic12)
         func loseAll() { for _ in 0..<3 where game.status == .playing { let c = firstOpenColumn(game); _ = game.drop(value: wrongValue(game, column: c), column: c) } }
         loseAll()
         XCTAssertTrue(game.continueWithHeart())
@@ -114,7 +130,7 @@ final class GameRulesTests: XCTestCase {
     }
 
     func testUndoCannotFarmSparks() {
-        var game = Game(level: levels[11])
+        var game = Game(level: classic12)
         for _ in 0..<50 where game.status == .playing {
             let hint = game.hint()!
             guard case let .placed(placement) = game.drop(value: hint.value, column: hint.position.column) else { return XCTFail() }
@@ -130,7 +146,7 @@ final class GameRulesTests: XCTestCase {
     }
 
     func testOnlyThreeFreeUndos() {
-        var game = Game(level: levels[11])
+        var game = Game(level: classic12)
         var undone = 0
         for _ in 0..<6 {
             let hint = game.hint()!
@@ -141,17 +157,20 @@ final class GameRulesTests: XCTestCase {
     }
 
     func testFullColumnRefusedWithoutHeartLoss() {
-        var game = Game(level: levels[11])
-        guard let full = (0..<game.size).first(where: { game.landingRow(column: $0) == nil }) else {
-            return XCTFail("level has no full column")
+        guard let level = board(.classic).first(where: { level in
+            (0..<level.size).contains { column in level.givens.allSatisfy { $0[column] != 0 } }
+        }) else {
+            return XCTFail("no Classic level starts with a full column")
         }
+        var game = Game(level: level)
+        let full = (0..<game.size).first { game.landingRow(column: $0) == nil }!
         let outcome = game.drop(value: 1, column: full)
         XCTAssertEqual(outcome, .columnFull)
         XCTAssertEqual(game.hearts, 3)
     }
 
     func testStarThresholds() {
-        let level = levels[11]
+        let level = classic12
         let limit = level.timeLimit
         let quarter = Int((Double(limit) * 0.25).rounded(.up))
         var fast = Game(level: level); fast.tick(seconds: limit - quarter); _ = solveWithHints(&fast)
@@ -165,13 +184,15 @@ final class GameRulesTests: XCTestCase {
     }
 
     func testEconomyRangeAtStrongPace() {
+        // No mistakes at 3/5/7 seconds per gap on 4x4/6x6/9x9, same as engine.test.js.
+        let pace = [4: 3, 6: 5, 9: 7]
+        let ranges = [4: 25...50, 6: 40...70, 9: 50...90]
         for level in levels {
             var game = Game(level: level)
-            game.tick(seconds: level.gaps * 4)
+            game.tick(seconds: level.gaps * pace[level.size]!)
             _ = solveWithHints(&game)
             let earned = game.result()!.earned
-            let range = level.size == 4 ? 30...50 : 45...70
-            XCTAssertTrue(range.contains(earned), "Level \(level.number) earned \(earned)")
+            XCTAssertTrue(ranges[level.size]!.contains(earned), "\(level.id) earned \(earned)")
         }
     }
 
@@ -191,7 +212,9 @@ final class GameRulesTests: XCTestCase {
 }
 
 final class ProgressTests: XCTestCase {
-    let levels = LevelLibrary.bundled()
+    let boards = LevelLibrary.bundled()
+    /// The Quick board: 30 levels, milestone at 10.
+    var levels: [Level] { boards[0].levels }
 
     private func perfectResult(_ level: Level) -> LevelResult {
         var game = Game(level: level)
@@ -254,6 +277,20 @@ final class ProgressTests: XCTestCase {
         XCTAssertEqual(progress.nextLevelIndex(in: levels), 1)
     }
 
+    func testEachBoardIsItsOwnPath() {
+        var progress = PlayerProgress()
+        let quick = boards[0].levels, classic = boards[1].levels, master = boards[2].levels
+        // All three boards are open from the start.
+        XCTAssertTrue(progress.isUnlocked(0, in: classic))
+        XCTAssertTrue(progress.isUnlocked(0, in: master))
+        _ = progress.recordWin(quick[0], result: perfectResult(quick[0]), device: "A")
+        XCTAssertTrue(progress.isUnlocked(1, in: quick))
+        XCTAssertFalse(progress.isUnlocked(1, in: classic), "clearing Quick 1 must not unlock Classic 2")
+        XCTAssertEqual(progress.nextLevelIndex(in: quick), 1)
+        XCTAssertEqual(progress.nextLevelIndex(in: classic), 0)
+        XCTAssertEqual(progress.nextLevelIndex(in: master), 0)
+    }
+
     func testWelcomeGiftOnlyOnce() {
         var progress = PlayerProgress()
         progress.finishTutorial(device: "A")
@@ -278,20 +315,20 @@ final class ProgressTests: XCTestCase {
 
     func testMergeKeepsBestStarsAndClearsSkippedOnceBeaten() {
         var a = PlayerProgress(), b = PlayerProgress()
-        a.bestStars["c1-l001"] = 2
-        b.bestStars["c1-l001"] = 3
-        a.skipped.insert("c1-l002")
-        b.bestStars["c1-l002"] = 1
+        a.bestStars["classic-001"] = 2
+        b.bestStars["classic-001"] = 3
+        a.skipped.insert("classic-002")
+        b.bestStars["classic-002"] = 1
         let merged = a.merged(with: b)
-        XCTAssertEqual(merged.bestStars["c1-l001"], 3)
-        XCTAssertFalse(merged.skipped.contains("c1-l002"))
+        XCTAssertEqual(merged.bestStars["classic-001"], 3)
+        XCTAssertFalse(merged.skipped.contains("classic-002"))
     }
 
     func testProgressRoundTripsThroughJSON() throws {
         var progress = PlayerProgress()
         progress.earn(123, device: "A")
-        progress.bestStars["c1-l001"] = 3
-        progress.skipped.insert("c1-l002")
+        progress.bestStars["classic-001"] = 3
+        progress.skipped.insert("classic-002")
         let data = try JSONEncoder().encode(progress)
         XCTAssertEqual(try JSONDecoder().decode(PlayerProgress.self, from: data), progress)
     }

@@ -25,8 +25,8 @@ struct RootView: View {
                 GameView(mode: .lesson(index: lesson), app: app)
             case .home:
                 HomeView()
-            case .level(let index):
-                GameView(mode: .level(index: index), app: app)
+            case .level(let board, let index):
+                GameView(mode: .level(board: board, index: index), app: app)
             }
         }
         // A new route gets a fresh screen (and a fresh game session).

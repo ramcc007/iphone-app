@@ -2,19 +2,23 @@ import Foundation
 import SwiftUI
 import DropkuCore
 
-/// Where the app is: first-run tutorial, home (level map), or playing a level.
+/// Where the app is: first-run tutorial, home (board picker and level map), or playing a level.
 enum Route: Hashable {
     case tutorial(lesson: Int)
     case home
-    case level(index: Int)
+    case level(board: BoardKind, index: Int)
 }
 
-/// Owns the levels, the player's saved progress and navigation.
+/// Owns the boards and levels, the player's saved progress and navigation.
 @MainActor
 final class AppModel: ObservableObject {
-    let levels: [Level] = LevelLibrary.bundled()
+    let boards: [Board] = LevelLibrary.bundled()
     @Published private(set) var progress: PlayerProgress
     @Published var route: Route
+    /// The board shown on the home screen. A per-device preference, so it is not synced.
+    @Published var selectedBoard: BoardKind {
+        didSet { UserDefaults.standard.set(selectedBoard.rawValue, forKey: "dropku.board") }
+    }
 
     let deviceID: String
     private let fileURL: URL
@@ -43,6 +47,7 @@ final class AppModel: ObservableObject {
         deviceID = id
         fileURL = url
         progress = loaded
+        selectedBoard = defaults.string(forKey: "dropku.board").flatMap(BoardKind.init(rawValue:)) ?? .classic
         route = loaded.tutorialDone ? .home : .tutorial(lesson: 0)
 
         NotificationCenter.default.addObserver(forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
@@ -76,9 +81,15 @@ final class AppModel: ObservableObject {
 
     // MARK: - Navigation
 
-    func play(_ index: Int) {
-        guard levels.indices.contains(index), progress.isUnlocked(index, in: levels) else { return }
-        route = .level(index: index)
+    func levels(_ board: BoardKind) -> [Level] {
+        boards.first { $0.id == board.rawValue }?.levels ?? []
+    }
+
+    func play(_ board: BoardKind, _ index: Int) {
+        let list = levels(board)
+        guard list.indices.contains(index), progress.isUnlocked(index, in: list) else { return }
+        selectedBoard = board
+        route = .level(board: board, index: index)
     }
 
     func goHome() {

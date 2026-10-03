@@ -3,3 +3,7 @@ __pycache__/
 .DS_Store
 .e2e.html
 node_modules/
+
+# Swift package build output
+.build/
+.swiftpm/

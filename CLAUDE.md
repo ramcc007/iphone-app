@@ -8,7 +8,8 @@ It **will be published on the Apple App Store**, and a marketing/support website
 - **High quality on every screen:** vector or code-drawn graphics only (the app icon master is the only raster), crisp at every resolution, 120 Hz animation.
 - **No ads and no In-App Purchases in v1.** Sparks are earned by playing only. No third-party SDKs, so the privacy label is "Data Not Collected".
 - **The timer is always on.** At 0s: "Time's up!" and the same level starts again. No untimed mode, no extra time.
-- Before any change ships: `python3 tools/levelgen/validate.py`, `node tools/failsafe/engine.test.js`, `game.test.js`, `tutorial.test.js` and `web.e2e.js` must pass, and `swift test` in `ios/DropkuCore` on a Mac.
+- **Three boards, all open from the start:** Quick 4×4 (30 levels), Classic 6×6 (100), Master 9×9 (100). Each has its own time table (`BOARDS` in `tools/levelgen/validate.py`, `engine.js` and `Level.swift` must match).
+- Before any change ships: `python3 tools/levelgen/validate.py`, `node tools/failsafe/engine.test.js`, `game.test.js`, `tutorial.test.js` and `web.e2e.js` must pass, and the Swift rule tests (`tools/swift/linux-swift.sh` on Linux, or `swift test` in `ios/DropkuCore` on a Mac).
 - The Swift rules (`ios/DropkuCore`) must stay identical to `prototype/web/engine.js`. Change both together, and keep their tests in step.
 
 ## Always

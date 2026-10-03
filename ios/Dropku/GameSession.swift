@@ -6,7 +6,7 @@ import DropkuCore
 @MainActor
 final class GameSession: ObservableObject {
     enum Mode: Equatable {
-        case level(index: Int)
+        case level(board: BoardKind, index: Int)
         case lesson(index: Int)
     }
 
@@ -50,8 +50,8 @@ final class GameSession: ObservableObject {
         self.mode = mode
         self.app = app
         switch mode {
-        case .level(let index):
-            game = Game(level: app.levels[index])
+        case .level(let board, let index):
+            game = Game(level: app.levels(board)[index])
         case .lesson(let index):
             game = Game(level: Lesson.all[index].level, timed: false)
         }
@@ -64,9 +64,20 @@ final class GameSession: ObservableObject {
         return nil
     }
 
-    var levelIndex: Int? {
-        if case .level(let index) = mode { return index }
+    var board: BoardKind? {
+        if case .level(let board, _) = mode { return board }
         return nil
+    }
+
+    var levelIndex: Int? {
+        if case .level(_, let index) = mode { return index }
+        return nil
+    }
+
+    /// The next level on the same board, if there is one.
+    var nextIndex: Int? {
+        guard let board, let index = levelIndex, index + 1 < app.levels(board).count else { return nil }
+        return index + 1
     }
 
     /// The guided step the tutorial is waiting for, if any.

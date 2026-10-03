@@ -6,17 +6,17 @@ struct HomeView: View {
     @State private var showRules = false
     @State private var showSettings = false
 
-    private let chapterNames = [1: "First Drops", 2: "Planning"]
-
     var body: some View {
         GeometryReader { geo in
             let wide = geo.size.width >= 700
+            let board = app.selectedBoard
+            let levels = app.levels(board)
             ScrollView {
                 VStack(spacing: 16) {
                     HStack {
                         Button("How to play") { showRules = true }
                             .font(Theme.rounded(15, .semibold))
-                            .padding(.horizontal, 14).frame(height: 40)
+                            .padding(.horizontal, 14).frame(height: 44)
                             .background(Capsule().fill(Theme.surface))
                         Spacer()
                         SparksLabel(amount: app.progress.sparks, size: 16)
@@ -35,16 +35,24 @@ struct HomeView: View {
                     }
                     .padding(.vertical, 8)
 
-                    let next = app.progress.nextLevelIndex(in: app.levels)
-                    if app.levels.indices.contains(next) {
-                        let level = app.levels[next]
-                        PrimaryButton("\(app.progress.bestStars[level.id] == nil ? "Play" : "Replay") Level \(level.number) \u{00B7} \(level.size)\u{00D7}\(level.size) \u{00B7} \(level.timeLimit)s") {
-                            app.play(next)
+                    BoardPicker(wide: wide)
+
+                    if let first = levels.first, let last = levels.last {
+                        Text("\(board.blurb) \(levels.count) levels, \(clockText(first.timeLimit)) to \(clockText(last.timeLimit)) each.")
+                            .font(Theme.rounded(14, .medium)).foregroundStyle(Theme.soft)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    let next = app.progress.nextLevelIndex(in: levels)
+                    if levels.indices.contains(next) {
+                        let level = levels[next]
+                        PrimaryButton("\(app.progress.bestStars[level.id] == nil ? "Play" : "Replay") \(board.name) Level \(level.number) \u{00B7} \(clockText(level.timeLimit))") {
+                            app.play(board, next)
                         }
                     }
 
-                    ForEach(chapters, id: \.self) { chapter in
-                        ChapterCard(chapter: chapter, name: chapterNames[chapter] ?? "Chapter \(chapter)", columns: wide ? 10 : 5)
+                    ForEach(chapters(levels), id: \.self) { chapter in
+                        ChapterCard(board: board, levels: levels, chapter: chapter, chapterCount: chapters(levels).count, columns: wide ? 10 : 5)
                     }
 
                     Text("No ads, nothing to buy. Every Spark is earned by playing.")
@@ -63,54 +71,139 @@ struct HomeView: View {
         .sheet(isPresented: $showSettings) { SettingsView() }
     }
 
-    private var chapters: [Int] {
-        Array(Set(app.levels.map(\.chapter))).sorted()
+    private func chapters(_ levels: [Level]) -> [Int] {
+        Array(Set(levels.map(\.chapter))).sorted()
+    }
+}
+
+/// "45s" under two minutes, "4:00" from there (the in-game clock always counts in seconds).
+func clockText(_ seconds: Int) -> String {
+    seconds < 120 ? "\(seconds)s" : "\(seconds / 60):" + String(format: "%02d", seconds % 60)
+}
+
+/// Quick 4x4, Classic 6x6, Master 9x9. All open from the start; each keeps its own progress.
+private struct BoardPicker: View {
+    @EnvironmentObject private var app: AppModel
+    let wide: Bool
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(BoardKind.allCases) { kind in
+                let levels = app.levels(kind)
+                let done = levels.filter { app.progress.bestStars[$0.id] != nil || app.progress.skipped.contains($0.id) }.count
+                let selected = app.selectedBoard == kind
+                Button {
+                    app.selectedBoard = kind
+                } label: {
+                    VStack(spacing: 3) {
+                        BoardIcon(kind: kind).frame(width: 40, height: 40).padding(.bottom, 4)
+                        Text(kind.name).font(Theme.rounded(wide ? 20 : 17))
+                        Text("\(kind.size)\u{00D7}\(kind.size)").font(Theme.rounded(13, .semibold)).foregroundStyle(Theme.soft)
+                        Text("\(done)/\(levels.count)").font(Theme.rounded(12, .medium)).foregroundStyle(Theme.muted)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: wide ? 132 : 112)
+                    .background(RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(selected ? Theme.accent.opacity(0.2) : Theme.surface))
+                    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .strokeBorder(selected ? Theme.accentSoft : .clear, lineWidth: 2))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("\(kind.name) board, \(kind.size) by \(kind.size), \(done) of \(levels.count) levels done")
+                .accessibilityAddTraits(selected ? .isSelected : [])
+            }
+        }
+    }
+}
+
+/// A small picture of a board: its grid split into boxes, with grey stacks topped by a dropped tile.
+struct BoardIcon: View {
+    let kind: BoardKind
+
+    var body: some View {
+        Canvas { context, size in
+            let n = kind.size
+            let (boxRows, boxCols) = n == 4 ? (2, 2) : n == 6 ? (2, 3) : (3, 3)
+            let gapRatio: CGFloat = n == 9 ? 0.24 : 0.28
+            let boxRatio: CGFloat = 0.65
+            let units = CGFloat(n) + CGFloat(n - 1) * gapRatio + CGFloat(n / boxCols - 1) * boxRatio
+            let cell = min(size.width, size.height) / units
+            let colors = [Theme.tile(1).base, Theme.tile(2).base, Theme.tile(4).base, Theme.tile(5).base, Theme.tile(6).base]
+            for r in 0..<n {
+                for c in 0..<n {
+                    let x = (CGFloat(c) * (1 + gapRatio) + CGFloat(c / boxCols) * boxRatio) * cell
+                    let y = (CGFloat(r) * (1 + gapRatio) + CGFloat(r / boxRows) * boxRatio) * cell
+                    let top = n - 1 - (c * 5 + 2) % max(2, n / 2)
+                    let color: Color = r < top ? Color.white.opacity(0.10) : (r == top ? colors[c % colors.count] : Color(hex: 0x59617F))
+                    let rect = CGRect(x: x, y: y, width: cell, height: cell)
+                    context.fill(Path(roundedRect: rect, cornerRadius: cell * 0.28, style: .continuous), with: .color(color))
+                }
+            }
+        }
+        .accessibilityHidden(true)
     }
 }
 
 private struct ChapterCard: View {
     @EnvironmentObject private var app: AppModel
+    let board: BoardKind
+    let levels: [Level]
     let chapter: Int
-    let name: String
+    let chapterCount: Int
     let columns: Int
 
     var body: some View {
-        let indices = app.levels.indices.filter { app.levels[$0].chapter == chapter }
-        let stars = indices.reduce(0) { total, index in total + (app.progress.bestStars[app.levels[index].id] ?? 0) }
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("CHAPTER \(chapter) OF 10").font(Theme.rounded(12, .semibold)).foregroundStyle(Theme.muted).tracking(1.5)
-                    Text(name).font(Theme.rounded(20))
-                }
+        let indices = levels.indices.filter { levels[$0].chapter == chapter }
+        let range = "Levels \(levels[indices.first!].number)\u{2013}\(levels[indices.last!].number)"
+        if let first = indices.first, !app.progress.isUnlocked(first, in: levels) {
+            // Locked chapters stay compact, so a 100-level board is still a short scroll.
+            HStack {
+                Text("Chapter \(chapter) \u{00B7} \(range)").font(Theme.rounded(16))
                 Spacer()
-                Label("\(stars)/\(indices.count * 3)", systemImage: "star.fill")
-                    .font(Theme.rounded(14)).foregroundStyle(Theme.spark)
-                    .accessibilityLabel("\(stars) of \(indices.count * 3) stars")
+                Label("Locked", systemImage: "lock.fill").font(Theme.rounded(14, .medium))
             }
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: columns), spacing: 8) {
-                ForEach(indices, id: \.self) { index in
-                    LevelTile(index: index, level: app.levels[index])
+            .foregroundStyle(Theme.faint)
+            .padding(16)
+            .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Theme.surface))
+            .accessibilityElement(children: .combine)
+        } else {
+            let stars = indices.reduce(0) { total, index in total + (app.progress.bestStars[levels[index].id] ?? 0) }
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .firstTextBaseline) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(board.name.uppercased()) \u{00B7} CHAPTER \(chapter) OF \(chapterCount)").font(Theme.rounded(12, .semibold)).foregroundStyle(Theme.muted).tracking(1.5)
+                        Text(range).font(Theme.rounded(20))
+                    }
+                    Spacer()
+                    Label("\(stars)/\(indices.count * 3)", systemImage: "star.fill")
+                        .font(Theme.rounded(14)).foregroundStyle(Theme.spark)
+                        .accessibilityLabel("\(stars) of \(indices.count * 3) stars")
+                }
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: columns), spacing: 8) {
+                    ForEach(indices, id: \.self) { index in
+                        LevelTile(board: board, levels: levels, index: index)
+                    }
                 }
             }
+            .padding(16)
+            .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Theme.surface))
         }
-        .padding(16)
-        .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Theme.surface))
     }
 }
 
 private struct LevelTile: View {
     @EnvironmentObject private var app: AppModel
+    let board: BoardKind
+    let levels: [Level]
     let index: Int
-    let level: Level
 
     var body: some View {
+        let level = levels[index]
         let best = app.progress.bestStars[level.id] ?? 0
         let skipped = app.progress.skipped.contains(level.id)
-        let unlocked = app.progress.isUnlocked(index, in: app.levels)
-        let isNext = app.progress.nextLevelIndex(in: app.levels) == index && best == 0 && !skipped
+        let unlocked = app.progress.isUnlocked(index, in: levels)
+        let isNext = app.progress.nextLevelIndex(in: levels) == index && best == 0 && !skipped
         Button {
-            app.play(index)
+            app.play(board, index)
         } label: {
             VStack(spacing: 1) {
                 Text("\(level.number)").font(Theme.rounded(19))
@@ -136,7 +229,7 @@ private struct LevelTile: View {
         }
         .buttonStyle(.plain)
         .disabled(!unlocked)
-        .accessibilityLabel(label(best: best, unlocked: unlocked, skipped: skipped, isNext: isNext))
+        .accessibilityLabel(label(level: level, best: best, unlocked: unlocked, skipped: skipped, isNext: isNext))
     }
 
     @ViewBuilder
@@ -154,7 +247,7 @@ private struct LevelTile: View {
         }
     }
 
-    private func label(best: Int, unlocked: Bool, skipped: Bool, isNext: Bool) -> String {
+    private func label(level: Level, best: Int, unlocked: Bool, skipped: Bool, isNext: Bool) -> String {
         if best > 0 { return "Level \(level.number), \(best) stars" }
         if skipped { return "Level \(level.number), skipped" }
         if isNext { return "Level \(level.number), play now" }

@@ -21,19 +21,30 @@ def ok(g, n, r, c, v):
     return all(g[i][j] != v for i in range(r0, r0 + br) for j in range(c0, c0 + bc))
 
 def count_solutions(g, n, limit=2):
+    """Count solutions up to `limit`. Always branches on the gap with the fewest candidates,
+    which keeps 9x9 boards with an empty top band fast."""
+    best = None
     for r in range(n):
         for c in range(n):
             if g[r][c] == 0:
-                total = 0
-                for v in range(1, n + 1):
-                    if ok(g, n, r, c, v):
-                        g[r][c] = v
-                        total += count_solutions(g, n, limit - total)
-                        g[r][c] = 0
-                        if total >= limit:
-                            return total
-                return total
-    return 1
+                vals = [v for v in range(1, n + 1) if ok(g, n, r, c, v)]
+                if best is None or len(vals) < len(best[2]):
+                    best = (r, c, vals)
+                    if len(vals) <= 1:
+                        break
+        if best and len(best[2]) <= 1:
+            break
+    if best is None:
+        return 1
+    r, c, vals = best
+    total = 0
+    for v in vals:
+        g[r][c] = v
+        total += count_solutions(g, n, limit - total)
+        g[r][c] = 0
+        if total >= limit:
+            break
+    return total
 
 def units(n):
     br, bc = boxes(n)
@@ -110,15 +121,58 @@ def validate(name, sol, giv, time_limit=None, min_secs_per_gap=6):
     print(f'{status} {name}: {n}x{n}, {gaps} gaps{extra}' + ''.join('\n   - ' + e for e in errors))
     return not errors
 
-# Time limit per level (seconds). Same for each block of 5 levels, rising with difficulty.
-def time_limit(level):
-    if level <= 10:                       # 4x4
-        return 60 if level <= 5 else 75
-    if level <= 70:                       # 6x6: 150s, then +10s every 5 levels
-        return 150 + 10 * ((level - 11) // 5)
-    if level < 100:                       # 9x9: 360s, then +15s every 5 levels
-        return 360 + 15 * ((level - 71) // 5)
-    return 480                            # level 100 finale
+# The three boards, all open from the start. Each board is its own path of levels.
+# Time limit per level (seconds): the same for each block of 5 levels, then +step.
+# Must match prototype/web/engine.js (BOARDS) and ios/DropkuCore Level.swift (Board, TimeTable).
+BOARDS = {
+    'quick':   {'name': 'Quick',   'size': 4, 'boxRows': 2, 'boxCols': 2, 'levels': 30,  'start': 30,  'step': 5,  'minSecsPerGap': 4},
+    'classic': {'name': 'Classic', 'size': 6, 'boxRows': 2, 'boxCols': 3, 'levels': 100, 'start': 75,  'step': 5,  'minSecsPerGap': 5},
+    'master':  {'name': 'Master',  'size': 9, 'boxRows': 3, 'boxCols': 3, 'levels': 100, 'start': 240, 'step': 5,  'minSecsPerGap': 6},
+}
+BOARD_ORDER = ['quick', 'classic', 'master']
+
+def time_limit(board, level):
+    b = BOARDS[board]
+    return b['start'] + b['step'] * ((level - 1) // 5)
+
+def check_level_file(path):
+    """Every level on every board, plus file-level checks. Returns a list of pass/fail booleans."""
+    import json
+    data = json.load(open(path))
+    results = []
+    if [b['id'] for b in data['boards']] != BOARD_ORDER:
+        print(f"FAIL boards are {[b['id'] for b in data['boards']]}, expected {BOARD_ORDER}")
+        results.append(False)
+    ids, grids = set(), set()
+    for board in data['boards']:
+        spec = BOARDS[board['id']]
+        print(f"\n{board['name']} ({board['id']}): {len(board['levels'])} levels, {spec['size']}x{spec['size']}")
+        for key in ('name', 'size', 'boxRows', 'boxCols'):
+            if board[key] != spec[key]:
+                print(f"FAIL board {board['id']} {key} is {board[key]}, expected {spec[key]}"); results.append(False)
+        if len(board['levels']) != spec['levels']:
+            print(f"FAIL board {board['id']} has {len(board['levels'])} levels, expected {spec['levels']}"); results.append(False)
+        for i, L in enumerate(board['levels']):
+            problems = []
+            expect_id = f"{board['id']}-{i + 1:03d}"
+            if L['id'] != expect_id: problems.append(f"id is {L['id']}, expected {expect_id}")
+            if L['id'] in ids: problems.append('duplicate id')
+            if json.dumps(L['givens']) in grids: problems.append('duplicate board')
+            if L['board'] != board['id']: problems.append('level is filed under the wrong board')
+            if L['number'] != i + 1: problems.append('levels out of order')
+            if (L['size'], L['boxRows'], L['boxCols']) != (spec['size'], spec['boxRows'], spec['boxCols']): problems.append('wrong grid size for this board')
+            if L['chapter'] != i // 10 + 1: problems.append('wrong chapter')
+            role = 'milestone' if L['number'] % 10 == 0 else 'breather' if L['number'] % 10 == 6 else 'normal'
+            if L['role'] != role: problems.append(f"role is {L['role']}, expected {role}")
+            tl = time_limit(board['id'], L['number'])
+            if L['timeLimit'] != tl: problems.append(f"time limit {L['timeLimit']}s does not match the table ({tl}s)")
+            gaps = sum(1 for row in L['givens'] for v in row if v == 0)
+            if L['gaps'] != gaps: problems.append('gap count is wrong')
+            ids.add(L['id']); grids.add(json.dumps(L['givens']))
+            good = validate(f"{board['name']:<7} {L['number']:>3} {L['id']}", L['solution'], L['givens'], L['timeLimit'], spec['minSecsPerGap']) and not problems
+            for p_ in problems: print('   - ' + p_)
+            results.append(good)
+    return results
 
 if __name__ == '__main__':
     S4 = [[1,2,3,4],[3,4,1,2],[2,1,4,3],[4,3,2,1]]
@@ -129,32 +183,22 @@ if __name__ == '__main__':
         validate('Tutorial lesson 1', S4, without({(0,1),(0,3)})),
         validate('Tutorial lesson 2', S4, without({(0,3),(1,3),(0,2)})),
         validate('Tutorial lesson 3', S4, without({(0,0),(1,0),(0,2),(0,3),(1,3)})),
-        validate('Level 12 (canvas)', S6, G6, time_limit(12)),
+        validate('6x6 canvas board', S6, G6, time_limit('classic', 12), BOARDS['classic']['minSecsPerGap']),
         validate('Demo step 2 board', S4, without({(0,2),(1,2)})),
         validate('Demo step 3 board', S4, without({(0,3),(1,3)})),
     ]
-    print('\nTime limit table:')
-    for start in list(range(1, 100, 5)):
-        end = min(start + 4, 99)
-        print(f'  Levels {start:>3}-{end:<3} {time_limit(start)}s')
-    print(f'  Level  100     {time_limit(100)}s')
-    # The shipped level file: every level, plus file-level checks.
-    import json, os
+    print('\nTime limit tables (same for each block of 5 levels):')
+    for bid in BOARD_ORDER:
+        b = BOARDS[bid]
+        steps = [time_limit(bid, lv) for lv in range(1, b['levels'] + 1, 5)]
+        print(f"  {b['name']:<7} {b['size']}x{b['size']}  levels 1-{b['levels']}: {steps[0]}s -> {steps[-1]}s (+{b['step']}s every 5 levels)")
+    # The shipped level file.
+    import os
     lf = os.path.join(os.path.dirname(__file__), '..', '..', 'levels', 'levels.json')
     if os.path.exists(lf):
-        data = json.load(open(lf))
-        print(f'\nlevels/levels.json ({len(data["levels"])} levels):')
-        ids, boards = set(), set()
-        for i, L in enumerate(data['levels']):
-            problems = []
-            if L['id'] in ids: problems.append('duplicate id')
-            if json.dumps(L['givens']) in boards: problems.append('duplicate board')
-            if L['number'] != i + 1: problems.append('levels out of order')
-            if L['timeLimit'] != time_limit(L['number']): problems.append(f"time limit {L['timeLimit']}s does not match the table ({time_limit(L['number'])}s)")
-            ids.add(L['id']); boards.add(json.dumps(L['givens']))
-            good = validate(f"Level {L['number']:>3} {L['id']}", L['solution'], L['givens'], L['timeLimit']) and not problems
-            for p_ in problems: print('   - ' + p_)
-            results.append(good)
+        results += check_level_file(lf)
+    else:
+        print('FAIL levels/levels.json is missing'); results.append(False)
 
     # Self-check: the validator must reject each of these deliberately broken levels.
     print('\nSelf-check (each of these must be rejected):')
@@ -166,4 +210,6 @@ if __name__ == '__main__':
     ]
     rejected = [not validate('  [broken] ' + name, sol, giv, tl) for name, sol, giv, tl in broken]
     print(f'Self-check: {sum(rejected)}/{len(broken)} broken levels rejected')
+    passed = sum(1 for r in results if r)
+    print(f'\n{passed}/{len(results)} checks passed')
     sys.exit(0 if all(results) and all(rejected) else 1)

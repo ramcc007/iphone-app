@@ -57,16 +57,16 @@ struct OverlayLayer: View {
                     .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.spark.opacity(0.12)))
             }
             Text("Wallet: \(app.progress.sparks) Sparks").font(Theme.rounded(14, .medium)).foregroundStyle(Theme.soft)
-            if let index = session.levelIndex, index + 1 < app.levels.count {
-                PrimaryButton("Next: Level \(level.number + 1)") { app.play(index + 1) }
+            if let board = session.board, let next = session.nextIndex {
+                PrimaryButton("Next: Level \(level.number + 1)") { app.play(board, next) }
                 ShareLink(item: shareText(result)) {
                     Text("Share result").font(Theme.rounded(16, .semibold)).frame(maxWidth: .infinity).frame(height: 50)
                         .background(Capsule().fill(Color.white.opacity(0.08)))
                 }
                 LinkButton("Back to the map") { app.goHome() }
             } else {
-                Text("That\u{2019}s every level so far. More chapters are coming.").font(Theme.rounded(.body, .medium)).foregroundStyle(Theme.soft)
-                PrimaryButton("Back to the map") { app.goHome() }
+                Text("That\u{2019}s every \(session.board?.name ?? "") level! Try another board for a new challenge.").font(Theme.rounded(.body, .medium)).foregroundStyle(Theme.soft)
+                PrimaryButton("Choose a board") { app.goHome() }
             }
 
         case .timeUp?:
@@ -90,9 +90,11 @@ struct OverlayLayer: View {
 
         case .skipped?:
             SheetTitle("Level skipped", color: Theme.spark)
-            BodyText("Level \(level.number + 1) is unlocked. Level \(level.number) stays on your map so you can come back for the stars.")
-            if let index = session.levelIndex, index + 1 < app.levels.count {
-                PrimaryButton("Play Level \(level.number + 1)") { app.play(index + 1) }
+            if let board = session.board, let next = session.nextIndex {
+                BodyText("Level \(level.number + 1) is unlocked. Level \(level.number) stays on your map so you can come back for the stars.")
+                PrimaryButton("Play Level \(level.number + 1)") { app.play(board, next) }
+            } else {
+                BodyText("Level \(level.number) stays on your map so you can come back for the stars.")
             }
             LinkButton("Back to the map") { app.goHome() }
 
@@ -103,7 +105,7 @@ struct OverlayLayer: View {
             if isLast {
                 Label("Welcome gift: +\(Economy.welcomeGift) Sparks", systemImage: "gift.fill")
                     .font(Theme.rounded(16, .semibold)).foregroundStyle(Theme.spark)
-                PrimaryButton("Start Level 1") { app.play(0) }
+                PrimaryButton("Choose your board") { app.goHome() }
             } else if case .lesson(let index) = session.mode {
                 PrimaryButton("Next lesson") { app.route = .tutorial(lesson: index + 1) }
             }
@@ -145,7 +147,7 @@ struct OverlayLayer: View {
 
     private func shareText(_ result: LevelResult) -> String {
         let stars = String(repeating: "\u{2605}", count: result.stars) + String(repeating: "\u{2606}", count: 3 - result.stars)
-        return "Dropku \u{00B7} Level \(session.level.number) \(stars) \u{00B7} \(session.game.timeLeft)s to spare"
+        return "Dropku \(session.board?.name ?? "") \u{00B7} Level \(session.level.number) \(stars) \u{00B7} \(session.game.timeLeft)s to spare"
     }
 }
 

@@ -2,6 +2,13 @@
   "v": 3,
   "attachments": {},
   "boards": {
+    "AppIcon.dc.html": {
+      "h": 820,
+      "title": "17. App icon (all appearances + small sizes)",
+      "w": 1240,
+      "x": 0,
+      "y": 5706
+    },
     "Complete.dc.html": {
       "h": 844,
       "is_interactive": true,
@@ -29,6 +36,13 @@
       "x": 940,
       "y": 300
     },
+    "Devices.dc.html": {
+      "h": 1120,
+      "title": "18. Devices, resolution and sharpness spec",
+      "w": 1400,
+      "x": 1320,
+      "y": 5706
+    },
     "Failed.dc.html": {
       "h": 844,
       "is_interactive": true,
@@ -42,7 +56,7 @@
       "h": 844,
       "is_interactive": true,
       "radius": 44,
-      "title": "7. Level 12: PLAYABLE 6×6 · 150s countdown",
+      "title": "7. Classic Level 12: PLAYABLE 6×6 · 85s countdown",
       "w": 390,
       "x": 940,
       "y": 1564
@@ -51,7 +65,7 @@
       "h": 844,
       "is_interactive": true,
       "radius": 44,
-      "title": "5. Home",
+      "title": "5. Home: pick a board (Quick 4×4, Classic 6×6, Master 9×9)",
       "w": 390,
       "x": 0,
       "y": 1564
@@ -60,7 +74,7 @@
       "h": 844,
       "is_interactive": true,
       "radius": 44,
-      "title": "6. Level map + milestone chest",
+      "title": "6. Level map (one per board) + milestone chest",
       "w": 390,
       "x": 470,
       "y": 1564
@@ -129,36 +143,22 @@
       "y": 300
     },
     "iPadGame.dc.html": {
-      "x": 0,
-      "y": 4092,
-      "w": 1376,
       "h": 1032,
-      "title": "15. iPad landscape: Level 12, PLAYABLE",
       "is_interactive": true,
-      "radius": 36
+      "radius": 36,
+      "title": "15. iPad landscape: Classic Level 12, PLAYABLE",
+      "w": 1376,
+      "x": 0,
+      "y": 4092
     },
     "iPadHome.dc.html": {
-      "x": 1456,
-      "y": 4092,
-      "w": 834,
       "h": 1194,
-      "title": "16. iPad portrait: Home",
       "is_interactive": true,
-      "radius": 36
-    },
-    "AppIcon.dc.html": {
-      "x": 0,
-      "y": 5706,
-      "w": 1240,
-      "h": 820,
-      "title": "17. App icon (all appearances + small sizes)"
-    },
-    "Devices.dc.html": {
-      "x": 1320,
-      "y": 5706,
-      "w": 1400,
-      "h": 1120,
-      "title": "18. Devices, resolution and sharpness spec"
+      "radius": 36,
+      "title": "16. iPad portrait: Home with the board picker",
+      "w": 834,
+      "x": 1456,
+      "y": 4092
     }
   },
   "createdOnFiles": {
@@ -182,7 +182,7 @@
       "fill": "blue",
       "maxH": 760,
       "size": 24,
-      "text": "Dropku in 5 lines\n\n1. Sudoku rule: each number once per row, column and box.\n2. You don't tap cells. Pick a number, tap a COLUMN, and it falls to the lowest gap.\n3. So the ORDER matters: fill the lower gaps first.\n4. WIN: fill the grid before the countdown hits 0s.\n5. LOSE: time's up, or 3 wrong drops (each one cracks and costs a heart).\n\nPress Play on screens 3, 4 and 7. They really work.",
+      "text": "Dropku in 5 lines\n\n1. Sudoku rule: each number once per row, column and box.\n2. You don't tap cells. Pick a number, tap a COLUMN, and it falls to the lowest gap.\n3. So the ORDER matters: fill the lower gaps first.\n4. WIN: fill the grid before the countdown hits 0s.\n5. LOSE: time's up, or 3 wrong drops (each one cracks and costs a heart).\n\nThree boards, all open from the start: Quick 4×4 (30 levels), Classic 6×6 (100) and Master 9×9 (100).\n\nPress Play on screens 3, 4 and 7. They really work.",
       "w": 420,
       "x": 1880,
       "y": 300
@@ -216,33 +216,35 @@
       "fill": "green",
       "maxH": 700,
       "size": 24,
-      "text": "v1 economy: no ads, no purchases\n\nEvery Spark is earned by playing: level 10 · no mistakes +10 · 1 per 5s left (max 20) · lines +1, combos +3/+8 · Daily Drop +25 · milestone chest 100–250. A perfect level is about 50.\n\nSpend: hint 40 · extra undo 15 · +1 heart 60 (once per attempt) · SKIP LEVEL 400 (after 2 failed tries).\n\nThe timer is the challenge: no way to buy extra time. Time's up = start the level again.\n\nPurchases and ads may come in a later version.",
+      "text": "v1 economy: no ads, no purchases\n\nEvery Spark is earned by playing: level 10 · no mistakes +10 · 1 per 5s left (max 20) · lines +1, combos +3/+8 · Daily Drop +25 · milestone chest 150 (every 10 levels on each board). A perfect level is about 50.\n\nSpend: hint 40 · extra undo 15 · +1 heart 60 (once per attempt) · SKIP LEVEL 400 (after 2 failed tries).\n\nThe timer is the challenge: no way to buy extra time. Time's up = start the level again.\n\nPurchases and ads may come in a later version.",
       "w": 400,
       "x": 2350,
       "y": 2828
     },
     "row4": {
-      "x": 0,
-      "y": 3832,
+      "kind": "title1",
+      "maxW": 2290,
       "text": "4 · iPad: same game, layouts made for the big screen",
-      "kind": "title1",
-      "maxW": 2290
-    },
-    "row5": {
+      "w": 240,
       "x": 0,
-      "y": 5446,
-      "text": "5 · App icon and every-screen spec",
-      "kind": "title1",
-      "maxW": 2720
+      "y": 3832
     },
     "row4note": {
-      "x": 2370,
-      "y": 4092,
-      "w": 420,
-      "maxH": 700,
       "fill": "teal",
-      "size": "m",
-      "text": "iPad\n\n• Landscape: board on the left (96pt tiles), timer, hearts, Sparks and a big 3×2 number tray on the right.\n• Portrait: two-column home with the whole chapter visible.\n• Narrow Split View windows fall back to the iPhone layout.\n\nScreen 15 runs the same game engine as screen 7 and passes the same 26 fail-safe tests."
+      "maxH": 700,
+      "size": 24,
+      "text": "iPad\n\n• Landscape: board on the left (96pt tiles), timer, hearts, Sparks and a big 3×2 number tray on the right.\n• Portrait: two-column home with the whole chapter visible.\n• Narrow Split View windows fall back to the iPhone layout.\n\nScreen 15 runs the same game engine as screen 7 and passes the same 26 fail-safe tests.",
+      "w": 420,
+      "x": 2370,
+      "y": 4092
+    },
+    "row5": {
+      "kind": "title1",
+      "maxW": 2720,
+      "text": "5 · App icon and every-screen spec",
+      "w": 240,
+      "x": 0,
+      "y": 5446
     }
   },
   "order": [

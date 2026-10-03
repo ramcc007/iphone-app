@@ -3,7 +3,7 @@
 Date: 3 October 2026. Scope: the approved game plan, the 14 screens on the design canvas, the playable prototype logic, the level data, the economy, App Store rules and the technical build.
 
 **How it was tested**
-- **Automated:** 24 gameplay tests on Level 12 (`tools/failsafe/game.test.js`), 7 tutorial tests (`tools/failsafe/tutorial.test.js`), and a level validator run on every board (`tools/levelgen/validate.py`).
+- **Automated:** 26 gameplay tests on Classic Level 12 (`tools/failsafe/game.test.js`), 7 tutorial tests (`tools/failsafe/tutorial.test.js`), engine tests on all 230 levels, Swift rule tests, a real-browser test on 6 screen sizes, and a level validator run on every level (`tools/levelgen/validate.py`).
 - **Validator self-check:** it was also fed 4 deliberately broken levels to prove it rejects them.
 - **Manual:** a walkthrough of each screen and rule, asking "what happens if…?"
 
@@ -25,13 +25,16 @@ Severity:
 
 | Suite | Before fixes | After fixes |
 |---|---|---|
-| Gameplay (Level 12, iPhone) | 11 / 13 passed: **no time limit**, **Sparks farming via undo** | **26 / 26** (timer, time's up and skip tests added) |
-| Gameplay (Level 12, iPad landscape) | — | **26 / 26** (same engine, same tests) |
+| Gameplay (Classic Level 12, iPhone) | 11 / 13 passed: **no time limit**, **Sparks farming via undo** | **26 / 26** (timer, time's up and skip tests added) |
+| Gameplay (Classic Level 12, iPad landscape) | — | **26 / 26** (same engine, same tests) |
 | Tutorial (3 lessons) | 7 / 7 | 7 / 7 |
-| Game engine on all 20 generated levels (`engine.test.js`) | — | **13 / 13**: every level solvable by following logical hints only, timer, hearts, undo, continue, stars, economy |
-| Real browser, iPhone SE to iPad 13" (`web.e2e.js`) | 43 / 49: on small screens the number tray wrapped and buttons went off-screen | **49 / 49** after fixing |
-| Level validator (6 boards) | 6 / 6 | 6 / 6 |
+| Game engine on all 230 levels of the 3 boards (`engine.test.js`) | — | **16 / 16**: every level solvable by following logical hints only, time tables, harder from first chapter to last, timer, hearts, undo, continue, stars, economy |
+| Swift rules on Linux (`tools/swift/linux-swift.sh`, Swift 6.0) | — | **25 / 25**: the same rules and all 230 levels, plus saving and iCloud merge |
+| Real browser, iPhone SE to iPad 13" (`web.e2e.js`) | 43 / 49: on small screens the number tray wrapped and buttons went off-screen | **85 / 85**, now including the board picker and 9×9 layouts on every device |
+| Level validator (all 230 levels + 6 design boards) | 6 / 6 | **236 / 236** |
 | Validator self-check (4 broken levels) | all 4 correctly rejected | all 4 correctly rejected |
+
+Updated 3 October 2026 for the three boards (Quick 4×4, Classic 6×6, Master 9×9) and the new time tables.
 
 ---
 
@@ -51,19 +54,19 @@ Severity:
 | A10 | A gap under a given number can never be filled. | Critical | The validator rejects any gap below a given. This is why "Stones" became "Locks". | ✅ |
 | A11 | A level needs guessing because gravity hides the deduction. | High | The validator requires the level to be solvable by logic using only the lowest gap of each column. | ✅ |
 | A12 | The hint gives a correct but non-deducible move, which feels like cheating, or wastes 40 Sparks. | Medium | The real solver returns the next *logical* step plus a one-line reason ("Row 2 is only missing a 5"). | 📐 |
-| A13 | Hard timer vs accessibility: some players can't meet any countdown. | Medium | **Owner's decision: no untimed mode in v1.** Mitigation: generous early limits (60s for 2–9 gaps), warnings in text and haptics, and the tutorial has no timer. Revisit after launch feedback. | ✅ decided |
+| A13 | Hard timer vs accessibility: some players can't meet any countdown. | Medium | **Owner's decision: no untimed mode in v1.** Mitigation: the player picks the board (Quick is short and forgiving), warnings in text and haptics, and the tutorial has no timer. Early limits were tightened on 3 October 2026 after the owner found the levels too easy. Revisit after launch feedback. | ✅ decided |
 | A14 | The last heart is lost at the same moment as 0s. | Low | The first event wins. A wrong drop is resolved before the clock tick. | 📐 |
 
 ## B. Levels and difficulty
 
 | # | What can go wrong | Severity | Fix | Status |
 |---|---|---|---|---|
-| B1 | Time limits too tight or too loose. | High | The tier table starts it. The validator enforces at least 6s per gap. Beta analytics record *why* each level fails (time vs hearts), and levels with a first-try clear rate under about 50% are re-tuned. | ✅ table · 📐 tuning |
-| B2 | Difficulty spikes when the grid grows (Level 11: 4×4 → 6×6; Level 71: 6×6 → 9×9). | Medium | A big time jump at each grid change. The first level of a new size is easy, with a one-screen intro. | ✅ table · 📐 |
+| B1 | Time limits too tight or too loose. | High | One table per board starts it. The validator enforces at least 4s (Quick), 5s (Classic) or 6s (Master) per gap. Beta analytics record *why* each level fails (time vs hearts), and levels with a first-try clear rate under about 50% are re-tuned. | ✅ table · 📐 tuning |
+| B2 | Difficulty spikes when the grid grows. | Medium | Gone: each grid size is now its own board with its own curve, starting easy. The player chooses when to try a bigger grid. | ✅ |
 | B3 | Queue levels (Chapters 4 and 7) where the given number order can't actually be completed. | Critical | The validator must also simulate the queue. To be added before those chapters are generated. | 📐 |
 | B4 | Tilt and Locks rules are not fully defined yet. | Medium | Write exact rules and validator checks before generating Chapters 3 and 6. | 📐 |
-| B5 | A 9×9 board on iPhone SE or mini: 9 columns at about 38pt is under Apple's 44pt touch target, and 9 tray tiles don't fit. | High | Full-height column hit areas, a 2-row tray, an enlarged highlight under the finger. Test on the smallest supported iPhone. | 📐 |
-| B6 | Gap ceiling: with bottom-stacked givens, uniqueness breaks above about 8 gaps (4×4) and 17 gaps (6×6), so "harder by removing more numbers" stops working. (Found while generating levels.) | High | Difficulty comes from a measured score (fewer logical moves per step), the timer and later-chapter clues. Generator gap targets are set inside the limits. | ✅ |
+| B5 | A 9×9 board on iPhone SE or mini: 9 columns at about 31–38pt is under Apple's 44pt touch target, and 9 tray tiles don't fit. | High | Full-height column hit areas. The board is sized from its measured space. The tray uses 2 rows on tall phones and 1 row of 9 on short ones. The browser test checks iPhone SE: 9×9 board fits, columns ≥ 30px, number tiles ≥ 32px. Still to do: try it on a real iPhone SE. | ✅ web · 📐 device |
+| B6 | Gap ceiling: with bottom-stacked givens, logic alone stops being able to finish a board above about 9 gaps (4×4), 21 (6×6) and 41 (9×9). Random gap placement almost never gave a valid 9×9 board. (Found while generating levels.) | High | The dig-holes generator (`tools/levelgen/dig.py`) removes one cell at a time and keeps only boards logic can finish, so every board is valid by construction. Difficulty also comes from a measured score (fewer moves per step, hidden singles) and the timer. | ✅ |
 
 ## C. Economy (Sparks)
 

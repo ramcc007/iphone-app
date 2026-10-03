@@ -1,25 +1,37 @@
 import SwiftUI
 import DropkuCore
 
-/// Tile size and spacing, worked out from the space the window gives us (docs/DEVICES_AND_ASSETS.md).
+/// Tile size and spacing, worked out from the space the board really gets once everything else
+/// on the screen is laid out (docs/DEVICES_AND_ASSETS.md). Same formula as the web version.
 struct BoardLayout {
     let tile: CGFloat
     let gap: CGFloat
     let boxGap: CGFloat
     let wide: Bool
 
-    init(size n: Int, available: CGSize, wide: Bool) {
+    init(size n: Int, area: CGSize, wide: Bool) {
         self.wide = wide
         gap = n >= 9 ? 4 : (wide ? 10 : 6)
         boxGap = n >= 9 ? 6 : (wide ? 14 : 8)
         let boxesAcross: CGFloat = n == 9 ? 2 : 1
         let boxesDown: CGFloat = n == 9 ? 2 : CGFloat(n / 2 - 1)
-        let availableWidth = wide ? available.width - 32 - 380 - 36 : min(available.width, 540) - 32
-        let availableHeight = wide ? available.height - 140 : available.height - (n >= 9 ? 400 : 348)
         let gapsAcross = CGFloat(n - 1) * gap + boxesAcross * boxGap + 20
         let gapsDown = CGFloat(n - 1) * gap + boxesDown * boxGap + 20
-        let fit = min((availableWidth - gapsAcross) / CGFloat(n), (availableHeight - gapsDown) / CGFloat(n))
-        tile = max(26, min(wide ? 96 : 92, fit.rounded(.down)))
+        let fit = min((area.width - gapsAcross) / CGFloat(n), (area.height - gapsDown) / CGFloat(n))
+        tile = max(22, min(wide ? 96 : 92, fit.rounded(.down)))
+    }
+}
+
+/// The board, sized to whatever space is left for it.
+private struct FittedBoard: View {
+    @ObservedObject var session: GameSession
+    let wide: Bool
+
+    var body: some View {
+        GeometryReader { area in
+            BoardView(session: session, layout: BoardLayout(size: session.game.size, area: area.size, wide: wide))
+                .frame(width: area.size.width, height: area.size.height)
+        }
     }
 }
 
@@ -36,19 +48,20 @@ struct GameView: View {
     var body: some View {
         GeometryReader { geo in
             let wide = geo.size.width >= 700 && geo.size.width > geo.size.height * 1.1
-            let layout = BoardLayout(size: session.game.size, available: geo.size, wide: wide)
+            // Short phones (iPhone SE): the 9-number tray goes in one row so the 9x9 board keeps its room.
+            let compact = geo.size.height < 750
             ZStack {
                 Theme.background.ignoresSafeArea()
                 if wide {
                     VStack(spacing: 14) {
                         TopBar(session: session, showRules: $showRules)
                         HStack(alignment: .top, spacing: 36) {
-                            BoardView(session: session, layout: layout)
+                            FittedBoard(session: session, wide: true)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                             VStack(alignment: .leading, spacing: 14) {
                                 StatusPanel(session: session, wide: true)
                                 GuideLine(session: session, wide: true)
-                                TrayView(session: session, wide: true)
+                                TrayView(session: session, wide: true, compact: false)
                                 FlashLine(session: session)
                                 Spacer(minLength: 0)
                                 ControlsRow(session: session, wide: true)
@@ -62,11 +75,14 @@ struct GameView: View {
                     VStack(spacing: 10) {
                         TopBar(session: session, showRules: $showRules)
                         StatusPanel(session: session, wide: false)
-                        GuideLine(session: session, wide: false)
-                        BoardView(session: session, layout: layout)
+                        // One line shows the latest feedback (Crack!, DOUBLE!...) or else the guide, so the board gets the room.
+                        Group {
+                            if session.flash != nil { FlashLine(session: session) } else { GuideLine(session: session, wide: false) }
+                        }
+                        .frame(minHeight: 38)
+                        FittedBoard(session: session, wide: false)
                             .frame(maxHeight: .infinity)
-                        FlashLine(session: session)
-                        TrayView(session: session, wide: false)
+                        TrayView(session: session, wide: false, compact: compact)
                         ControlsRow(session: session, wide: false)
                     }
                     .frame(maxWidth: 540)
@@ -144,7 +160,7 @@ private struct TopBar: View {
 
     private var title: String {
         if case .lesson(let index) = session.mode { return "Lesson \(index + 1) of \(Lesson.all.count)" }
-        return "Level \(session.level.number)"
+        return "\(session.board?.name ?? "") \u{00B7} Level \(session.level.number)"
     }
 
     private var subtitle: String {
@@ -440,12 +456,17 @@ struct CellView: View {
 private struct TrayView: View {
     @ObservedObject var session: GameSession
     let wide: Bool
+    let compact: Bool
 
     var body: some View {
         let n = session.game.size
         if wide {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
                 ForEach(1...n, id: \.self) { value in NumberButton(session: session, value: value, height: 100, digitSize: 46) }
+            }
+        } else if n >= 9 && compact {
+            HStack(spacing: 4) {
+                ForEach(1...n, id: \.self) { value in NumberButton(session: session, value: value, height: 52, digitSize: 22) }
             }
         } else if n >= 9 {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(maximum: 56), spacing: 8), count: 5), spacing: 8) {

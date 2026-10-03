@@ -24,7 +24,7 @@ public struct Lesson: Sendable, Identifiable {
                 gaps.contains(where: { $0.0 == row && $0.1 == column }) ? 0 : value
             }
         }
-        return Level(id: "tutorial", number: 0, chapter: 0, role: .normal, size: 4, boxRows: 2, boxCols: 2,
+        return Level(id: "tutorial", board: "tutorial", number: 0, chapter: 0, role: .normal, size: 4, boxRows: 2, boxCols: 2,
                      timeLimit: 0, gaps: gaps.count, difficulty: 0, givens: givens, solution: solution)
     }
 
@@ -46,7 +46,7 @@ public struct Lesson: Sendable, Identifiable {
         Lesson(id: 2, title: "On your own",
                instructions: "No more help. A wrong drop cracks and costs a heart. Lose all 3 and you start again. Fill the grid!",
                costsHearts: true, steps: [], stepTexts: [],
-               winText: "Real levels add a countdown: 60 seconds at first, more as grids grow. Seconds left turn into Sparks.",
+               winText: "Real levels add a countdown, and seconds left turn into Sparks. Now pick a board: Quick 4\u{00D7}4, Classic 6\u{00D7}6 or Master 9\u{00D7}9.",
                level: board(gaps: [(0, 0), (1, 0), (0, 2), (0, 3), (1, 3)]))
     ]
 }

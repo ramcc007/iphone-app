@@ -4,12 +4,19 @@
 (function (root) {
   'use strict';
 
-  // Seconds per level: same for each block of 5 levels, rising with difficulty (docs/GAME_PLAN.md §2).
-  function timeLimit(level) {
-    if (level <= 10) return level <= 5 ? 60 : 75;
-    if (level <= 70) return 150 + 10 * Math.floor((level - 11) / 5);
-    if (level < 100) return 360 + 15 * Math.floor((level - 71) / 5);
-    return 480;
+  // The three boards, all open from the start; each is its own path of levels (docs/GAME_PLAN.md §2).
+  // Seconds per level: the same for each block of 5 levels, then +5s.
+  // Must match tools/levelgen/validate.py (BOARDS) and ios/DropkuCore Level.swift (Board).
+  const BOARDS = {
+    quick:   { name: 'Quick',   size: 4, levels: 30,  start: 30,  step: 5 },
+    classic: { name: 'Classic', size: 6, levels: 100, start: 75,  step: 5 },
+    master:  { name: 'Master',  size: 9, levels: 100, start: 240, step: 5 }
+  };
+  const BOARD_ORDER = ['quick', 'classic', 'master'];
+
+  function timeLimit(board, level) {
+    var b = BOARDS[board];
+    return b.start + b.step * Math.floor((level - 1) / 5);
   }
 
   const LINE_SPARKS = 1;          // each row, column or box completed (once per attempt)
@@ -162,7 +169,7 @@
     return { stars: stars, breakdown: breakdown, earned: breakdown.reduce(function (a, b) { return a + b.n; }, 0) };
   }
 
-  var api = { timeLimit: timeLimit, newGame: newGame, landing: landing, left: left, drop: drop, tick: tick, undo: undo,
+  var api = { BOARDS: BOARDS, BOARD_ORDER: BOARD_ORDER, timeLimit: timeLimit, newGame: newGame, landing: landing, left: left, drop: drop, tick: tick, undo: undo,
     continueWithHeart: continueWithHeart, hint: hint, result: result, conflict: conflict, HEARTS: HEARTS, UNDOS_FREE: UNDOS_FREE };
   root.Dropku = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

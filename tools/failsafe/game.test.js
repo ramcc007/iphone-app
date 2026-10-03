@@ -99,52 +99,52 @@ t('Restart resets hearts, clock and board but keeps Sparks already spent', () =>
   return g.state.hearts === 3 && g.state[k] === fresh.state[k] && g.state.wallet === w ? true : 'hearts=' + g.state.hearts + ' ' + k + '=' + g.state[k] + ' wallet=' + g.state.wallet;
 });
 
-t('Countdown starts at the level limit (150s for Level 12)', () => { const L = load(FILE); const g = L.make(); return g.state.timeLeft === 150 && g.renderVals().timeText === '150s' ? true : 'timeLeft=' + g.state.timeLeft; });
+t('Countdown starts at the level limit (85s for Classic Level 12)', () => { const L = load(FILE); const g = L.make(); return g.state.timeLeft === 85 && g.renderVals().timeText === '85s' ? true : 'timeLeft=' + g.state.timeLeft; });
 t('Warning at 30s (amber) and 10s (red)', () => {
-  const L = load(FILE); const g = L.make(); L.tickSeconds(120); const f30 = g.state.flash, c30 = g.renderVals().timeColor; L.tickSeconds(20); const f10 = g.state.flash, c10 = g.renderVals().timeColor;
+  const L = load(FILE); const g = L.make(); L.tickSeconds(55); const f30 = g.state.flash, c30 = g.renderVals().timeColor; L.tickSeconds(20); const f10 = g.state.flash, c10 = g.renderVals().timeColor;
   return /30 seconds/.test(f30) && c30 === '#FFB547' && /10 seconds/.test(f10) && c10 === '#FF6B7A' ? true : [f30, c30, f10, c10].join(' | ');
 });
 t("Time's up at exactly 0s: board locks, hint and drops refused", () => {
-  const L = load(FILE); const g = L.make(); L.tickSeconds(149); const stillPlaying = g.state.status === 'play'; L.tickSeconds(1);
+  const L = load(FILE); const g = L.make(); L.tickSeconds(84); const stillPlaying = g.state.status === 'play'; L.tickSeconds(1);
   const grid = JSON.stringify(g.state.grid); const w = g.state.wallet; g.renderVals().hint(); pick(g, 3); g.renderVals().cols[0].drop();
   return stillPlaying && g.state.status === 'timeup' && g.state.timeLeft === 0 && JSON.stringify(g.state.grid) === grid && g.state.wallet === w ? true : 'status=' + g.state.status + ' t=' + g.state.timeLeft;
 });
 t('Clock never goes negative', () => { const L = load(FILE); const g = L.make(); L.tickSeconds(500); return g.state.timeLeft === 0 ? true : 'timeLeft=' + g.state.timeLeft; });
 t("v1: Time's up only offers to start the same level again (no paid extra time)", () => {
-  const L = load(FILE); const g = L.make(); L.tickSeconds(150); const v = g.renderVals();
+  const L = load(FILE); const g = L.make(); L.tickSeconds(85); const v = g.renderVals();
   return v.isTimeUp && !('extend' in v) && !('canExtend' in v) && v.showSkip === false && /starts again/.test(v.timeUpText) ? true : JSON.stringify({ isTimeUp: v.isTimeUp, showSkip: v.showSkip });
 });
-t('Start again after time-up gives a fresh board and the full 150s', () => {
-  const L = load(FILE); const g = L.make(); correctDrop(L, g, 0); L.tickSeconds(150); g.renderVals().restart();
+t('Start again after time-up gives a fresh board and the full 85s', () => {
+  const L = load(FILE); const g = L.make(); correctDrop(L, g, 0); L.tickSeconds(85); g.renderVals().restart();
   const fresh = L.make();
-  return g.state.timeLeft === 150 && g.state.status === 'play' && JSON.stringify(g.state.grid) === JSON.stringify(fresh.state.grid) ? true : 't=' + g.state.timeLeft;
+  return g.state.timeLeft === 85 && g.state.status === 'play' && JSON.stringify(g.state.grid) === JSON.stringify(fresh.state.grid) ? true : 't=' + g.state.timeLeft;
 });
 t('Skip only appears after 2 failed attempts (time or hearts)', () => {
-  const L = load(FILE); const g = L.make(); L.tickSeconds(150); const after1 = g.renderVals().showSkip; g.renderVals().restart();
+  const L = load(FILE); const g = L.make(); L.tickSeconds(85); const after1 = g.renderVals().showSkip; g.renderVals().restart();
   for (let i = 0; i < 3; i++) wrongDrop(g, 0);
   return after1 === false && g.state.status === 'lose' && g.renderVals().showSkip === true ? true : 'after1=' + after1 + ' after2=' + g.renderVals().showSkip;
 });
 t('Skip is refused below 400 Sparks and costs exactly 400 when allowed', () => {
-  const L = load(FILE); const g = L.make(); L.tickSeconds(150); g.renderVals().restart(); L.tickSeconds(150);
+  const L = load(FILE); const g = L.make(); L.tickSeconds(85); g.renderVals().restart(); L.tickSeconds(85);
   g.setState({ wallet: 399 }); g.renderVals().skip(); const refused = g.state.status === 'timeup' && g.state.wallet === 399;
   g.setState({ wallet: 450 }); g.renderVals().skip();
   return refused && g.state.status === 'skipped' && g.state.wallet === 50 ? true : 'status=' + g.state.status + ' wallet=' + g.state.wallet;
 });
 t('Nothing can be dropped after skipping', () => {
-  const L = load(FILE); const g = L.make(); L.tickSeconds(150); g.renderVals().restart(); L.tickSeconds(150); g.setState({ wallet: 400 }); g.renderVals().skip();
+  const L = load(FILE); const g = L.make(); L.tickSeconds(85); g.renderVals().restart(); L.tickSeconds(85); g.setState({ wallet: 400 }); g.renderVals().skip();
   const grid = JSON.stringify(g.state.grid); pick(g, 3); g.renderVals().cols[0].drop(); g.renderVals().hint();
   return JSON.stringify(g.state.grid) === grid && g.state.wallet === 0 ? true : 'changed';
 });
-t('Winning in the last second still counts as a win', () => { const L = load(FILE); const g = L.make(); L.tickSeconds(149); solveAll(L, g); return g.state.status === 'win' && g.state.result.stars === 2 ? true : 'status=' + g.state.status + ' stars=' + (g.state.result && g.state.result.stars); });
-t('3rd star needs at least 25% of the time left (38s of 150)', () => {
-  const L = load(FILE); const a = L.make(); L.tickSeconds(112); solveAll(L, a);
-  const L2 = load(FILE); const b = L2.make(); L2.tickSeconds(113); solveAll(L2, b);
-  return a.state.result.stars === 3 && b.state.result.stars === 2 ? true : 'at 38s left=' + a.state.result.stars + ', at 37s left=' + b.state.result.stars;
+t('Winning in the last second still counts as a win', () => { const L = load(FILE); const g = L.make(); L.tickSeconds(84); solveAll(L, g); return g.state.status === 'win' && g.state.result.stars === 2 ? true : 'status=' + g.state.status + ' stars=' + (g.state.result && g.state.result.stars); });
+t('3rd star needs at least 25% of the time left (22s of 85)', () => {
+  const L = load(FILE); const a = L.make(); L.tickSeconds(63); solveAll(L, a);
+  const L2 = load(FILE); const b = L2.make(); L2.tickSeconds(64); solveAll(L2, b);
+  return a.state.result.stars === 3 && b.state.result.stars === 2 ? true : 'at 22s left=' + a.state.result.stars + ', at 21s left=' + b.state.result.stars;
 });
-t('Time bonus = 1 Spark per 5 seconds left, max 20', () => {
+t('Time bonus = 1 Spark per 5 seconds left (85s left = 17, 10s left = 2)', () => {
   const L = load(FILE); const g = L.make(); solveAll(L, g); const tb = g.state.result.breakdown.find((b) => /Time bonus/.test(b.label));
-  const L2 = load(FILE); const h = L2.make(); L2.tickSeconds(140); solveAll(L2, h); const tb2 = h.state.result.breakdown.find((b) => /Time bonus/.test(b.label));
-  return tb && tb.n === 20 && tb2 && tb2.n === 2 ? true : JSON.stringify([tb, tb2]);
+  const L2 = load(FILE); const h = L2.make(); L2.tickSeconds(75); solveAll(L2, h); const tb2 = h.state.result.breakdown.find((b) => /Time bonus/.test(b.label));
+  return tb && tb.n === 17 && tb2 && tb2.n === 2 ? true : JSON.stringify([tb, tb2]);
 });
 t('Sparks earned for a full perfect level stay in the planned range (about 40-70)', () => { const L = load(FILE); const g = L.make(); solveAll(L, g); const e = g.state.result.earned; return e >= 40 && e <= 70 ? true : 'earned=' + e; });
 console.log('\n' + pass + ' passed, ' + fail + ' failed');

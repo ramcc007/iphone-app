@@ -1,6 +1,7 @@
 # Game Plan v2: "Dropku" (working title), Sudoku where numbers fall
 
 Status: **approved 3 October 2026.** Screens designed (canvas "Dropku – Game Screens", 18 screens incl. iPad). v1 decisions recorded in section 11.
+**Update 3 October 2026:** after playtesting the web version ("levels feel too easy"), the game now has **three boards to choose from** (Quick 4×4, Classic 6×6, Master 9×9), 230 levels in all, harder levels and tighter clocks. See sections 2 and 7.
 Previous concept ("Spill") was scrapped and moved to `docs/archive/`.
 Last updated: 3 October 2026.
 
@@ -16,16 +17,26 @@ Last updated: 3 October 2026.
 Sudoku asks *what* goes where. Dropku also asks **in what order**. That ordering is the new layer of challenge, and it makes every level feel like a small strategy puzzle rather than a fill-in exercise.
 
 - **Audience:** 16–30. Also accessible to anyone who has seen a Sudoku.
-- **Session length:** 2–6 minutes per level. Small grids early, 9×9 only at the end.
+- **Session length:** under a minute (Quick) to about 5 minutes (Master) per level. The player picks the board.
 - **Mental benefit:** logic, planning ahead and working memory, plus mental arithmetic in later chapters (sum clues). We'll describe this honestly as "a workout for logic and planning" and make no medical or "proven brain training" claims, which Apple and advertising rules restrict.
 
 ---
 
 ## 2. How to play
 
-### The board
-- A grid of columns: 4×4 early on, then 6×6, then 9×9 by the end.
-- The board is split into **boxes**: 2×2 boxes on a 4×4 grid, 2×3 boxes on a 6×6 grid, 3×3 boxes on a 9×9 grid.
+### The three boards
+The player chooses a board on the home screen. **All three are open from the start**, and each is its own path of levels with its own progress, stars and milestone chests.
+
+| Board | Grid | Boxes | Levels | Gaps per level | Clock per level |
+|---|---|---|---|---|---|
+| **Quick** | 4×4 | 2×2 | 30 | 5 → 9 | 30s → 55s |
+| **Classic** (starting choice) | 6×6 | 2×3 | 100 | 12 → 21 | 75s → 170s |
+| **Master** | 9×9 | 3×3 | 100 | 28 → 41 | 240s → 335s |
+
+- The tutorial is always on a 4×4 grid. When it ends, the player picks a board. Classic is selected by default.
+- Inside a board, levels unlock one after another (or by skipping). Clearing a Quick level never unlocks Classic levels.
+
+### The grid
 - **Given numbers** are already fixed in place, shown as grey tiles. Every column is a stack, so givens always sit at the bottom of their column and dropped numbers land on top of them.
 - **Locks** (from Chapter 3): some columns start padlocked and open when you complete the box next to them.
 
@@ -53,7 +64,7 @@ You have **3 hearts** per level.
 - **Time's up → level failed.** See the time limit below.
 
 ### Time limit (countdown in seconds)
-Every level has a hard countdown, shown in seconds (e.g. "150s"). The timer is always on: playing against the clock **is** the game. When it reaches **0s** the board locks and a pop-up says **"Time's up!"**, with:
+Every level has a hard countdown, shown in seconds (e.g. "85s"). The timer is always on: playing against the clock **is** the game. When it reaches **0s** the board locks and a pop-up says **"Time's up!"**, with:
 - **Start Level X again:** a fresh board and the full time. This is the main action.
 - After 2 failed attempts: **Skip this level · 400 Sparks** (earned Sparks only).
 - Back to the map.
@@ -62,23 +73,21 @@ There is no way to buy or earn extra time.
 
 Warnings: the clock turns **amber at 30s** ("30 seconds left") and **red at 10s**, with a soft haptic tick each second. The warnings are text as well as colour.
 
-The limit is the same for each block of 5 levels and rises as the grids get bigger and harder:
+Each board has its own table. The limit is the same for each block of 5 levels, then rises by 5 seconds. Each move also needs more thinking as you go (fewer obvious moves, more hidden singles):
 
-| Levels | Grid | Time limit | Step |
-|---|---|---|---|
-| 1–5 | 4×4 | 60s | |
-| 6–10 | 4×4 | 75s | +15s |
-| 11–15 | 6×6 (first) | 150s | jump for the bigger grid |
-| 16–70 | 6×6 | 160s → 260s | +10s every 5 levels |
-| 71–75 | 9×9 (first) | 360s | jump for the bigger grid |
-| 76–99 | 9×9 | 375s → 435s | +15s every 5 levels |
-| 100 | 9×9 finale | 480s | |
+| Board | Levels 1–5 | Step every 5 levels | Last block | Seconds per gap (first → last level) |
+|---|---|---|---|---|
+| Quick 4×4 | 30s | +5s | 55s (levels 26–30) | about 6 → 6 |
+| Classic 6×6 | 75s | +5s | 170s (levels 96–100) | about 6 → 8 |
+| Master 9×9 | 240s | +5s | 335s (levels 96–100) | about 8.5 → 8 |
+
+The first table (60s for the first 4×4 levels, 150s and more for 6×6) left 10–20 seconds per gap, which is why the early levels felt too easy. The new tables give 5–10 seconds per gap. Later levels also need more thinking per move (see section 7).
 
 Fail-safes (details in `docs/FAILSAFE_REVIEW.md`):
 - The clock pauses whenever the app leaves the screen, on Pause and on the "?" help screen.
 - The board is hidden while paused, so pausing can't buy thinking time.
 - A drop tapped before 0s counts.
-- The validator rejects any level with fewer than 6 seconds per gap.
+- The validator rejects any level with fewer than 4 (Quick), 5 (Classic) or 6 (Master) seconds per gap.
 - The table is the starting point. Real per-level times are tuned in beta from "time's up" rates.
 - No relaxed or untimed mode in v1 (owner's decision).
 
@@ -111,7 +120,7 @@ Game mechanics can't be owned (copyright protects code, art, text and names, not
 - **Perfect level:** 3 stars, a confetti burst, and a "Perfect!" streak counter.
 
 **Why players come back:**
-- **Visible progress:** a level map in 10 chapters, each with a theme and a milestone chest at the end.
+- **Visible progress:** each board's map is split into chapters of 10 levels, with a milestone chest at the end of each. Quick has 3 chapters, Classic and Master have 10 each.
 - **"One more level":** levels are short, and the next one starts with one tap.
 - **Daily Drop:** one puzzle a day, the same for everyone, with a streak, a leaderboard and a spoiler-free share card.
 - **Collections:** number skins and board themes unlocked with stars.
@@ -155,10 +164,10 @@ Game mechanics can't be owned (copyright protects code, art, text and names, not
 | Each row, column or box completed | +1 |
 | Combo (Double / Triple) | +3 / +8 total |
 | Daily Drop completed | +25 (+streak bonus) |
-| **Milestone chest** every 10 levels | 100 to 250 Sparks, plus a cosmetic (only once the level is actually cleared, not skipped) |
+| **Milestone chest** every 10 levels on each board (23 in all) | 150 Sparks (only once the level is actually cleared, not skipped). Cosmetics later |
 | First 3-star clear of a chapter | +50 |
 
-Measured in simulation: a perfect 6×6 level earns about 52 Sparks. An average run earns about 25–35.
+Measured in simulation (no mistakes, steady pace): 25–50 Sparks on a 4×4 level, 40–70 on 6×6, 50–90 on 9×9. An average run earns less.
 Replaying a level only pays for improving its stars, so easy levels can't be farmed.
 
 ### Spending
@@ -187,40 +196,28 @@ Because v1 players will have earned everything by playing, any later purchases m
 
 ---
 
-## 7. Difficulty curve (100 levels, 10 chapters)
+## 7. Difficulty curve (three boards, 230 levels)
 
-**Pattern in each chapter:**
-- the first level introduces the idea
-- difficulty builds
-- a **breather** level at x6
-- a **milestone** level at x0, with a chest
+**Pattern in each chapter of 10 levels, on every board:**
+- each normal level is at least as hard as the one before
+- a **breather** level at x6 (fewer gaps, easier)
+- a **milestone** level at x0: the chapter's hardest, with a chest
 
-| Levels | Chapter | Grid | New idea | Time limit |
-|---|---|---|---|---|
-| 1–10 | First Drops | 4×4 | Drop and gravity. Free choice of number | 60s / 75s |
-| 11–20 | Planning | 6×6 | First 6×6 grids, longer drop orders | 150s / 160s |
-| 21–30 | Locks | 6×6 | Padlocked columns open when you complete the neighbouring box | 170s / 180s |
-| 31–40 | The Queue | 6×6 | Numbers arrive in a fixed order, next 3 shown (Tetris-style) | 190s / 200s |
-| 41–50 | Sums | 6×6 | Sum clues on some rows or boxes. Mental arithmetic begins | 210s / 220s |
-| 51–60 | Tilt | 6×6 | **Rotate the board** to change the drop direction (limited rotations) | 230s / 240s |
-| 61–70 | Blind Queue | 6×6 | Only the next number is shown | 250s / 260s |
-| 71–80 | Big Board | 9×9 (partly pre-filled) | Bigger grids, more givens | 360s / 375s |
-| 81–90 | Mixed | 9×9 | Locks, sums and tilt combined | 390s / 405s |
-| 91–100 | Master | 9×9 | Fewest givens, queue plus tilt. Level 100 is a showcase finale | 420s / 435s, finale 480s |
+**What makes a level harder** (measured by the generator, `tools/levelgen/dig.py`):
+- **more gaps**, rising steadily from the first level of a board to the last
+- **fewer obvious moves:** at each step, how many gaps can be worked out right now. On hard levels there is often only one
+- **hidden singles:** steps where no gap has only one possible number, so you must spot that a number has only one place left in a row, column or box
+- **a tighter clock** per gap (section 2)
 
-**Level creation:** a generator builds a valid solution. A solver then confirms:
-- the puzzle has exactly one solution
-- a legal drop order exists, with the queue order too in queue levels
-- a difficulty score, from the number of decision points and dead-end traps
+Difficulty score = Σ(1 / moves available at each step) + 0.15 × gaps + 0.5 × steps that need a hidden single.
 
-Hand-made levels: tutorials, the first level of each chapter and the milestone levels. The rest are generated, then hand-picked and ordered by difficulty score.
+**How levels are made:** start from a truly random full grid, then dig gaps from the tops of columns one cell at a time. A gap is kept only if the board can still be finished by logic, playing only the lowest gap of each column. Logic that finishes the board proves there is exactly one solution, and `validate.py` checks that again separately.
 
-**Design finding from generating the real levels (3 October 2026):** because every column is a stack (givens sit at the bottom), a level can only have so many gaps before it stops having exactly one solution: about **8 on 4×4** and **17 on 6×6**. So difficulty does not come from removing ever more numbers. It comes from:
-- **fewer obvious moves per step:** the difficulty score counts how many logical drops are available at each step
-- **the timer**
-- **the later chapters' extra clues.** Sum clues and locks add information, which allows more gaps.
+**Design finding (3 October 2026):** because every column is a stack (givens sit at the bottom), a board can only have so many gaps before logic alone can't finish it: about **9 on 4×4, 21 on 6×6 and 41 on 9×9**. Removing gaps at random almost never gave a valid 9×9 board (0 of 200 at 42 gaps); digging one cell at a time makes every board valid by construction, about 0.3 seconds each.
 
-Levels 1–20 are generated (`tools/levelgen/build_levels.py` → `levels/levels.json`). Each is validated, and they're ordered so each normal level is a small step harder, with an easier breather at x6, the hardest at x0, and an easy first 6×6 level at 11.
+**Later, not in this version:** the chapter twists from the original plan (Locks, the Queue, Sum clues, Tilt) can come back as extra boards or special chapters once the core game is tested.
+
+The whole set is generated deterministically (`python3 tools/levelgen/build_levels.py` → `levels/levels.json`, seed 2026) and every level is validated before it ships.
 
 ---
 
@@ -244,9 +241,9 @@ Levels 1–20 are generated (`tools/levelgen/build_levels.py` → `levels/levels
 
 ## 10. Next steps after approval
 1. ~~Design the screens on a new canvas.~~ Done (18 screens, including iPad, app icon and device spec).
-2. ~~Generate and validate the real level set.~~ Levels 1–20 done.
+2. ~~Generate and validate the real level set.~~ Done: 230 levels on three boards.
 3. ~~Make a playable web version.~~ Done (`prototype/web`, published as a private link).
-4. iPhone/iPad app in SwiftUI: **written, not yet compiled** (`ios/`). Next: first build on a Mac, then sound, Game Center, the Daily Drop and chapters 3–10.
+4. iPhone/iPad app in SwiftUI (`ios/`). The game rules (`DropkuCore`) now compile and pass their tests on Linux (`tools/swift/linux-swift.sh`). The screens still need their first build in Xcode on a Mac. Then: sound, Game Center and the Daily Drop.
 
 ---
 
@@ -256,6 +253,7 @@ Levels 1–20 are generated (`tools/levelgen/build_levels.py` → `levels/levels
 - **Timer always on** (decided after the fail-safe review): every level has a hard countdown in seconds. At 0s, "Time's up!" and the same level starts again. No relaxed mode, no paid or earned extra time.
 - **v1: no ads and no In-App Purchases.** Sparks are earned only. Purchases may come in a later version.
 - **Universal app:** iPhone first, iPad fully supported, Mac and Vision Pro automatically (as an iPad app).
-- **Time table approved:** 60s/75s for 4×4, 150s and up for 6×6, 360s and up for 9×9, 480s finale.
+- ~~Time table approved: 60s/75s for 4×4, 150s and up for 6×6, 360s and up for 9×9, 480s finale.~~ Replaced on 3 October 2026 by one table per board (section 2), after the owner found the levels too easy. [Check] The new tables are a first guess, to be tuned in TestFlight from "time's up" rates.
+- **Three boards** (owner's idea, 3 October 2026): Quick 4×4 (30 levels), Classic 6×6 (100) and Master 9×9 (100), all open from the start. 4×4 instead of 3×3, because a 3×3 grid can't hold boxes.
 - Reward balance after simulating a full 6×6 level: line +1, Double +3, Triple +8. A perfect level earns about 52 Sparks (measured), so a 400-Spark skip takes about 8 perfect levels.
 - Level generator prototype: `tools/levelgen/gen.py`. It builds bottom-stacked levels with a unique solution that can be solved by logic while respecting gravity.

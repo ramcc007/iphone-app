@@ -24,7 +24,8 @@ struct HowToPlayView: View {
     private let rules: [Rule] = [
         Rule(symbol: "checkmark", color: Theme.good, title: "The Sudoku rule", text: "Each row, column and box holds each number once."),
         Rule(symbol: "arrow.down", color: Color(hex: 0x4FC3F7), title: "Numbers fall", text: "Pick a number, tap a column: it drops to the lowest gap. So fill lower gaps first."),
-        Rule(symbol: "timer", color: Theme.spark, title: "Beat the countdown", text: "60 seconds at first, more as grids grow. Time\u{2019}s up = start the level again."),
+        Rule(symbol: "square.grid.3x3.fill", color: Theme.pink, title: "Three boards", text: "Quick 4\u{00D7}4, Classic 6\u{00D7}6 or Master 9\u{00D7}9. All open from the start."),
+        Rule(symbol: "timer", color: Theme.spark, title: "Beat the countdown", text: "Every level has one: seconds on Quick, minutes on Master. Time\u{2019}s up = start the level again."),
         Rule(symbol: "heart.fill", color: Theme.bad, title: "3 hearts", text: "A wrong drop cracks and costs a heart."),
         Rule(symbol: "star.fill", color: Theme.spark, title: "Up to 3 stars", text: "No mistakes, with a quarter of the time still left."),
         Rule(symbol: "sparkle", color: Color(hex: 0x9D8CFF), title: "Sparks", text: "Earned by playing. Spend them on hints, or 400 to skip a level after 2 tries.")
