@@ -28,6 +28,8 @@ Severity:
 | Gameplay (Level 12, iPhone) | 11 / 13 passed: **no time limit**, **Sparks farming via undo** | **26 / 26** (timer, time's up and skip tests added) |
 | Gameplay (Level 12, iPad landscape) | — | **26 / 26** (same engine, same tests) |
 | Tutorial (3 lessons) | 7 / 7 | 7 / 7 |
+| Game engine on all 20 generated levels (`engine.test.js`) | — | **13 / 13**: every level solvable by following logical hints only, timer, hearts, undo, continue, stars, economy |
+| Real browser, iPhone SE to iPad 13" (`web.e2e.js`) | 43 / 49: on small screens the number tray wrapped and buttons went off-screen | **49 / 49** after fixing |
 | Level validator (6 boards) | 6 / 6 | 6 / 6 |
 | Validator self-check (4 broken levels) | all 4 correctly rejected | all 4 correctly rejected |
 
