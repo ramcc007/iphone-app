@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dropku level failed</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #13161F; color: #F5F6FA; font-family: Fredoka, ui-rounded, system-ui, sans-serif; display: flex; flex-direction: column; padding: 70px 22px 28px; gap: 14px; overflow: hidden">
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
+    <div style="font-size: 15px; font-weight: 600; color: #FF6B7A; letter-spacing: 2px">LEVEL 12 · ATTEMPT 2</div>
+    <sc-if value="{{isTime}}" hint-placeholder-val="{{true}}">
+      <div style="width: 84px; height: 84px; border-radius: 42px; border: 4px solid #FF6B7A; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: #FF6B7A">0s</div>
+    </sc-if>
+    <sc-if value="{{isHearts}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; gap: 6px" aria-label="0 hearts left">
+        <sc-for list="{{emptyHearts}}" as="h" hint-placeholder-count="3">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#FF6B7A" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.3 5 6.8 5c2 0 3.6 1.1 5.2 3 1.6-1.9 3.2-3 5.2-3 3.5 0 5.6 3.6 4.3 6.8C19.5 16.4 12 21 12 21z"></path></svg>
+        </sc-for>
+      </div>
+    </sc-if>
+    <h1 style="margin: 0; font-size: 38px; font-weight: 700">{{title}}</h1>
+    <p style="margin: 0; font-size: 16px; line-height: 1.45; color: #C3C8DA">{{body}}</p>
+  </div>
+
+  <div style="flex-grow: 1"></div>
+
+  <a href="Game.dc.html" style="height: 58px; border-radius: 29px; background: #6B5CF0; color: #FFFFFF; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 #4A3DC0">Start again · free</a>
+  <a href="Game.dc.html" style="height: 54px; border-radius: 27px; background: #1E2230; color: #F5F6FA; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; padding: 0 22px">
+    <span>{{continueLabel}}</span><span style="color: #FFB547; font-weight: 700">{{continueCost}}</span>
+  </a>
+  <a href="Game.dc.html" style="height: 54px; border-radius: 27px; background: #1E2230; color: #F5F6FA; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; padding: 0 22px">
+    <span>{{continueLabel}}</span><span style="color: #C3C8DA">Watch a short ad</span>
+  </a>
+  <div style="font-size: 12px; color: #A3A9BF; text-align: center">Continue is offered once per attempt.</div>
+
+  <div style="background: #1E2230; border-radius: 22px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+    <div style="font-size: 15px; font-weight: 700">Skip this level</div>
+    <div style="display: flex; gap: 10px">
+      <a href="Shop.dc.html" aria-label="Skip with 400 Sparks: you need 28 more" style="flex-grow: 1; height: 50px; border-radius: 25px; border: 1.5px dashed rgba(255,181,71,0.5); color: #FFB547; font-size: 15px; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15">
+        <span>400 ✦</span><span style="font-size: 11px; color: #C3C8DA">you have 372</span>
+      </a>
+      <a href="LevelMap.dc.html" style="flex-grow: 1; height: 50px; border-radius: 25px; background: rgba(255,255,255,0.08); color: #F5F6FA; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">Skip now · [PRICE]</a>
+    </div>
+    <div style="font-size: 12px; line-height: 1.45; color: #A3A9BF">Skipping appears after 2 tries. Skipped levels stay on your map so you can come back for the stars.</div>
+  </div>
+
+  <a href="Home.dc.html" style="text-align: center; font-size: 15px; font-weight: 600; padding: 4px">Back to Home</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"reason":{"editor":"enum","options":["timeup","hearts"],"default":"timeup"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const time = (this.props.reason ?? 'timeup') !== 'hearts';
+    return {
+      isTime: time, isHearts: !time,
+      emptyHearts: [0, 1, 2].map((i) => ({ i })),
+      title: time ? 'Time’s up!' : 'Out of hearts',
+      body: time
+        ? 'You filled 12 of 16 gaps in 150 seconds. Start again and the board resets. Your Sparks are safe.'
+        : 'So close: 4 gaps left! Your last drop put a 5 where a 3 belonged.',
+      continueLabel: time ? '+30 seconds, keep this board' : '+1 heart, keep this board',
+      continueCost: time ? '50 ✦' : '60 ✦'
+    };
+  }
+}
+</script>
+</body>
+</html>

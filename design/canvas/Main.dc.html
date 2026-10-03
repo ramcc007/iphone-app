@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dropku launch screen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #13161F; color: #F5F6FA; font-family: Fredoka, ui-rounded, system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; position: relative; overflow: hidden">
+  <a href="Welcome.dc.html" aria-label="Continue" style="display: flex; flex-direction: column; align-items: center; gap: 22px; color: #F5F6FA">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+      <div style="width: 58px; height: 58px; border-radius: 16px; background: #FFB547; color: #13161F; font-size: 34px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 0 #C9862A">4</div>
+      <div style="display: flex; gap: 8px">
+        <div style="width: 58px; height: 58px; border-radius: 16px; background: #4FC3F7; color: #13161F; font-size: 34px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 0 #2E8DB8">1</div>
+        <div style="width: 58px; height: 58px; border-radius: 16px; background: #2A3045; color: #E6E9F2; font-size: 34px; font-weight: 600; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 0 #1C2030">3</div>
+      </div>
+    </div>
+    <div style="font-size: 54px; font-weight: 700; letter-spacing: -0.5px">Dropku</div>
+  </a>
+  <div style="position: absolute; bottom: 60px; font-size: 14px; color: #A3A9BF">Shown for under 1 second · tap to continue</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

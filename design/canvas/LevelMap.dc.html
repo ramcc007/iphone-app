@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dropku level map</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #13161F; color: #F5F6FA; font-family: Fredoka, ui-rounded, system-ui, sans-serif; display: flex; flex-direction: column; padding: 58px 18px 26px; gap: 12px; overflow: hidden">
+  <div style="display: flex; align-items: center; gap: 12px">
+    <a href="Home.dc.html" aria-label="Back to Home" style="width: 44px; height: 44px; border-radius: 22px; background: #1E2230; color: #F5F6FA; display: flex; align-items: center; justify-content: center">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,5 8,12 15,19"></polyline></svg>
+    </a>
+    <div style="flex-grow: 1; display: flex; flex-direction: column">
+      <div style="font-size: 13px; font-weight: 600; color: #A3A9BF; letter-spacing: 1.5px">CHAPTER 2 OF 10 · LEVELS 11–20</div>
+      <div style="font-size: 22px; font-weight: 700">Planning</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 4px; font-size: 15px; font-weight: 700; color: #FFB547">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFB547"><polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21.5 12,17.3 5.5,21.5 7.5,14 2,9.3 9,9"></polygon></svg>2/30
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 2px; padding: 4px 28px; flex-grow: 1; justify-content: center">
+    <sc-for list="{{nodes}}" as="n" hint-placeholder-count="10">
+      <div style="display: flex; justify-content: {{n.align}}">
+        <sc-if value="{{n.done}}" hint-placeholder-val="{{true}}">
+          <a href="Game.dc.html" aria-label="Level {{n.num}}, {{n.starsText}}" style="display: flex; flex-direction: column; align-items: center; gap: 1px; color: #F5F6FA">
+            <span style="width: 52px; height: 52px; border-radius: 16px; background: #2A3045; box-shadow: 0 4px 0 #1C2030; display: flex; align-items: center; justify-content: center; font-size: 21px; font-weight: 700">{{n.num}}</span>
+            <span style="font-size: 12px; color: #FFB547; letter-spacing: 1px">{{n.starsText}}</span>
+          </a>
+        </sc-if>
+        <sc-if value="{{n.current}}" hint-placeholder-val="{{false}}">
+          <a href="Game.dc.html" aria-label="Level {{n.num}}, play now" style="display: flex; flex-direction: column; align-items: center; gap: 2px; color: #FFFFFF">
+            <span style="width: 62px; height: 62px; border-radius: 19px; background: #6B5CF0; box-shadow: 0 5px 0 #4A3DC0, 0 0 26px rgba(107,92,240,0.6); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700">{{n.num}}</span>
+            <span style="font-size: 12px; font-weight: 700; color: #B3A8FF">PLAY</span>
+          </a>
+        </sc-if>
+        <sc-if value="{{n.locked}}" hint-placeholder-val="{{false}}">
+          <div aria-label="Level {{n.num}}, locked" style="display: flex; flex-direction: column; align-items: center; gap: 1px">
+            <span style="width: 52px; height: 52px; box-sizing: border-box; border-radius: 16px; border: 1.5px dashed rgba(255,255,255,0.16); display: flex; align-items: center; justify-content: center; color: #8C92AB; font-size: 19px; font-weight: 600">{{n.num}}</span>
+            <span style="font-size: 12px; color: #8C92AB">locked</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{n.chest}}" hint-placeholder-val="{{false}}">
+          <a href="Milestone.dc.html" aria-label="Level 20, milestone chest" style="display: flex; flex-direction: column; align-items: center; gap: 2px; color: #FFB547">
+            <span style="width: 64px; height: 64px; box-sizing: border-box; border-radius: 20px; border: 2px solid #FFB547; background: rgba(255,181,71,0.1); display: flex; align-items: center; justify-content: center">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#FFB547" stroke-width="2" stroke-linejoin="round"><rect x="3" y="10" width="18" height="10" rx="2"></rect><path d="M3 10a9 5 0 0 1 18 0"></path><rect x="10" y="12" width="4" height="4" rx="1" fill="#FFB547"></rect></svg>
+            </span>
+            <span style="font-size: 12px; font-weight: 700">20 · CHEST</span>
+          </a>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background: #1E2230; border-radius: 18px; padding: 12px 16px; font-size: 13px; line-height: 1.45; color: #C3C8DA">Clear a level to unlock the next. Every 10th level has a milestone chest. Stuck? Spend 400 ✦ to skip, and come back for the stars later.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const aligns = ['flex-start', 'center', 'flex-end', 'center'];
+    const nodes = [];
+    for (let i = 9; i >= 0; i--) {
+      const num = 11 + i;
+      nodes.push({
+        num, align: aligns[i % 4],
+        done: num === 11, current: num === 12, locked: num > 12 && num < 20, chest: num === 20,
+        starsText: '★★☆'
+      });
+    }
+    return { nodes };
+  }
+}
+</script>
+</body>
+</html>

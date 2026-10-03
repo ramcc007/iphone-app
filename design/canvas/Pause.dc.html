@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dropku pause</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #13161F; color: #F5F6FA; font-family: Fredoka, ui-rounded, system-ui, sans-serif; position: relative; overflow: hidden">
+  <div style="position: absolute; left: 31px; top: 200px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; width: 328px; box-sizing: border-box; padding: 10px; border-radius: 22px; background: #1E2230; opacity: 0.35; filter: blur(4px)">
+    <sc-for list="{{cells}}" as="c" hint-placeholder-count="36">
+      <span style="height: 46px; border-radius: 12px; background: {{c.bg}}"></span>
+    </sc-for>
+  </div>
+  <div style="position: absolute; inset: 0; background: rgba(8,9,14,0.55)"></div>
+
+  <div style="position: absolute; left: 12px; right: 12px; bottom: 12px; border-radius: 34px; background: #272C3D; border: 1px solid rgba(255,255,255,0.1); padding: 24px 18px 20px; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding-bottom: 6px">
+      <div style="font-size: 28px; font-weight: 700">Paused</div>
+      <div style="font-size: 14px; color: #C3C8DA">Level 12 · clock paused at 112s · board hidden so pausing can’t buy thinking time</div>
+    </div>
+    <a href="Game.dc.html" style="height: 56px; border-radius: 28px; background: #6B5CF0; color: #FFFFFF; font-size: 19px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 #4A3DC0">Resume</a>
+    <a href="Game.dc.html" style="height: 50px; border-radius: 25px; background: rgba(255,255,255,0.08); color: #F5F6FA; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center">Restart level</a>
+    <a href="Demo.dc.html" style="height: 50px; border-radius: 25px; background: rgba(255,255,255,0.08); color: #F5F6FA; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center">How to play</a>
+    <a href="Settings.dc.html" style="height: 50px; border-radius: 25px; background: rgba(255,255,255,0.08); color: #F5F6FA; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center">Settings</a>
+    <a href="Home.dc.html" style="height: 50px; border-radius: 25px; border: 1.5px solid rgba(255,255,255,0.22); color: #F5F6FA; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center">Exit to Home</a>
+    <div style="text-align: center; font-size: 12px; color: #A3A9BF">You can also just close the app. Nothing is lost.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const colours = ['#FF6B7A', '#FFB547', '#F5E663', '#6EE7A8', '#4FC3F7', '#9D8CFF'];
+    const cells = [];
+    for (let i = 0; i < 36; i++) cells.push({ bg: i < 8 ? 'rgba(255,255,255,0.05)' : colours[i % 6] });
+    return { cells };
+  }
+}
+</script>
+</body>
+</html>

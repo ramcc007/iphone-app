@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dropku how to play demo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #13161F; color: #F5F6FA; font-family: Fredoka, ui-rounded, system-ui, sans-serif; display: flex; flex-direction: column; padding: 58px 20px 30px; gap: 16px; overflow: hidden">
+  <div style="display: flex; align-items: center; justify-content: space-between">
+    <div style="font-size: 14px; font-weight: 600; color: #A3A9BF; letter-spacing: 1.5px">HOW TO PLAY · 30 SEC</div>
+    <a href="Tutorial.dc.html" style="height: 36px; padding: 0 14px; border-radius: 18px; background: #1E2230; display: flex; align-items: center; font-size: 15px; font-weight: 600">Skip</a>
+  </div>
+
+  <div style="display: flex; gap: 6px">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+      <button type="button" onClick="{{t.go}}" aria-label="Step {{t.num}}" style="flex-grow: 1; height: 6px; border-radius: 3px; border: none; padding: 0; background: {{t.color}}; cursor: pointer"></button>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <h1 style="margin: 0; font-size: 30px; font-weight: 700; line-height: 1.1">{{title}}</h1>
+    <p style="margin: 0; font-size: 16px; line-height: 1.45; color: #C3C8DA">{{sub}}</p>
+  </div>
+
+  <div style="flex-grow: 1; background: #1E2230; border-radius: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 18px">
+    <sc-if value="{{showBoard}}" hint-placeholder-val="{{true}}">
+      <div style="display: flex; gap: 8px">
+        <sc-for list="{{cols}}" as="col" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-left: {{col.ml}}">
+            <div style="width: 54px; height: 54px; display: flex; align-items: center; justify-content: center">
+              <sc-if value="{{col.hasLane}}" hint-placeholder-val="{{false}}">
+                <div style="width: 50px; height: 50px; border-radius: 14px; background: {{col.laneBg}}; color: #13161F; font-size: 28px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 {{col.laneShadow}}">{{col.laneV}}</div>
+              </sc-if>
+            </div>
+            <sc-for list="{{col.cells}}" as="c" hint-placeholder-count="4">
+              <div style="width: 54px; height: 54px; box-sizing: border-box; border-radius: 14px; background: {{c.bg}}; border: {{c.border}}; color: {{c.fg}}; box-shadow: {{c.shadow}}; opacity: {{c.op}}; font-size: 28px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: {{c.mt}}; transition: all 0.3s">{{c.v}}</div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+      <div style="min-height: 50px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 17px; font-weight: 600; line-height: 1.35; padding: 0 6px">{{caption}}</div>
+    </sc-if>
+    <sc-if value="{{showRules}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 8px; width: 100%">
+        <sc-for list="{{rules}}" as="r" hint-placeholder-count="5">
+          <div style="display: flex; align-items: center; gap: 12px; background: #272C3D; border-radius: 16px; padding: 10px 14px">
+            <div style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{r.bg}}; color: #13161F; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{r.icon}}</div>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <div style="font-size: 17px; font-weight: 700">{{r.head}}</div>
+              <div style="font-size: 14px; line-height: 1.4; color: #C3C8DA">{{r.body}}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{notLast}}" hint-placeholder-val="{{true}}">
+    <button type="button" onClick="{{next}}" style="height: 58px; border-radius: 29px; border: none; background: #6B5CF0; color: #FFFFFF; font-family: inherit; font-size: 20px; font-weight: 700; cursor: pointer; box-shadow: 0 5px 0 #4A3DC0">Next</button>
+  </sc-if>
+  <sc-if value="{{isLast}}" hint-placeholder-val="{{false}}">
+    <a href="Tutorial.dc.html" style="height: 58px; border-radius: 29px; background: #6B5CF0; color: #FFFFFF; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 #4A3DC0">Try it yourself</a>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+const TILE = { 1: ['#FF6B7A', '#C94656'], 2: ['#FFB547', '#C9862A'], 3: ['#F5E663', '#BFB244'], 4: ['#6EE7A8', '#3FB27A'] };
+// cell codes: '.' empty, 'gN' given, 'pN' placed, 'xN' cracked, 'hN' ghost hint
+const FULL = [['p1','p2','p3','p4'],['p3','p4','p1','p2'],['p2','p1','p4','p3'],['p4','p3','p2','p1']];
+const STEPS = [
+  {
+    title: '1. The rule you know',
+    sub: 'Like Sudoku: every row, column and box holds each number exactly once.',
+    frames: [
+      { caption: 'Each ROW has 1, 2, 3, 4 once', grid: FULL, focus: [[0,0],[0,1],[0,2],[0,3]] },
+      { caption: 'Each COLUMN has them once', grid: FULL, focus: [[0,1],[1,1],[2,1],[3,1]] },
+      { caption: 'Each BOX has them once', grid: FULL, focus: [[0,0],[0,1],[1,0],[1,1]] }
+    ]
+  },
+  {
+    title: '2. But numbers fall',
+    sub: 'You never tap a square. Pick a number, tap a column, and it drops to the lowest gap.',
+    frames: [
+      { caption: 'Pick 1, tap column 3…', grid: [['g1','g2','.','g4'],['g3','g4','.','g2'],['g2','g1','g4','g3'],['g4','g3','g2','g1']], lane: [2, 1] },
+      { caption: '…it falls to the lowest gap.', grid: [['g1','g2','.','g4'],['g3','g4','p1','g2'],['g2','g1','g4','g3'],['g4','g3','g2','g1']] }
+    ]
+  },
+  {
+    title: '3. So order matters',
+    sub: 'A number can only land on top of what’s already there. Plan which gap to fill first.',
+    frames: [
+      { caption: 'The top gap of column 4 needs a 4…', grid: [['g1','g2','g3','h4'],['g3','g4','g1','.'],['g2','g1','g4','g3'],['g4','g3','g2','g1']] },
+      { caption: '…but if you drop the 4 now…', grid: [['g1','g2','g3','.'],['g3','g4','g1','.'],['g2','g1','g4','g3'],['g4','g3','g2','g1']], lane: [3, 4] },
+      { caption: 'It falls to the LOWER gap. Wrong spot: crack!', grid: [['g1','g2','g3','.'],['g3','g4','g1','x4'],['g2','g1','g4','g3'],['g4','g3','g2','g1']] },
+      { caption: 'Fill the lower gap first with a 2…', grid: [['g1','g2','g3','.'],['g3','g4','g1','p2'],['g2','g1','g4','g3'],['g4','g3','g2','g1']], lane: [3, 4] },
+      { caption: '…then the 4 lands on top. Solved!', grid: [['g1','g2','g3','p4'],['g3','g4','g1','p2'],['g2','g1','g4','g3'],['g4','g3','g2','g1']] }
+    ]
+  },
+  {
+    title: '4. Win, lose, earn',
+    sub: 'Short levels. Free retries. Every level a little harder.',
+    rules: [
+      { icon: '✓', bg: '#6EE7A8', head: 'Fill the grid to win', body: 'Every row, column or box you finish earns Sparks.' },
+      { icon: '60s', bg: '#4FC3F7', head: 'Beat the countdown', body: '60 seconds at first, more as grids grow. Time’s up = start again.' },
+      { icon: '♥', bg: '#FF6B7A', head: '3 hearts', body: 'A wrong drop cracks and costs a heart. No hearts = start again.' },
+      { icon: '★', bg: '#FFB547', head: 'Up to 3 stars', body: 'No mistakes, with a quarter of the time still left.' },
+      { icon: '✦', bg: '#9D8CFF', head: 'Sparks', body: 'Seconds left become Sparks. Spend them on hints, or 400 to skip a level.' }
+    ]
+  }
+];
+function cell(code, r, c, dim) {
+  const mt = r === 2 ? '8px' : '0px';
+  const op = dim ? '0.25' : '1';
+  if (code === '.') return { v: '', mt, op, bg: 'rgba(255,255,255,0.03)', fg: '#13161F', border: '1.5px dashed rgba(255,255,255,0.16)', shadow: 'none' };
+  const k = code[0], v = Number(code.slice(1));
+  if (k === 'g') return { v, mt, op, bg: '#2A3045', fg: '#E6E9F2', border: 'none', shadow: '0 4px 0 #1C2030' };
+  if (k === 'p') return { v, mt, op, bg: TILE[v][0], fg: '#13161F', border: 'none', shadow: '0 4px 0 ' + TILE[v][1] };
+  if (k === 'x') return { v, mt, op, bg: 'rgba(255,107,122,0.2)', fg: '#FF6B7A', border: '2px dashed #FF6B7A', shadow: 'none' };
+  return { v, mt, op, bg: 'rgba(110,231,168,0.08)', fg: 'rgba(110,231,168,0.7)', border: '2px dashed #6EE7A8', shadow: 'none' };
+}
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { step: 0, frame: 0 };
+  }
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      const s = STEPS[this.state.step];
+      if (!s.frames) return;
+      this.setState({ frame: (this.state.frame + 1) % s.frames.length });
+    }, 1900);
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+  renderVals() {
+    const s = STEPS[this.state.step];
+    const f = s.frames ? (s.frames[this.state.frame] || s.frames[0]) : null;
+    let cols = [];
+    if (f) {
+      const focus = f.focus || null;
+      cols = [0, 1, 2, 3].map((c) => {
+        const lane = f.lane && f.lane[0] === c ? f.lane[1] : null;
+        return {
+          ml: c === 2 ? '8px' : '0px',
+          hasLane: lane !== null,
+          laneV: lane || '',
+          laneBg: lane ? TILE[lane][0] : 'transparent',
+          laneShadow: lane ? TILE[lane][1] : 'transparent',
+          cells: [0, 1, 2, 3].map((r) => cell(f.grid[r][c], r, c, focus && !focus.some(([fr, fc]) => fr === r && fc === c)))
+        };
+      });
+    }
+    return {
+      title: s.title, sub: s.sub,
+      showBoard: !!f, showRules: !f,
+      cols, caption: f ? f.caption : '',
+      rules: s.rules || [],
+      tabs: STEPS.map((_, i) => ({ num: i + 1, color: i <= this.state.step ? '#6B5CF0' : 'rgba(255,255,255,0.15)', go: () => this.setState({ step: i, frame: 0 }) })),
+      notLast: this.state.step < STEPS.length - 1,
+      isLast: this.state.step === STEPS.length - 1,
+      next: () => this.setState({ step: Math.min(this.state.step + 1, STEPS.length - 1), frame: 0 })
+    };
+  }
+}
+</script>
+</body>
+</html>

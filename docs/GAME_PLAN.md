@@ -42,7 +42,7 @@ Sudoku asks *what* goes where. Dropku also asks **in what order**. That ordering
 Fill the whole grid so every row, column and box is correct. You get 1–3 stars:
 - ★ cleared
 - ★★ cleared with no mistakes
-- ★★★ cleared with no mistakes **and** under the target time
+- ★★★ cleared with no mistakes **and** at least 25% of the time still left
 
 ### Lose
 You have **3 hearts** per level.
@@ -50,6 +50,35 @@ You have **3 hearts** per level.
   - The game explains why: "There's already a 5 in that row", or "A 5 can't go there: dead end" when the drop is legal but leads to no solution.
   - Players are never left stuck without knowing it.
 - **0 hearts → level failed.** Retry is free. There are no lives or waiting timers outside the level.
+- **Time's up → level failed.** See the time limit below.
+
+### Time limit (countdown in seconds)
+Every level has a hard countdown, shown in seconds (e.g. "150s"). When it reaches **0s** the board locks and the player sees **"Time's up!"**, with:
+- **Start again · free:** the main button. The board resets.
+- **+30 seconds, keep this board · 50 Sparks** (or a rewarded ad). Once per attempt.
+- More options, including skip after 2 tries.
+
+Warnings: the clock turns **amber at 30s** ("30 seconds left") and **red at 10s**, with a soft haptic tick each second. The warnings are text as well as colour.
+
+The limit is the same for each block of 5 levels and rises as the grids get bigger and harder:
+
+| Levels | Grid | Time limit | Step |
+|---|---|---|---|
+| 1–5 | 4×4 | 60s | |
+| 6–10 | 4×4 | 75s | +15s |
+| 11–15 | 6×6 (first) | 150s | jump for the bigger grid |
+| 16–70 | 6×6 | 160s → 260s | +10s every 5 levels |
+| 71–75 | 9×9 (first) | 360s | jump for the bigger grid |
+| 76–99 | 9×9 | 375s → 435s | +15s every 5 levels |
+| 100 | 9×9 finale | 480s | |
+
+Fail-safes (details in `docs/FAILSAFE_REVIEW.md`):
+- The clock pauses whenever the app leaves the screen, on Pause and on the "?" help screen.
+- The board is hidden while paused, so pausing can't buy thinking time.
+- A drop tapped before 0s counts.
+- The validator rejects any level with fewer than 6 seconds per gap.
+- The table is the starting point. Real per-level times are tuned in beta from "time's up" rates.
+- **Relaxed mode** (Settings, proposed for accessibility): no countdown, at most 2 stars, no time bonus.
 
 ### Undo
 - 3 free undos per level. Extra undos cost points (section 6).
@@ -120,14 +149,15 @@ Game mechanics can't be owned (copyright protects code, art, text and names, not
 |---|---|
 | Clear a level | 10 |
 | No mistakes | +10 |
-| Under the target time | +5 to +20 (more for faster) |
+| Time bonus | 1 per 5 seconds left (max 20) |
 | Each row, column or box completed | +1 |
 | Combo (Double / Triple) | +3 / +8 total |
 | Daily Drop completed | +25 (+streak bonus) |
-| **Milestone chest** every 10 levels | 100 to 250 Sparks, plus a hint and a cosmetic |
+| **Milestone chest** every 10 levels | 100 to 250 Sparks, plus a cosmetic (only once the level is actually cleared, not skipped) |
 | First 3-star clear of a chapter | +50 |
 
-A good player earns about 30–50 Sparks per level.
+Measured in simulation: a perfect 6×6 level earns about 52 Sparks. An average run earns about 25–35.
+Replaying a level only pays for improving its stars, so easy levels can't be farmed.
 
 ### Spending
 
@@ -135,8 +165,9 @@ A good player earns about 30–50 Sparks per level.
 |---|---|
 | Hint (reveals one correct drop) | 40 |
 | Extra undo | 15 |
-| Extra heart (once per attempt) | 60 |
-| **Skip level** | **400** (about 10 levels' worth of play) |
+| +1 heart, keep this board (once per attempt) | 60 |
+| +30 seconds, keep this board (once per attempt) | 50 |
+| **Skip level** | **400** (about 8 perfect levels or 12–15 average ones) |
 
 ### Paying instead [prices are placeholders]
 - **Skip now:** a single skip bought with real money (about $0.99), for people who don't want to wait.
@@ -158,18 +189,18 @@ A good player earns about 30–50 Sparks per level.
 - a **breather** level at x6
 - a **milestone** level at x0, with a chest
 
-| Levels | Chapter | Grid | New idea | Target time |
+| Levels | Chapter | Grid | New idea | Time limit |
 |---|---|---|---|---|
-| 1–10 | First Drops | 4×4 | Drop and gravity. Free choice of number | 1–2 min |
-| 11–20 | Planning | 4×4 → 6×6 | Fewer givens, longer drop orders | 2–3 min |
-| 21–30 | Locks | 6×6 | Padlocked columns open when you complete the neighbouring box | 2–3 min |
-| 31–40 | The Queue | 6×6 | Numbers arrive in a fixed order, next 3 shown (Tetris-style) | 3 min |
-| 41–50 | Sums | 6×6 | Sum clues on some rows or boxes. Mental arithmetic begins | 3–4 min |
-| 51–60 | Tilt | 6×6 | **Rotate the board** to change the drop direction (limited rotations) | 3–4 min |
-| 61–70 | Blind Queue | 6×6 | Only the next number is shown | 4 min |
-| 71–80 | Big Board | 9×9 (partly pre-filled) | Bigger grids, more givens | 4–5 min |
-| 81–90 | Mixed | 9×9 | Locks, sums and tilt combined | 5 min |
-| 91–100 | Master | 9×9 | Fewest givens, queue plus tilt. Level 100 is a showcase finale | 5–6 min |
+| 1–10 | First Drops | 4×4 | Drop and gravity. Free choice of number | 60s / 75s |
+| 11–20 | Planning | 6×6 | First 6×6 grids, longer drop orders | 150s / 160s |
+| 21–30 | Locks | 6×6 | Padlocked columns open when you complete the neighbouring box | 170s / 180s |
+| 31–40 | The Queue | 6×6 | Numbers arrive in a fixed order, next 3 shown (Tetris-style) | 190s / 200s |
+| 41–50 | Sums | 6×6 | Sum clues on some rows or boxes. Mental arithmetic begins | 210s / 220s |
+| 51–60 | Tilt | 6×6 | **Rotate the board** to change the drop direction (limited rotations) | 230s / 240s |
+| 61–70 | Blind Queue | 6×6 | Only the next number is shown | 250s / 260s |
+| 71–80 | Big Board | 9×9 (partly pre-filled) | Bigger grids, more givens | 360s / 375s |
+| 81–90 | Mixed | 9×9 | Locks, sums and tilt combined | 390s / 405s |
+| 91–100 | Master | 9×9 | Fewest givens, queue plus tilt. Level 100 is a showcase finale | 420s / 435s, finale 480s |
 
 **Level creation:** a generator builds a valid solution. A solver then confirms:
 - the puzzle has exactly one solution
@@ -206,7 +237,7 @@ Hand-made levels: tutorials, the first level of each chapter and the milestone l
 ## 11. Decisions confirmed at approval
 - Working name: **Dropku** (trademark and App Store search still pending).
 - 3 hearts per level. A wrong drop costs 1 heart. Retry is always free.
-- The clock only earns bonus points. There's a relaxed option to hide it (no time bonus).
+- ~~The clock only earns bonus points.~~ **Changed after the fail-safe review:** every level has a hard countdown in seconds, with "Time's up!" at 0s (see the time limit in section 2). Relaxed mode is proposed for accessibility.
 - Ads are optional rewarded ads only: +20 Sparks or +1 heart, a few per day.
 - Reward balance after simulating a full 6×6 level: line +1, Double +3, Triple +8. A perfect level earns about 60 Sparks, so a 400-Spark skip takes about 7 perfect levels.
 - Level generator prototype: `tools/levelgen/gen.py`. It builds bottom-stacked levels with a unique solution that can be solved by logic while respecting gravity.

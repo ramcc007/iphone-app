@@ -1,0 +1,211 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Complete.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "8. Win: stars + Sparks",
+      "w": 390,
+      "x": 1410,
+      "y": 1564
+    },
+    "Daily.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "12. Daily Drop + streak",
+      "w": 390,
+      "x": 940,
+      "y": 2828
+    },
+    "Demo.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "3. How to play: animated demo",
+      "w": 390,
+      "x": 940,
+      "y": 300
+    },
+    "Failed.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "9. Lose: time's up OR out of hearts (switch in Tweaks)",
+      "w": 390,
+      "x": 1880,
+      "y": 1564
+    },
+    "Game.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "7. Level 12: PLAYABLE 6×6 · 150s countdown",
+      "w": 390,
+      "x": 940,
+      "y": 1564
+    },
+    "Home.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "5. Home",
+      "w": 390,
+      "x": 0,
+      "y": 1564
+    },
+    "LevelMap.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "6. Level map + milestone chest",
+      "w": 390,
+      "x": 470,
+      "y": 1564
+    },
+    "Main.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "1. Launch",
+      "w": 390,
+      "x": 0,
+      "y": 300
+    },
+    "Milestone.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "10. Milestone chest (every 10 levels)",
+      "w": 390,
+      "x": 0,
+      "y": 2828
+    },
+    "Pause.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "13. Pause = the way out",
+      "w": 390,
+      "x": 1410,
+      "y": 2828
+    },
+    "Settings.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "14. Settings",
+      "w": 390,
+      "x": 1880,
+      "y": 2828
+    },
+    "Shop.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "11. Sparks: earn, spend, skip",
+      "w": 390,
+      "x": 470,
+      "y": 2828
+    },
+    "Tutorial.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "4. Tutorial: 3 PLAYABLE lessons",
+      "w": 390,
+      "x": 1410,
+      "y": 300
+    },
+    "Welcome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 44,
+      "title": "2. Welcome (first run)",
+      "w": 390,
+      "x": 470,
+      "y": 300
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-03T10:05:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "row1": {
+      "kind": "title1",
+      "maxW": 2260,
+      "text": "1 · First launch: see it, then learn by playing",
+      "w": 240,
+      "x": 0,
+      "y": 40
+    },
+    "row1note": {
+      "fill": "blue",
+      "maxH": 760,
+      "size": 24,
+      "text": "Dropku in 5 lines\n\n1. Sudoku rule: each number once per row, column and box.\n2. You don't tap cells. Pick a number, tap a COLUMN, and it falls to the lowest gap.\n3. So the ORDER matters: fill the lower gaps first.\n4. WIN: fill the grid before the countdown hits 0s.\n5. LOSE: time's up, or 3 wrong drops (each one cracks and costs a heart).\n\nPress Play on screens 3, 4 and 7. They really work.",
+      "w": 420,
+      "x": 1880,
+      "y": 300
+    },
+    "row2": {
+      "kind": "title1",
+      "maxW": 2260,
+      "text": "2 · The core loop: play, win or lose, go again",
+      "w": 240,
+      "x": 0,
+      "y": 1304
+    },
+    "row2note": {
+      "fill": "orange",
+      "maxH": 700,
+      "size": 24,
+      "text": "The winning \"hit\"\n\n• Every correct drop: a weighty landing plus a haptic tick.\n• Finish a row, column or box: flash, chime, +1 Spark (once each, so undo can't farm).\n• One drop finishing 2 or 3 at once: DOUBLE (+3) / TRIPLE (+8).\n• Countdown turns amber at 30s and red with ticks at 10s.\n• Level end: stars fill one by one, seconds left turn into Sparks.",
+      "w": 400,
+      "x": 2350,
+      "y": 1564
+    },
+    "row3": {
+      "kind": "title1",
+      "maxW": 2260,
+      "text": "3 · Rewards, Sparks and settings",
+      "w": 240,
+      "x": 0,
+      "y": 2568
+    },
+    "row3note": {
+      "fill": "green",
+      "maxH": 700,
+      "size": 24,
+      "text": "Sparks economy (to tune in beta)\n\nEarn: level 10 · no mistakes +10 · 1 per 5s left (max 20) · lines +1, combos +3/+8 · Daily Drop +25 · milestone chest 100–250. A perfect level is about 50.\n\nSpend: hint 40 · +30 seconds 50 · +1 heart 60 · SKIP LEVEL 400. Continues: once per attempt.\n\nOr pay: skip now, Sparks packs, or \"Dropku Complete\". All through Apple In-App Purchase. Chest contents are fixed, never random.",
+      "w": 400,
+      "x": 2350,
+      "y": 2828
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Welcome.dc.html",
+    "Demo.dc.html",
+    "Tutorial.dc.html",
+    "Home.dc.html",
+    "LevelMap.dc.html",
+    "Game.dc.html",
+    "Complete.dc.html",
+    "Failed.dc.html",
+    "Milestone.dc.html",
+    "Shop.dc.html",
+    "Daily.dc.html",
+    "Pause.dc.html",
+    "Settings.dc.html"
+  ],
+  "pages": [],
+  "title": "Dropku – Game Screens"
+}

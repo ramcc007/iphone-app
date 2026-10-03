@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dropku welcome</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #13161F; color: #F5F6FA; font-family: Fredoka, ui-rounded, system-ui, sans-serif; display: flex; flex-direction: column; padding: 70px 24px 36px; gap: 24px; overflow: hidden">
+  <div style="font-size: 24px; font-weight: 700">Dropku</div>
+
+  <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px">
+    <div style="display: flex; gap: 8px; height: 60px; align-items: flex-end">
+      <div style="width: 60px"></div>
+      <div style="width: 60px"></div>
+      <div style="width: 60px; display: flex; flex-direction: column; align-items: center; gap: 2px">
+        <div style="width: 52px; height: 52px; border-radius: 14px; background: #F5E663; color: #13161F; font-size: 30px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 #BFB244">3</div>
+      </div>
+      <div style="width: 60px"></div>
+    </div>
+    <div style="display: flex; gap: 8px; padding: 12px; border-radius: 24px; background: #1E2230">
+      <sc-for list="{{cols}}" as="col" hint-placeholder-count="4">
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-left: {{col.ml}}">
+          <sc-for list="{{col.cells}}" as="c" hint-placeholder-count="4">
+            <div style="width: 52px; height: 52px; box-sizing: border-box; border-radius: 14px; background: {{c.bg}}; border: {{c.border}}; color: {{c.fg}}; box-shadow: {{c.shadow}}; font-size: 28px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: {{c.mt}}">{{c.v}}</div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px">
+    <h1 style="margin: 0; font-size: 36px; line-height: 1.08; font-weight: 700">Sudoku.<br>But the numbers fall.</h1>
+    <p style="margin: 0; font-size: 17px; line-height: 1.45; color: #C3C8DA">Drop numbers into columns. Each one falls to the lowest gap, so the order you play them in is the whole puzzle.</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px; align-items: center">
+    <a href="Demo.dc.html" style="width: 100%; height: 58px; border-radius: 29px; background: #6B5CF0; color: #FFFFFF; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 #4A3DC0">Play</a>
+    <div style="font-size: 13px; line-height: 1.45; color: #A3A9BF; text-align: center">No sign-up. Progress saves automatically on this iPhone and in iCloud.</div>
+    <div style="display: flex; gap: 18px; font-size: 13px; font-weight: 600">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+const TILE = { 1: ['#FF6B7A', '#C94656'], 2: ['#FFB547', '#C9862A'], 3: ['#F5E663', '#BFB244'], 4: ['#6EE7A8', '#3FB27A'] };
+// rows top to bottom; g = given (grey), p = placed (coloured), 0 = empty
+const GRID = [
+  [[0], [0], [0], ['p', 4]],
+  [[0], ['p', 4], [0], ['p', 2]],
+  [['g', 2], ['p', 1], ['g', 4], ['g', 3]],
+  [['g', 4], ['g', 3], ['g', 2], ['g', 1]]
+];
+class Component extends DCLogic {
+  renderVals() {
+    const cols = [0, 1, 2, 3].map((c) => ({
+      ml: c === 2 ? '8px' : '0px',
+      cells: GRID.map((row, r) => {
+        const [k, v] = row[c];
+        const mt = r === 2 ? '8px' : '0px';
+        if (k === 'g') return { v, mt, bg: '#2A3045', fg: '#E6E9F2', border: 'none', shadow: '0 4px 0 #1C2030' };
+        if (k === 'p') return { v, mt, bg: TILE[v][0], fg: '#13161F', border: 'none', shadow: '0 4px 0 ' + TILE[v][1] };
+        return { v: '', mt, bg: 'rgba(255,255,255,0.03)', fg: '#13161F', border: '1.5px dashed rgba(255,255,255,0.14)', shadow: 'none' };
+      })
+    }));
+    return { cols };
+  }
+}
+</script>
+</body>
+</html>
