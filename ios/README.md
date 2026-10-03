@@ -21,7 +21,7 @@ Then in Xcode:
 ## Run the rule tests
 ```sh
 cd ios/DropkuCore
-swift test               # 25 tests: rules on all 20 real levels, timer, hearts, undo, stars, economy, saving, iCloud merge
+swift test               # 24 tests: rules on all 20 real levels, timer, hearts, undo, stars, economy, saving, iCloud merge
 ```
 
 ## How it's organised
