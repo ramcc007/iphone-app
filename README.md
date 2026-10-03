@@ -11,6 +11,8 @@ Sudoku with gravity: pick a number, drop it into a column, and it falls to the l
 | `design/canvas/` | Snapshot of the design canvas (18 screens, including iPad and app icon) |
 | `levels/levels.json` | The generated, validated levels (1–20 so far) |
 | `prototype/web/` | Playable web version: tutorial and levels 1–20 (engine + page) |
+| `ios/` | The iPhone/iPad app in SwiftUI, with the `DropkuCore` rules package and its unit tests (see `ios/README.md`) |
+| `design/icon/` | App icon master (1024 px PNG) and its source |
 | `tools/levelgen/` | Level generator, builder and validator |
 | `tools/failsafe/` | Automated tests |
 
@@ -22,6 +24,7 @@ node tools/failsafe/game.test.js            # Level 12 prototype logic (iPhone c
 node tools/failsafe/game.test.js design/canvas/iPadGame.dc.html   # same tests on the iPad screen
 node tools/failsafe/tutorial.test.js        # 3 tutorial lessons
 NODE_PATH=$(npm root -g) node tools/failsafe/web.e2e.js           # real browser: iPhone SE to iPad 13", needs Playwright
+cd ios/DropkuCore && swift test                                    # Swift rules (on a Mac)
 ```
 
 Rebuild levels (deterministic): `python3 tools/levelgen/build_levels.py`

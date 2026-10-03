@@ -8,7 +8,8 @@ It **will be published on the Apple App Store**, and a marketing/support website
 - **High quality on every screen:** vector or code-drawn graphics only (the app icon master is the only raster), crisp at every resolution, 120 Hz animation.
 - **No ads and no In-App Purchases in v1.** Sparks are earned by playing only. No third-party SDKs, so the privacy label is "Data Not Collected".
 - **The timer is always on.** At 0s: "Time's up!" and the same level starts again. No untimed mode, no extra time.
-- Before any change ships: `python3 tools/levelgen/validate.py` and `node tools/failsafe/game.test.js` / `tutorial.test.js` must pass.
+- Before any change ships: `python3 tools/levelgen/validate.py`, `node tools/failsafe/engine.test.js`, `game.test.js`, `tutorial.test.js` and `web.e2e.js` must pass, and `swift test` in `ios/DropkuCore` on a Mac.
+- The Swift rules (`ios/DropkuCore`) must stay identical to `prototype/web/engine.js`. Change both together, and keep their tests in step.
 
 ## Always
 - **App Store compliance comes first.** Every design, feature and code change must pass App Review. Check it against `docs/APP_STORE_COMPLIANCE.md` and the current App Review Guidelines (developer.apple.com/app-store/review/guidelines). If a request would break a guideline, say so and propose a compliant alternative before doing it.

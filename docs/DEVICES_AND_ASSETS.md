@@ -39,7 +39,7 @@ gaps:    4×4 = 32pt · 6×6 = 38pt · 9×9 = 44pt (tile gaps plus thicker box g
 ## Sharpness rules ("high-quality on every screen")
 1. **Vector or code only.** Tiles, board, buttons, hearts, stars, Sparks, chest and all icons are SwiftUI shapes, SF Symbols or vector PDF/SVG assets ("Preserve Vector Data" on). They're crisp at 2× and 3×, and on any iPad or Mac window size, with no per-resolution image files.
 2. **The only raster image is the app icon master** (1024 × 1024 px). It's built as layers in Icon Composer, so iOS 26 can render the default, dark, clear and tinted looks. Xcode generates all other sizes.
-3. **Typography:** Fredoka (SIL Open Font License, free to bundle) for numbers and headings, SF Pro for small body text. Menus support Dynamic Type. Tile digits scale with the tile.
+3. **Typography:** the native app uses **SF Pro Rounded**, Apple's own rounded system font: free on Apple platforms, crisp at every size, and built for Dynamic Type. The app icon and the web version use **Fredoka** (SIL Open Font License), a close rounded match. Menus support Dynamic Type. Tile digits scale with the tile.
 4. **Animation:** 120 fps on ProMotion iPhones and iPads (SwiftUI/Core Animation, no frame-by-frame images). Reduce Motion swaps shakes and flashes for fades.
 5. **Colour:** dark theme first. Every text-on-background pair meets 4.5:1 contrast (3:1 for large text), and tile digits are always shown, so colour is never the only signal.
 6. **Haptics:** Core Haptics on iPhone. iPads and Macs without haptics fall back to sound and visual cues only.

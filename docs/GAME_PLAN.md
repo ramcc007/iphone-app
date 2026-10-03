@@ -244,9 +244,9 @@ Levels 1–20 are generated (`tools/levelgen/build_levels.py` → `levels/levels
 
 ## 10. Next steps after approval
 1. ~~Design the screens on a new canvas.~~ Done (18 screens, including iPad, app icon and device spec).
-2. Generate and validate the real level set (chapters 1–2 first, as they use only the core rules).
-3. Make a playable web version of those levels to test with friends on iPhone and iPad.
-4. Build the iPhone/iPad app in Swift (game engine first, with unit tests, then the screens).
+2. ~~Generate and validate the real level set.~~ Levels 1–20 done.
+3. ~~Make a playable web version.~~ Done (`prototype/web`, published as a private link).
+4. iPhone/iPad app in SwiftUI: **written, not yet compiled** (`ios/`). Next: first build on a Mac, then sound, Game Center, the Daily Drop and chapters 3–10.
 
 ---
 
