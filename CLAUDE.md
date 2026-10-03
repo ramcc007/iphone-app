@@ -1,6 +1,6 @@
-# Spill: project rules for Claude
+# Dropku (working title): project rules for Claude
 
-Spill is an original iPhone numbers puzzle game (see `docs/GAME_PLAN.md`).
+An original iPhone numbers puzzle game, Sudoku with gravity (see `docs/GAME_PLAN.md`). The earlier "Spill" concept was scrapped (`docs/archive/`).
 It **will be published on the Apple App Store**, and a marketing/support website will follow.
 
 ## Always

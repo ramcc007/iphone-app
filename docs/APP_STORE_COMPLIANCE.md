@@ -1,4 +1,4 @@
-# App Store compliance checklist: Spill
+# App Store compliance checklist: Dropku (working title)
 
 This is a living checklist. Re-check Apple's current rules before each submission, because they change every year.
 - App Review Guidelines: https://developer.apple.com/app-store/review/guidelines/
@@ -11,7 +11,7 @@ This is not legal advice. Items marked **[Check]** need confirming with Apple's 
 - [ ] **Paid Apps Agreement**, plus tax and banking forms in App Store Connect. Required before any In-App Purchase can be sold.
 - [ ] **App Store Small Business Program**: apply so Apple's commission is 15% instead of 30%.
 - [ ] **EU Digital Services Act trader status**: you must declare it to be distributed in the EU. Traders have their address, phone and email shown publicly on the App Store [Check].
-- [ ] **Name.** Search USPTO, the App Store and Google for "Spill" and the alternatives. The App Store name is limited to 30 characters and must be unique. Consider registering a trademark.
+- [ ] **Name.** Search USPTO, the App Store and Google for the final name. The App Store name is limited to 30 characters and must be unique. Consider registering a trademark.
 
 ## 2. Design and functionality (Guidelines 2 and 4)
 - [ ] The app is complete, with no placeholder content, broken links or "coming soon" items (2.1).
@@ -25,8 +25,8 @@ This is not legal advice. Items marked **[Check]** need confirming with Apple's 
 - [ ] App Review notes explain the game and how to reach late levels. Give the reviewer a way to see all levels, for example a review-only debug unlock that is not shipped, or a clear explanation [Check the approach].
 
 ## 3. Payments (Guideline 3.1)
-- [ ] All hints, skips, extra moves and the "Spill Complete" unlock are sold through **In-App Purchase (StoreKit 2)**. No external payment links.
-- [ ] **Restore Purchases** button, required for non-consumables such as "Spill Complete".
+- [ ] All hints, skips, extra moves and the "Dropku Complete" unlock are sold through **In-App Purchase (StoreKit 2)**. No external payment links.
+- [ ] **Restore Purchases** button, required for non-consumables such as "Dropku Complete".
 - [ ] Prices come from StoreKit and are shown in the local currency. Never hard-code prices.
 - [ ] Each IAP has a clear name, description and review screenshot in App Store Connect.
 - [ ] No loot boxes. If any are ever added, the odds must be disclosed before purchase (3.1.1).
@@ -44,7 +44,7 @@ This is not legal advice. Items marked **[Check]** need confirming with Apple's 
 - [ ] GDPR (EU/UK) and CCPA (California): covered by not collecting personal data. The privacy policy states that [Check with a template or lawyer].
 
 ## 5. Age rating and young players
-- [ ] Complete Apple's **age rating questionnaire** honestly. Spill should rate low (4+ or 9+), with no violence, chat or user-generated content.
+- [ ] Complete Apple's **age rating questionnaire** honestly. The game should rate low (4+ or 9+), with no violence, chat or user-generated content.
 - [ ] **Do not** choose the Kids category. Its rules on ads and analytics are much stricter.
 - [ ] US state app-store age laws (e.g. Texas, Utah) and Apple's **Declared Age Range API**: check whether developers must respond to age signals [Check before launch].
 - [ ] UK Age Appropriate Design Code: use high-privacy defaults and no nudging. This plan already follows it.
