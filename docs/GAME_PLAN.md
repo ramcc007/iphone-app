@@ -1,7 +1,7 @@
 # Game Plan: an original iPhone numbers puzzle (working title: "Spill")
 
 Status: planning only. No code has been written yet.
-Last updated: 3 October 2026.
+Last updated: 3 October 2026 (rules clarified, onboarding redesigned after the first mock-up review).
 
 Labels used in this plan:
 - **[Verified]**: confirmed in an October 2026 web search. Sources are listed at the end.
@@ -179,6 +179,7 @@ All five avoid the "taken" mechanics in section 0. The last three still need an 
 5. Between sessions: daily puzzle, streaks, achievements.
 
 ### 3.2 Rules
+- **Gold cups** are the targets. Each shows its progress as "1 of 2", turns green when exact, and cracks at 4 drops.
 - **Cups** hold 0–3 droplets. The overflow limit is normally 4. Later levels add cups with a smaller limit.
 - **Pour (your move):** swipe a non-empty cup up, down, left or right.
   - The cup empties, and its droplets go one per cup into the following cups in that direction.
@@ -191,9 +192,12 @@ All five avoid the "taken" mechanics in section 0. The last three still need an 
   - **Drain:** clear every droplet off the board (variety levels).
   - **Mixed:** fill the rings *and* leave every other cup empty (late game).
 - **Win:** goal met within the move limit.
-- **Lose:** out of moves.
-  - Options: Retry (always free), or use a hint, an extra move or a skip (see section 4).
+- **Lose:** either of these ends the attempt:
+  - **out of moves** before every gold cup is exact, or
+  - **a gold cup reaches 4 drops and cracks.** This adds tension and makes "don't overfill" a real rule.
+  - Options after losing: Retry (always free), or use a hint, an extra move or a skip (see section 4).
   - **Undo is unlimited and free.** It removes frustration, and the move counter rolls back.
+  - There are no lives and no waiting.
 - **Stars:**
   - ★★★ = solved in par moves (par = the solver's best solution)
   - ★★ = par + 1–2 moves
@@ -231,11 +235,32 @@ Breathers: 6, 16, 26 … 96. Showcases: 10, 20 … 100.
 
 We'll tune with real data: if more than 40% of players fail a level on their first 3 tries, smooth it out [Estimate threshold].
 
-### 3.5 Onboarding (no walls of text)
-- **Level 1:** a single row. One cup holds 2 droplets and a ring two cells away needs 1. A pulsing finger hint shows the swipe. The player wins in one move.
-- **Level 2:** two rings and one pour that fills both. This teaches "one per cup".
-- **Level 3:** the first wrong-direction trap, plus a hint shown on screen: "Undo is free." This teaches planning and undo.
-- Later mechanics each get a 1-sentence tooltip and a demo animation on their first level.
+### 3.5 Onboarding: "show, then let them do it"
+User testing of the first screen mock-ups showed the rules were **not** self-explanatory, so onboarding has three layers:
+
+1. **30-second animated demo** (first launch, skippable, replayable from Home, Settings and the "?" button in every level). Three auto-playing steps:
+   - Swipe to pour
+   - 4 drops = BURST (a chain fills three gold cups)
+   - Win vs lose
+2. **Guided tutorial: 3 playable lessons**, each with one instruction, a highlighted cup and a single move:
+   - **Pour:** fill a gold cup with exactly 1 drop
+   - **Burst:** one pour sets off a chain reaction that fills three gold cups
+   - **Choose your direction:** drops that go past the edge are lost, so the wrong way loses
+   Failing a lesson explains *why* ("Out of moves" or "A gold cup cracked") and offers Undo.
+3. **Help on every gameplay screen:**
+   - a permanent goal banner: "Fill every gold cup to its exact number · gold cups crack at 4"
+   - a moves-left counter and a gold-cups counter (e.g. "Gold 1/3")
+   - a hint that lights up the right cup and direction
+   - "1 drop fell off the edge" and "BURST! Chain ×2" messages after each move
+
+Later mechanics each get a 1-sentence tooltip and a demo animation on their first level.
+
+### 3.5b What makes Spill different
+- **Chain reactions you plan.** Bursts are fully predictable, like dominoes. The best solutions are one swipe that sets off a long chain.
+- **Every chain plays music.** Each burst is a rising note with a haptic tick, so a perfect solve sounds and feels like a little song.
+- **Shareable chain replays.** At the end of a level, share a 5-second clip of your winning chain, not just a score. This is the viral loop for 16–30 year olds.
+- **Daily "One Swipe" challenge.** Today's board can be solved with a single swipe. Everyone gets the same board, and you share a spoiler-free result card.
+- **Fair by design.** No lives, no timers, free undo, and every level is proven solvable by the solver.
 
 ### 3.6 Engagement and retention
 - **Stars and the chain score** on every level. Total stars unlock cosmetic droplet "inks" (colour themes).
