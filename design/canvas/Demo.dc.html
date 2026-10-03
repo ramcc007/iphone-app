@@ -38,7 +38,7 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
           <div style="display: flex; flex-direction: column; gap: 8px; margin-left: {{col.ml}}">
             <div style="width: 54px; height: 54px; display: flex; align-items: center; justify-content: center">
               <sc-if value="{{col.hasLane}}" hint-placeholder-val="{{false}}">
-                <div style="width: 50px; height: 50px; border-radius: 14px; background: {{col.laneBg}}; color: #13161F; font-size: 28px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 {{col.laneShadow}}">{{col.laneV}}</div>
+                <div style="width: 50px; height: 50px; border-radius: 14px; background: {{col.laneBg}}; color: #13161F; font-size: 28px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), 0 5px 0 {{col.laneShadow}}">{{col.laneV}}</div>
               </sc-if>
             </div>
             <sc-for list="{{col.cells}}" as="c" hint-placeholder-count="4">
@@ -74,6 +74,13 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 const TILE = { 1: ['#FF6B7A', '#C94656'], 2: ['#FFB547', '#C9862A'], 3: ['#F5E663', '#BFB244'], 4: ['#6EE7A8', '#3FB27A'] };
+
+const TILE_LIGHT = { 1: '#FF97A2', 2: '#FFCF85', 3: '#FAF29A', 4: '#A0F2C6', 5: '#8ADAFB', 6: '#BDB2FF' };
+// Glossy tile: lighter top fading into the base colour, drawn in code so it stays sharp at every resolution.
+function grad(v) { return 'linear-gradient(180deg, ' + TILE_LIGHT[v] + ' 0%, ' + TILE[v][0] + ' 58%)'; }
+const GIVEN_BG = 'linear-gradient(180deg, #363D57 0%, #2A3045 60%)';
+const SHINE = 'inset 0 2px 0 rgba(255,255,255,0.45), ';
+const GIVEN_SHINE = 'inset 0 1.5px 0 rgba(255,255,255,0.10), ';
 // cell codes: '.' empty, 'gN' given, 'pN' placed, 'xN' cracked, 'hN' ghost hint
 const FULL = [['p1','p2','p3','p4'],['p3','p4','p1','p2'],['p2','p1','p4','p3'],['p4','p3','p2','p1']];
 const STEPS = [
@@ -122,8 +129,8 @@ function cell(code, r, c, dim) {
   const op = dim ? '0.25' : '1';
   if (code === '.') return { v: '', mt, op, bg: 'rgba(255,255,255,0.03)', fg: '#13161F', border: '1.5px dashed rgba(255,255,255,0.16)', shadow: 'none' };
   const k = code[0], v = Number(code.slice(1));
-  if (k === 'g') return { v, mt, op, bg: '#2A3045', fg: '#E6E9F2', border: 'none', shadow: '0 4px 0 #1C2030' };
-  if (k === 'p') return { v, mt, op, bg: TILE[v][0], fg: '#13161F', border: 'none', shadow: '0 4px 0 ' + TILE[v][1] };
+  if (k === 'g') return { v, mt, op, bg: GIVEN_BG, fg: '#E6E9F2', border: 'none', shadow: GIVEN_SHINE + '0 4px 0 #1C2030' };
+  if (k === 'p') return { v, mt, op, bg: grad(v), fg: '#13161F', border: 'none', shadow: SHINE + '0 4px 0 ' + TILE[v][1] };
   if (k === 'x') return { v, mt, op, bg: 'rgba(255,107,122,0.2)', fg: '#FF6B7A', border: '2px dashed #FF6B7A', shadow: 'none' };
   return { v, mt, op, bg: 'rgba(110,231,168,0.08)', fg: 'rgba(110,231,168,0.7)', border: '2px dashed #6EE7A8', shadow: 'none' };
 }
@@ -152,7 +159,7 @@ class Component extends DCLogic {
           ml: c === 2 ? '8px' : '0px',
           hasLane: lane !== null,
           laneV: lane || '',
-          laneBg: lane ? TILE[lane][0] : 'transparent',
+          laneBg: lane ? grad(lane) : 'transparent',
           laneShadow: lane ? TILE[lane][1] : 'transparent',
           cells: [0, 1, 2, 3].map((r) => cell(f.grid[r][c], r, c, focus && !focus.some(([fr, fc]) => fr === r && fc === c)))
         };

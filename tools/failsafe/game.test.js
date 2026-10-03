@@ -110,14 +110,31 @@ t("Time's up at exactly 0s: board locks, hint and drops refused", () => {
   return stillPlaying && g.state.status === 'timeup' && g.state.timeLeft === 0 && JSON.stringify(g.state.grid) === grid && g.state.wallet === w ? true : 'status=' + g.state.status + ' t=' + g.state.timeLeft;
 });
 t('Clock never goes negative', () => { const L = load(FILE); const g = L.make(); L.tickSeconds(500); return g.state.timeLeft === 0 ? true : 'timeLeft=' + g.state.timeLeft; });
-t('+30 seconds works once per attempt and costs 50 Sparks', () => {
-  const L = load(FILE); const g = L.make(); L.tickSeconds(150); const w = g.state.wallet; g.renderVals().extend();
-  const ok1 = g.state.status === 'play' && g.state.timeLeft === 30 && g.state.wallet === w - 50;
-  L.tickSeconds(30); g.renderVals().extend();
-  return ok1 && g.state.status === 'timeup' && g.state.wallet === w - 50 && g.renderVals().canExtend === false ? true : 'status=' + g.state.status + ' wallet=' + g.state.wallet;
+t("v1: Time's up only offers to start the same level again (no paid extra time)", () => {
+  const L = load(FILE); const g = L.make(); L.tickSeconds(150); const v = g.renderVals();
+  return v.isTimeUp && !('extend' in v) && !('canExtend' in v) && v.showSkip === false && /starts again/.test(v.timeUpText) ? true : JSON.stringify({ isTimeUp: v.isTimeUp, showSkip: v.showSkip });
 });
-t('+30 seconds refused without enough Sparks', () => { const L = load(FILE); const g = L.make(); g.setState({ wallet: 20 }); L.tickSeconds(150); g.renderVals().extend(); return g.state.status === 'timeup' && g.state.wallet === 20 ? true : 'status=' + g.state.status; });
-t('Restart after time-up gives a full clock and a fresh extend', () => { const L = load(FILE); const g = L.make(); L.tickSeconds(150); g.renderVals().extend(); L.tickSeconds(30); g.renderVals().restart(); return g.state.timeLeft === 150 && g.state.extended === false && g.state.status === 'play' ? true : JSON.stringify({ t: g.state.timeLeft, e: g.state.extended }); });
+t('Start again after time-up gives a fresh board and the full 150s', () => {
+  const L = load(FILE); const g = L.make(); correctDrop(L, g, 0); L.tickSeconds(150); g.renderVals().restart();
+  const fresh = L.make();
+  return g.state.timeLeft === 150 && g.state.status === 'play' && JSON.stringify(g.state.grid) === JSON.stringify(fresh.state.grid) ? true : 't=' + g.state.timeLeft;
+});
+t('Skip only appears after 2 failed attempts (time or hearts)', () => {
+  const L = load(FILE); const g = L.make(); L.tickSeconds(150); const after1 = g.renderVals().showSkip; g.renderVals().restart();
+  for (let i = 0; i < 3; i++) wrongDrop(g, 0);
+  return after1 === false && g.state.status === 'lose' && g.renderVals().showSkip === true ? true : 'after1=' + after1 + ' after2=' + g.renderVals().showSkip;
+});
+t('Skip is refused below 400 Sparks and costs exactly 400 when allowed', () => {
+  const L = load(FILE); const g = L.make(); L.tickSeconds(150); g.renderVals().restart(); L.tickSeconds(150);
+  g.setState({ wallet: 399 }); g.renderVals().skip(); const refused = g.state.status === 'timeup' && g.state.wallet === 399;
+  g.setState({ wallet: 450 }); g.renderVals().skip();
+  return refused && g.state.status === 'skipped' && g.state.wallet === 50 ? true : 'status=' + g.state.status + ' wallet=' + g.state.wallet;
+});
+t('Nothing can be dropped after skipping', () => {
+  const L = load(FILE); const g = L.make(); L.tickSeconds(150); g.renderVals().restart(); L.tickSeconds(150); g.setState({ wallet: 400 }); g.renderVals().skip();
+  const grid = JSON.stringify(g.state.grid); pick(g, 3); g.renderVals().cols[0].drop(); g.renderVals().hint();
+  return JSON.stringify(g.state.grid) === grid && g.state.wallet === 0 ? true : 'changed';
+});
 t('Winning in the last second still counts as a win', () => { const L = load(FILE); const g = L.make(); L.tickSeconds(149); solveAll(L, g); return g.state.status === 'win' && g.state.result.stars === 2 ? true : 'status=' + g.state.status + ' stars=' + (g.state.result && g.state.result.stars); });
 t('3rd star needs at least 25% of the time left (38s of 150)', () => {
   const L = load(FILE); const a = L.make(); L.tickSeconds(112); solveAll(L, a);

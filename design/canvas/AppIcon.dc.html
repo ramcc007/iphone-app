@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dropku app icon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1240px; height: 820px; box-sizing: border-box; background: #0D0F15; color: #F5F6FA; font-family: Fredoka, ui-rounded, system-ui, sans-serif; display: flex; gap: 56px; padding: 56px 60px; overflow: hidden">
+  <div style="display: flex; flex-direction: column; gap: 22px; flex-shrink: 0">
+    <div style="font-size: 15px; font-weight: 600; color: #A3A9BF; letter-spacing: 1.5px">MASTER · 1024 × 1024 (SHOWN AT 440)</div>
+    <div style="width: 440px; height: 440px; border-radius: 99px; background: linear-gradient(160deg, #2C3250 0%, #171A26 70%); box-shadow: inset 0 2px 0 rgba(255,255,255,0.08), 0 30px 60px rgba(0,0,0,0.5); position: relative; overflow: hidden">
+      <div style="position: absolute; left: 183px; top: 52px; width: 6px; height: 46px; border-radius: 3px; background: rgba(255,207,133,0.35)"></div>
+      <div style="position: absolute; left: 217px; top: 34px; width: 6px; height: 64px; border-radius: 3px; background: rgba(255,207,133,0.55)"></div>
+      <div style="position: absolute; left: 251px; top: 52px; width: 6px; height: 46px; border-radius: 3px; background: rgba(255,207,133,0.35)"></div>
+      <div style="position: absolute; left: 156px; top: 108px; width: 128px; height: 128px; border-radius: 32px; background: linear-gradient(180deg, #FFCF85 0%, #FFB547 58%); box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), 0 10px 0 #C9862A; color: #13161F; font-size: 84px; font-weight: 700; display: flex; align-items: center; justify-content: center">4</div>
+      <div style="position: absolute; left: 85px; top: 266px; width: 128px; height: 128px; border-radius: 32px; background: linear-gradient(180deg, #8ADAFB 0%, #4FC3F7 58%); box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), 0 10px 0 #2E8DB8; color: #13161F; font-size: 84px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</div>
+      <div style="position: absolute; left: 227px; top: 266px; width: 128px; height: 128px; border-radius: 32px; background: linear-gradient(180deg, #363D57 0%, #2A3045 60%); box-shadow: inset 0 3px 0 rgba(255,255,255,0.12), 0 10px 0 #1C2030; color: #E6E9F2; font-size: 84px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</div>
+    </div>
+    <div style="font-size: 15px; line-height: 1.5; color: #C3C8DA; max-width: 440px">The game in one picture: a number falling onto a stack. No words, readable at tiny sizes, and nothing that copies another game.</div>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 26px">
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <div style="font-size: 15px; font-weight: 600; color: #A3A9BF; letter-spacing: 1.5px">iOS / iPadOS APPEARANCES (SHOWN AT 150)</div>
+      <div style="display: flex; gap: 22px">
+        <sc-for list="{{variants}}" as="v" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+            <div style="width: 150px; height: 150px; border-radius: 34px; background: {{v.bg}}; border: {{v.border}}; box-sizing: border-box; position: relative; overflow: hidden">
+              <div style="position: absolute; left: 53px; top: 30px; width: 44px; height: 44px; border-radius: 11px; background: {{v.a}}; box-shadow: {{v.shadowA}}; color: {{v.ink}}; font-size: 29px; font-weight: 700; display: flex; align-items: center; justify-content: center">4</div>
+              <div style="position: absolute; left: 29px; top: 84px; width: 44px; height: 44px; border-radius: 11px; background: {{v.b}}; box-shadow: {{v.shadowB}}; color: {{v.ink}}; font-size: 29px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</div>
+              <div style="position: absolute; left: 77px; top: 84px; width: 44px; height: 44px; border-radius: 11px; background: {{v.c}}; box-shadow: {{v.shadowC}}; color: {{v.inkC}}; font-size: 29px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</div>
+            </div>
+            <div style="font-size: 15px; font-weight: 600">{{v.name}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <div style="font-size: 15px; font-weight: 600; color: #A3A9BF; letter-spacing: 1.5px">SMALL-SIZE CHECK (ACTUAL POINT SIZES)</div>
+      <div style="display: flex; gap: 30px; align-items: flex-end">
+        <sc-for list="{{sizes}}" as="z" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+            <div style="width: {{z.px}}px; height: {{z.px}}px; border-radius: {{z.r}}px; background: linear-gradient(160deg, #2C3250 0%, #171A26 70%); position: relative; overflow: hidden">
+              <div style="position: absolute; left: {{z.ax}}px; top: {{z.ay}}px; width: {{z.t}}px; height: {{z.t}}px; border-radius: {{z.tr}}px; background: #FFB547"></div>
+              <div style="position: absolute; left: {{z.bx}}px; top: {{z.by}}px; width: {{z.t}}px; height: {{z.t}}px; border-radius: {{z.tr}}px; background: #4FC3F7"></div>
+              <div style="position: absolute; left: {{z.cx}}px; top: {{z.by}}px; width: {{z.t}}px; height: {{z.t}}px; border-radius: {{z.tr}}px; background: #2A3045"></div>
+            </div>
+            <div style="font-size: 13px; color: #A3A9BF">{{z.label}}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="font-size: 14px; line-height: 1.5; color: #C3C8DA">At small sizes the three tiles still read as "a block landing on a stack". iOS drops fine detail automatically when the icon is built as layers.</div>
+    </div>
+
+    <div style="background: #1E2230; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 1.5; color: #D7DBE8">
+      <div style="font-size: 17px; font-weight: 700; color: #F5F6FA">How it gets built</div>
+      <div>• One 1024 × 1024 master. Xcode generates every iPhone, iPad and Mac size from it.</div>
+      <div>• Made as separate layers (background, tiles, digits) in Apple's Icon Composer, so iOS 26 can render the glass, dark, clear and tinted looks.</div>
+      <div>• Vector shapes and the Fredoka font (free open licence), so no blurry edges at any size.</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1240,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const shine = (d) => 'inset 0 2px 0 rgba(255,255,255,0.45), 0 4px 0 ' + d;
+    const variants = [
+      { name: 'Default', bg: 'linear-gradient(160deg, #2C3250 0%, #171A26 70%)', border: 'none', a: 'linear-gradient(180deg, #FFCF85 0%, #FFB547 58%)', b: 'linear-gradient(180deg, #8ADAFB 0%, #4FC3F7 58%)', c: '#2A3045', shadowA: shine('#C9862A'), shadowB: shine('#2E8DB8'), shadowC: '0 4px 0 #1C2030', ink: '#13161F', inkC: '#E6E9F2' },
+      { name: 'Dark', bg: '#08090D', border: '1px solid rgba(255,255,255,0.08)', a: '#E6A240', b: '#3FA9D9', c: '#23283A', shadowA: '0 4px 0 #9C6820', shadowB: '0 4px 0 #23739A', shadowC: '0 4px 0 #15182A', ink: '#08090D', inkC: '#C9CDDA' },
+      { name: 'Tinted', bg: '#101114', border: '1px solid rgba(255,255,255,0.08)', a: '#D9D9DE', b: '#A6A7AE', c: '#4A4B52', shadowA: '0 4px 0 #8E8F96', shadowB: '0 4px 0 #6E6F76', shadowC: '0 4px 0 #2E2F35', ink: '#101114', inkC: '#D9D9DE' },
+      { name: 'Clear (iOS 26)', bg: 'rgba(255,255,255,0.10)', border: '1.5px solid rgba(255,255,255,0.35)', a: 'rgba(255,255,255,0.85)', b: 'rgba(255,255,255,0.55)', c: 'rgba(255,255,255,0.22)', shadowA: 'none', shadowB: 'none', shadowC: 'none', ink: '#13161F', inkC: '#F5F6FA' }
+    ];
+    const sz = (px, label) => {
+      const t = Math.round(px * 0.29), tr = Math.max(2, Math.round(t * 0.25));
+      return { px, label, r: Math.round(px * 0.225), t, tr, ax: Math.round(px * 0.355), ay: Math.round(px * 0.2), bx: Math.round(px * 0.195), by: Math.round(px * 0.56), cx: Math.round(px * 0.515) };
+    };
+    return { variants, sizes: [sz(120, '120 · iPad Pro'), sz(76, '76 · iPad'), sz(60, '60 · iPhone'), sz(40, '40 · Spotlight'), sz(29, '29 · Settings')] };
+  }
+}
+</script>
+</body>
+</html>

@@ -105,7 +105,7 @@
       "h": 844,
       "is_interactive": true,
       "radius": 44,
-      "title": "11. Sparks: earn, spend, skip",
+      "title": "11. Sparks: earned only (v1: no ads, no purchases)",
       "w": 390,
       "x": 470,
       "y": 2828
@@ -127,6 +127,38 @@
       "w": 390,
       "x": 470,
       "y": 300
+    },
+    "iPadGame.dc.html": {
+      "x": 0,
+      "y": 4092,
+      "w": 1376,
+      "h": 1032,
+      "title": "15. iPad landscape: Level 12, PLAYABLE",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "iPadHome.dc.html": {
+      "x": 1456,
+      "y": 4092,
+      "w": 834,
+      "h": 1194,
+      "title": "16. iPad portrait: Home",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "AppIcon.dc.html": {
+      "x": 0,
+      "y": 5706,
+      "w": 1240,
+      "h": 820,
+      "title": "17. App icon (all appearances + small sizes)"
+    },
+    "Devices.dc.html": {
+      "x": 1320,
+      "y": 5706,
+      "w": 1400,
+      "h": 1120,
+      "title": "18. Devices, resolution and sharpness spec"
     }
   },
   "createdOnFiles": {
@@ -167,7 +199,7 @@
       "fill": "orange",
       "maxH": 700,
       "size": 24,
-      "text": "The winning \"hit\"\n\n• Every correct drop: a weighty landing plus a haptic tick.\n• Finish a row, column or box: flash, chime, +1 Spark (once each, so undo can't farm).\n• One drop finishing 2 or 3 at once: DOUBLE (+3) / TRIPLE (+8).\n• Countdown turns amber at 30s and red with ticks at 10s.\n• Level end: stars fill one by one, seconds left turn into Sparks.",
+      "text": "The winning \"hit\"\n\n• Every correct drop: a weighty landing plus a haptic tick.\n• Finish a row, column or box: flash, chime, +1 Spark (once each, so undo can't farm).\n• One drop finishing 2 or 3 at once: DOUBLE (+3) / TRIPLE (+8).\n• Countdown turns amber at 30s and red with ticks at 10s. At 0s: \"Time's up!\" and the level starts again.\n• Level end: stars fill one by one, seconds left turn into Sparks.",
       "w": 400,
       "x": 2350,
       "y": 1564
@@ -184,10 +216,33 @@
       "fill": "green",
       "maxH": 700,
       "size": 24,
-      "text": "Sparks economy (to tune in beta)\n\nEarn: level 10 · no mistakes +10 · 1 per 5s left (max 20) · lines +1, combos +3/+8 · Daily Drop +25 · milestone chest 100–250. A perfect level is about 50.\n\nSpend: hint 40 · +30 seconds 50 · +1 heart 60 · SKIP LEVEL 400. Continues: once per attempt.\n\nOr pay: skip now, Sparks packs, or \"Dropku Complete\". All through Apple In-App Purchase. Chest contents are fixed, never random.",
+      "text": "v1 economy: no ads, no purchases\n\nEvery Spark is earned by playing: level 10 · no mistakes +10 · 1 per 5s left (max 20) · lines +1, combos +3/+8 · Daily Drop +25 · milestone chest 100–250. A perfect level is about 50.\n\nSpend: hint 40 · extra undo 15 · +1 heart 60 (once per attempt) · SKIP LEVEL 400 (after 2 failed tries).\n\nThe timer is the challenge: no way to buy extra time. Time's up = start the level again.\n\nPurchases and ads may come in a later version.",
       "w": 400,
       "x": 2350,
       "y": 2828
+    },
+    "row4": {
+      "x": 0,
+      "y": 3832,
+      "text": "4 · iPad: same game, layouts made for the big screen",
+      "kind": "title1",
+      "maxW": 2290
+    },
+    "row5": {
+      "x": 0,
+      "y": 5446,
+      "text": "5 · App icon and every-screen spec",
+      "kind": "title1",
+      "maxW": 2720
+    },
+    "row4note": {
+      "x": 2370,
+      "y": 4092,
+      "w": 420,
+      "maxH": 700,
+      "fill": "teal",
+      "size": "m",
+      "text": "iPad\n\n• Landscape: board on the left (96pt tiles), timer, hearts, Sparks and a big 3×2 number tray on the right.\n• Portrait: two-column home with the whole chapter visible.\n• Narrow Split View windows fall back to the iPhone layout.\n\nScreen 15 runs the same game engine as screen 7 and passes the same 26 fail-safe tests."
     }
   },
   "order": [
@@ -204,7 +259,11 @@
     "Shop.dc.html",
     "Daily.dc.html",
     "Pause.dc.html",
-    "Settings.dc.html"
+    "Settings.dc.html",
+    "iPadGame.dc.html",
+    "iPadHome.dc.html",
+    "AppIcon.dc.html",
+    "Devices.dc.html"
   ],
   "pages": [],
   "title": "Dropku – Game Screens"

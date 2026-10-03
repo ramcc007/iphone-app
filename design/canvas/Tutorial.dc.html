@@ -54,7 +54,7 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
     <div style="font-size: 13px; font-weight: 500; color: #A3A9BF">{{trayLabel}}</div>
     <div style="display: flex; gap: 10px">
       <sc-for list="{{tray}}" as="t" hint-placeholder-count="4">
-        <button type="button" aria-label="{{t.aria}}" onClick="{{t.pick}}" style="width: 62px; height: 66px; border-radius: 16px; border: {{t.border}}; background: {{t.bg}}; color: #13161F; opacity: {{t.op}}; box-shadow: 0 5px 0 {{t.shadow}}; transform: translateY({{t.lift}}); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; cursor: pointer; font-family: inherit; outline: {{t.outline}}; outline-offset: 4px; transition: all 0.15s">
+        <button type="button" aria-label="{{t.aria}}" onClick="{{t.pick}}" style="width: 62px; height: 66px; border-radius: 16px; border: {{t.border}}; background: {{t.bg}}; color: #13161F; opacity: {{t.op}}; box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), 0 5px 0 {{t.shadow}}; transform: translateY({{t.lift}}); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; cursor: pointer; font-family: inherit; outline: {{t.outline}}; outline-offset: 4px; transition: all 0.15s">
           <span style="font-size: 30px; font-weight: 700; line-height: 1">{{t.v}}</span>
           <span style="font-size: 11px; font-weight: 600">×{{t.left}}</span>
         </button>
@@ -83,6 +83,13 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
 const N = 4, B = 2;
 const SOL = [[1,2,3,4],[3,4,1,2],[2,1,4,3],[4,3,2,1]];
 const TILE = { 1: ['#FF6B7A','#C94656'], 2: ['#FFB547','#C9862A'], 3: ['#F5E663','#BFB244'], 4: ['#6EE7A8','#3FB27A'] };
+
+const TILE_LIGHT = { 1: '#FF97A2', 2: '#FFCF85', 3: '#FAF29A', 4: '#A0F2C6', 5: '#8ADAFB', 6: '#BDB2FF' };
+// Glossy tile: lighter top fading into the base colour, drawn in code so it stays sharp at every resolution.
+function grad(v) { return 'linear-gradient(180deg, ' + TILE_LIGHT[v] + ' 0%, ' + TILE[v][0] + ' 58%)'; }
+const GIVEN_BG = 'linear-gradient(180deg, #363D57 0%, #2A3045 60%)';
+const SHINE = 'inset 0 2px 0 rgba(255,255,255,0.45), ';
+const GIVEN_SHINE = 'inset 0 1.5px 0 rgba(255,255,255,0.10), ';
 function gridWithout(empties) { return SOL.map((row, r) => row.map((v, c) => (empties.some(([er, ec]) => er === r && ec === c) ? 0 : v))); }
 const LESSONS = [
   {
@@ -178,8 +185,8 @@ class Component extends DCLogic {
         const glow = s.glow.indexOf(r + ',' + c) >= 0;
         let cell;
         if (s.crack && s.crack.r === r && s.crack.c === c) cell = { v: s.crack.v, bg: 'rgba(255,107,122,0.22)', fg: '#FF6B7A', border: '2px dashed #FF6B7A', shadow: 'none' };
-        else if (v && !s.placed[r][c]) cell = { v, bg: '#2A3045', fg: '#E6E9F2', border: 'none', shadow: glow ? '0 0 0 3px #FFFFFF, 0 0 18px rgba(255,255,255,0.6)' : '0 4px 0 #1C2030' };
-        else if (v) cell = { v, bg: TILE[v][0], fg: '#13161F', border: 'none', shadow: glow ? '0 0 0 3px #FFFFFF, 0 0 18px rgba(255,255,255,0.6)' : '0 4px 0 ' + TILE[v][1] };
+        else if (v && !s.placed[r][c]) cell = { v, bg: GIVEN_BG, fg: '#E6E9F2', border: 'none', shadow: glow ? '0 0 0 3px #FFFFFF, 0 0 18px rgba(255,255,255,0.6)' : GIVEN_SHINE + '0 4px 0 #1C2030' };
+        else if (v) cell = { v, bg: grad(v), fg: '#13161F', border: 'none', shadow: glow ? '0 0 0 3px #FFFFFF, 0 0 18px rgba(255,255,255,0.6)' : SHINE + '0 4px 0 ' + TILE[v][1] };
         else if (ghostR === r) cell = { v: s.sel, bg: 'rgba(255,255,255,0.02)', fg: TILE[s.sel][0], border: '2px dashed ' + TILE[s.sel][0], shadow: 'none' };
         else cell = { v: '', bg: 'rgba(255,255,255,0.03)', fg: '#13161F', border: '1.5px dashed rgba(255,255,255,0.16)', shadow: 'none' };
         cells.push({ ...cell, mt });
@@ -195,7 +202,7 @@ class Component extends DCLogic {
       const left = this.left(s.grid, v), on = s.sel === v;
       return {
         v, left, aria: 'Number ' + v + ', ' + left + ' left',
-        bg: TILE[v][0], shadow: TILE[v][1],
+        bg: grad(v), shadow: TILE[v][1],
         border: on ? '3px solid #FFFFFF' : '3px solid transparent',
         lift: on ? '-6px' : '0px', op: left === 0 ? '0.25' : '1',
         outline: guide && guide.v === v && !on ? '3px solid #FFB547' : '0px solid transparent',

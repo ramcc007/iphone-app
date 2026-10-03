@@ -22,7 +22,7 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
       <div style="width: 60px"></div>
       <div style="width: 60px"></div>
       <div style="width: 60px; display: flex; flex-direction: column; align-items: center; gap: 2px">
-        <div style="width: 52px; height: 52px; border-radius: 14px; background: #F5E663; color: #13161F; font-size: 30px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 #BFB244">3</div>
+        <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(180deg, #FAF29A 0%, #F5E663 58%); color: #13161F; font-size: 30px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), 0 5px 0 #BFB244">3</div>
       </div>
       <div style="width: 60px"></div>
     </div>
@@ -54,6 +54,13 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 const TILE = { 1: ['#FF6B7A', '#C94656'], 2: ['#FFB547', '#C9862A'], 3: ['#F5E663', '#BFB244'], 4: ['#6EE7A8', '#3FB27A'] };
+
+const TILE_LIGHT = { 1: '#FF97A2', 2: '#FFCF85', 3: '#FAF29A', 4: '#A0F2C6', 5: '#8ADAFB', 6: '#BDB2FF' };
+// Glossy tile: lighter top fading into the base colour, drawn in code so it stays sharp at every resolution.
+function grad(v) { return 'linear-gradient(180deg, ' + TILE_LIGHT[v] + ' 0%, ' + TILE[v][0] + ' 58%)'; }
+const GIVEN_BG = 'linear-gradient(180deg, #363D57 0%, #2A3045 60%)';
+const SHINE = 'inset 0 2px 0 rgba(255,255,255,0.45), ';
+const GIVEN_SHINE = 'inset 0 1.5px 0 rgba(255,255,255,0.10), ';
 // rows top to bottom; g = given (grey), p = placed (coloured), 0 = empty
 const GRID = [
   [[0], [0], [0], ['p', 4]],
@@ -68,8 +75,8 @@ class Component extends DCLogic {
       cells: GRID.map((row, r) => {
         const [k, v] = row[c];
         const mt = r === 2 ? '8px' : '0px';
-        if (k === 'g') return { v, mt, bg: '#2A3045', fg: '#E6E9F2', border: 'none', shadow: '0 4px 0 #1C2030' };
-        if (k === 'p') return { v, mt, bg: TILE[v][0], fg: '#13161F', border: 'none', shadow: '0 4px 0 ' + TILE[v][1] };
+        if (k === 'g') return { v, mt, bg: GIVEN_BG, fg: '#E6E9F2', border: 'none', shadow: GIVEN_SHINE + '0 4px 0 #1C2030' };
+        if (k === 'p') return { v, mt, bg: grad(v), fg: '#13161F', border: 'none', shadow: SHINE + '0 4px 0 ' + TILE[v][1] };
         return { v: '', mt, bg: 'rgba(255,255,255,0.03)', fg: '#13161F', border: '1.5px dashed rgba(255,255,255,0.14)', shadow: 'none' };
       })
     }));

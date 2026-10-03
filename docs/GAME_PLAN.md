@@ -1,6 +1,6 @@
 # Game Plan v2: "Dropku" (working title), Sudoku where numbers fall
 
-Status: **approved 3 October 2026.** Screens designed (canvas "Dropku – Game Screens"). Next: playable prototype, then iPhone code.
+Status: **approved 3 October 2026.** Screens designed (canvas "Dropku – Game Screens", 18 screens incl. iPad). v1 decisions recorded in section 11.
 Previous concept ("Spill") was scrapped and moved to `docs/archive/`.
 Last updated: 3 October 2026.
 
@@ -53,10 +53,12 @@ You have **3 hearts** per level.
 - **Time's up → level failed.** See the time limit below.
 
 ### Time limit (countdown in seconds)
-Every level has a hard countdown, shown in seconds (e.g. "150s"). When it reaches **0s** the board locks and the player sees **"Time's up!"**, with:
-- **Start again · free:** the main button. The board resets.
-- **+30 seconds, keep this board · 50 Sparks** (or a rewarded ad). Once per attempt.
-- More options, including skip after 2 tries.
+Every level has a hard countdown, shown in seconds (e.g. "150s"). The timer is always on: playing against the clock **is** the game. When it reaches **0s** the board locks and a pop-up says **"Time's up!"**, with:
+- **Start Level X again:** a fresh board and the full time. This is the main action.
+- After 2 failed attempts: **Skip this level · 400 Sparks** (earned Sparks only).
+- Back to the map.
+
+There is no way to buy or earn extra time.
 
 Warnings: the clock turns **amber at 30s** ("30 seconds left") and **red at 10s**, with a soft haptic tick each second. The warnings are text as well as colour.
 
@@ -78,7 +80,7 @@ Fail-safes (details in `docs/FAILSAFE_REVIEW.md`):
 - A drop tapped before 0s counts.
 - The validator rejects any level with fewer than 6 seconds per gap.
 - The table is the starting point. Real per-level times are tuned in beta from "time's up" rates.
-- **Relaxed mode** (Settings, proposed for accessibility): no countdown, at most 2 stars, no time bonus.
+- No relaxed or untimed mode in v1 (owner's decision).
 
 ### Undo
 - 3 free undos per level. Extra undos cost points (section 6).
@@ -166,14 +168,18 @@ Replaying a level only pays for improving its stars, so easy levels can't be far
 | Hint (reveals one correct drop) | 40 |
 | Extra undo | 15 |
 | +1 heart, keep this board (once per attempt) | 60 |
-| +30 seconds, keep this board (once per attempt) | 50 |
 | **Skip level** | **400** (about 8 perfect levels or 12–15 average ones) |
 
-### Paying instead [prices are placeholders]
-- **Skip now:** a single skip bought with real money (about $0.99), for people who don't want to wait.
+### v1: no ads, no purchases
+Version 1 has **no ads and no In-App Purchases**. Every Spark is earned by playing. The goal of v1 is for people to enjoy the game and recommend it.
+
+**Possible later versions** (not in v1, to be decided after launch):
+- **Skip now:** a single skip bought with real money.
 - **Sparks packs:** for example 500 / 1,500 / 4,000 Sparks.
-- **Dropku Complete:** a one-time purchase that removes ads, gives monthly bonus Sparks and unlocks all themes.
-- **Rewarded ads (optional):** watch an ad for 20 Sparks or an extra heart, a few times a day.
+- **Dropku Complete:** a one-time purchase that unlocks all themes and gives bonus Sparks.
+- **Rewarded ads:** watch an ad for Sparks.
+
+Because v1 players will have earned everything by playing, any later purchases must only be optional shortcuts. Levels must never be made harder to push people towards paying.
 
 **Rules we'll follow:**
 - The skip button only appears after 2 failed attempts, so skipping stays a safety net rather than the main way to progress.
@@ -211,33 +217,38 @@ Hand-made levels: tutorials, the first level of each chapter and the milestone l
 
 ---
 
-## 8. Look and feel (detailed design comes after approval)
+## 8. Look and feel
 - Clean, modern and tactile, aimed at 16–30 year olds rather than the newspaper-puzzle feel.
 - Chunky rounded number tiles with a weighty drop and a soft bounce. Colours are distinct per number, but every tile always shows its digit, which keeps it colour-blind safe.
 - Dark and light themes, haptics on every landing, and line-clear sound and light effects.
 - It reuses the decisions already made: no sign-up, automatic saving on the device and in iCloud, Pause → Exit to Home, and the App Store compliance checklist.
+- **Universal app:** designed iPhone-first, and fully supported on iPad (all orientations, resizable windows). It also runs on Apple silicon Macs and Vision Pro as an iPad app.
+- **Always sharp:** everything is drawn as vectors or in code, so it's crisp on every screen. Only the 1024 × 1024 app icon is an image. See `docs/DEVICES_AND_ASSETS.md`.
 
 ---
 
 ## 9. App Store notes for this design
-- Sparks packs, the paid skip and Dropku Complete are **In-App Purchases** (StoreKit 2). Restore Purchases is required for Dropku Complete.
-- Earned Sparks never expire, and prices are always shown before buying.
+- **v1 has no In-App Purchases and no ads**, so StoreKit, Restore Purchases, the Paid Apps Agreement and ad privacy disclosures are not needed for v1. When purchases are added later, they must use StoreKit 2 with Restore Purchases.
+- Earned Sparks never expire.
 - The age rating should stay low. There's no gambling-style mechanic: chests have **fixed** contents, not random ones. If chests ever become random, odds must be shown.
 - No "brain training" health claims in the store listing.
 
 ---
 
 ## 10. Next steps after approval
-1. Design the screens on a new canvas: demo, tutorial, level map, gameplay, win, lose, milestone chest, Sparks shop and skip.
-2. Make a playable browser prototype of 5–10 levels to check that the drop-order idea is fun.
-3. Build the solver and generator, then the iPhone app in Swift.
+1. ~~Design the screens on a new canvas.~~ Done (18 screens, including iPad, app icon and device spec).
+2. Generate and validate the real level set (chapters 1–2 first, as they use only the core rules).
+3. Make a playable web version of those levels to test with friends on iPhone and iPad.
+4. Build the iPhone/iPad app in Swift (game engine first, with unit tests, then the screens).
 
 ---
 
 ## 11. Decisions confirmed at approval
 - Working name: **Dropku** (trademark and App Store search still pending).
 - 3 hearts per level. A wrong drop costs 1 heart. Retry is always free.
-- ~~The clock only earns bonus points.~~ **Changed after the fail-safe review:** every level has a hard countdown in seconds, with "Time's up!" at 0s (see the time limit in section 2). Relaxed mode is proposed for accessibility.
-- Ads are optional rewarded ads only: +20 Sparks or +1 heart, a few per day.
-- Reward balance after simulating a full 6×6 level: line +1, Double +3, Triple +8. A perfect level earns about 60 Sparks, so a 400-Spark skip takes about 7 perfect levels.
+- **Timer always on** (decided after the fail-safe review): every level has a hard countdown in seconds. At 0s, "Time's up!" and the same level starts again. No relaxed mode, no paid or earned extra time.
+- **v1: no ads and no In-App Purchases.** Sparks are earned only. Purchases may come in a later version.
+- **Universal app:** iPhone first, iPad fully supported, Mac and Vision Pro automatically (as an iPad app).
+- **Time table approved:** 60s/75s for 4×4, 150s and up for 6×6, 360s and up for 9×9, 480s finale.
+- Reward balance after simulating a full 6×6 level: line +1, Double +3, Triple +8. A perfect level earns about 52 Sparks (measured), so a 400-Spark skip takes about 8 perfect levels.
 - Level generator prototype: `tools/levelgen/gen.py`. It builds bottom-stacked levels with a unique solution that can be solved by logic while respecting gravity.

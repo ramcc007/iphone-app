@@ -34,11 +34,10 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
     </sc-for>
   </div>
 
-  <div style="font-size: 12px; font-weight: 600; color: #A3A9BF; letter-spacing: 1.5px; padding: 6px 10px 0">PROGRESS &amp; PURCHASES</div>
+  <div style="font-size: 12px; font-weight: 600; color: #A3A9BF; letter-spacing: 1.5px; padding: 6px 10px 0">PROGRESS</div>
   <div style="background: #1E2230; border-radius: 18px; overflow: hidden">
     <div style="height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid rgba(255,255,255,0.06)"><span style="font-size: 16px; font-weight: 500">iCloud sync</span><span style="font-size: 14px; color: #6EE7A8">On · synced just now</span></div>
-    <div style="height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid rgba(255,255,255,0.06)"><span style="font-size: 16px; font-weight: 500">Game Center</span><span style="font-size: 14px; color: #A3A9BF">[player alias]</span></div>
-    <a href="#" style="height: 44px; display: flex; align-items: center; padding: 0 16px; font-size: 16px; font-weight: 500">Restore Purchases</a>
+    <div style="height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px"><span style="font-size: 16px; font-weight: 500">Game Center</span><span style="font-size: 14px; color: #A3A9BF">[player alias]</span></div>
   </div>
 
   <div style="font-size: 12px; font-weight: 600; color: #A3A9BF; letter-spacing: 1.5px; padding: 6px 10px 0">HELP &amp; ABOUT</div>
@@ -56,10 +55,10 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { sound: true, music: true, haptics: true, relaxed: false, contrast: false };
+    this.state = { sound: true, music: true, haptics: true, contrast: false };
   }
   renderVals() {
-    const rows = [['sound', 'Sound effects'], ['music', 'Music'], ['haptics', 'Haptics'], ['relaxed', 'Relaxed mode: no time limit (max 2 stars)'], ['contrast', 'High-contrast number tiles']];
+    const rows = [['sound', 'Sound effects'], ['music', 'Music'], ['haptics', 'Haptics'], ['contrast', 'High-contrast number tiles']];
     return {
       toggles: rows.map(([k, label]) => {
         const on = !!this.state[k];

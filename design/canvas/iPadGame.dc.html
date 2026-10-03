@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Dropku level 12</title>
+<title>Dropku iPad level 12 landscape</title>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -14,107 +14,111 @@ body{margin:0}
 a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
 </style>
 </helmet>
-<div style="width: 390px; height: 844px; box-sizing: border-box; background: #13161F; color: #F5F6FA; font-family: Fredoka, ui-rounded, system-ui, sans-serif; display: flex; flex-direction: column; padding: 54px 16px 24px; gap: 12px; overflow: hidden; position: relative">
-  <div style="display: flex; align-items: center; justify-content: space-between">
-    <a href="Pause.dc.html" aria-label="Pause" style="width: 44px; height: 44px; border-radius: 22px; background: #1E2230; display: flex; align-items: center; justify-content: center; color: #F5F6FA">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="8" y1="5" x2="8" y2="19"></line><line x1="16" y1="5" x2="16" y2="19"></line></svg>
-    </a>
-    <div style="display: flex; flex-direction: column; align-items: center">
-      <div style="font-size: 20px; font-weight: 700">Level 12</div>
-      <div style="font-size: 12px; font-weight: 500; color: #A3A9BF">Chapter 2 · 150-second limit</div>
+<div style="width: 1376px; height: 1032px; box-sizing: border-box; background: #13161F; color: #F5F6FA; font-family: Fredoka, ui-rounded, system-ui, sans-serif; display: flex; gap: 40px; padding: 44px 52px 40px; overflow: hidden; position: relative">
+  <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 22px; min-width: 0">
+    <div style="display: flex; align-items: center; gap: 16px">
+      <a href="Pause.dc.html" aria-label="Pause" style="width: 52px; height: 52px; border-radius: 26px; background: #1E2230; display: flex; align-items: center; justify-content: center; color: #F5F6FA">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="8" y1="5" x2="8" y2="19"></line><line x1="16" y1="5" x2="16" y2="19"></line></svg>
+      </a>
+      <div style="display: flex; flex-direction: column; flex-grow: 1">
+        <div style="font-size: 28px; font-weight: 700">Level 12</div>
+        <div style="font-size: 15px; font-weight: 500; color: #A3A9BF">Chapter 2 · 150-second limit</div>
+      </div>
+      <a href="Demo.dc.html" aria-label="How to play" style="width: 52px; height: 52px; border-radius: 26px; background: #1E2230; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #F5F6FA">?</a>
     </div>
-    <a href="Demo.dc.html" aria-label="How to play" style="width: 44px; height: 44px; border-radius: 22px; background: #1E2230; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #F5F6FA">?</a>
-  </div>
-
-  <div style="display: flex; align-items: center; justify-content: space-between; background: #1E2230; border-radius: 18px; padding: 8px 12px">
-    <div style="display: flex; gap: 4px" aria-label="{{heartsLabel}}">
-      <sc-for list="{{hearts}}" as="h" hint-placeholder-count="3">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="{{h.fill}}" stroke="#FF6B7A" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.3 5 6.8 5c2 0 3.6 1.1 5.2 3 1.6-1.9 3.2-3 5.2-3 3.5 0 5.6 3.6 4.3 6.8C19.5 16.4 12 21 12 21z"></path></svg>
-      </sc-for>
-    </div>
-    <div aria-label="{{timeAria}}" style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 15px; background: {{timeBg}}; font-size: 15px; font-weight: 600; color: {{timeColor}}">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"></circle><line x1="12" y1="13" x2="12" y2="9"></line><line x1="10" y1="2" x2="14" y2="2"></line></svg>
-      <span style="font-size: 17px; font-weight: 700">{{timeText}}</span> <span style="color: #A3A9BF; font-weight: 500">left</span>
-    </div>
-    <div style="display: flex; align-items: center; gap: 5px; font-size: 15px; font-weight: 700; color: #FFB547">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFB547"><path d="M12 1l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"></path></svg>
-      {{walletText}}
+    <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center">
+      <div style="display: flex; gap: 10px; padding: 18px; border-radius: 34px; background: #1E2230">
+        <sc-for list="{{cols}}" as="col" hint-placeholder-count="6">
+          <button type="button" aria-label="{{col.aria}}" onClick="{{col.drop}}" style="display: flex; flex-direction: column; gap: 10px; padding: 0; border: none; background: transparent; cursor: pointer; margin-left: {{col.ml}}; border-radius: 22px; outline: {{col.outline}}; outline-offset: 5px; font-family: inherit">
+            <sc-for list="{{col.cells}}" as="c" hint-placeholder-count="6">
+              <span style="width: 96px; height: 96px; box-sizing: border-box; border-radius: 22px; background: {{c.bg}}; border: {{c.border}}; color: {{c.fg}}; box-shadow: {{c.shadow}}; font-size: 50px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: {{c.mt}}; transition: all 0.2s">{{c.v}}</span>
+            </sc-for>
+          </button>
+        </sc-for>
+      </div>
     </div>
   </div>
 
-  <div style="text-align: center; font-size: 14px; font-weight: 500; color: #C3C8DA; min-height: 18px">{{guide}}</div>
-
-  <div style="display: flex; justify-content: center">
-    <div style="display: flex; gap: 6px; padding: 10px; border-radius: 22px; background: #1E2230">
-      <sc-for list="{{cols}}" as="col" hint-placeholder-count="6">
-        <button type="button" aria-label="{{col.aria}}" onClick="{{col.drop}}" style="display: flex; flex-direction: column; gap: 6px; padding: 0; border: none; background: transparent; cursor: pointer; margin-left: {{col.ml}}; border-radius: 14px; outline: {{col.outline}}; outline-offset: 3px; font-family: inherit">
-          <sc-for list="{{col.cells}}" as="c" hint-placeholder-count="6">
-            <span style="width: 46px; height: 46px; box-sizing: border-box; border-radius: 12px; background: {{c.bg}}; border: {{c.border}}; color: {{c.fg}}; box-shadow: {{c.shadow}}; font-size: 25px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: {{c.mt}}; transition: all 0.2s">{{c.v}}</span>
+  <div style="width: 420px; flex-shrink: 0; display: flex; flex-direction: column; gap: 18px">
+    <div style="background: #1E2230; border-radius: 28px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px">
+      <div aria-label="{{timeAria}}" style="display: flex; align-items: baseline; justify-content: space-between; padding: 8px 16px; border-radius: 20px; background: {{timeBg}}; color: {{timeColor}}">
+        <span style="font-size: 18px; font-weight: 600">Time left</span>
+        <span style="font-size: 56px; font-weight: 700; line-height: 1">{{timeText}}</span>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <div style="display: flex; gap: 6px" aria-label="{{heartsLabel}}">
+          <sc-for list="{{hearts}}" as="h" hint-placeholder-count="3">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="{{h.fill}}" stroke="#FF6B7A" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.3 5 6.8 5c2 0 3.6 1.1 5.2 3 1.6-1.9 3.2-3 5.2-3 3.5 0 5.6 3.6 4.3 6.8C19.5 16.4 12 21 12 21z"></path></svg>
           </sc-for>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 700; color: #FFB547">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#FFB547"><path d="M12 1l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"></path></svg>{{walletText}}
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size: 17px; font-weight: 500; color: #C3C8DA; min-height: 48px; line-height: 1.4">{{guide}}</div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+      <sc-for list="{{tray}}" as="t" hint-placeholder-count="6">
+        <button type="button" aria-label="{{t.aria}}" onClick="{{t.pick}}" style="height: 112px; border-radius: 24px; border: {{t.border}}; background: {{t.bg}}; color: #13161F; opacity: {{t.op}}; box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), 0 6px 0 {{t.shadow}}; transform: translateY({{t.lift}}); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; cursor: pointer; font-family: inherit; transition: all 0.15s">
+          <span style="font-size: 52px; font-weight: 700; line-height: 1">{{t.v}}</span>
+          <span style="font-size: 15px; font-weight: 600">×{{t.left}} left</span>
         </button>
       </sc-for>
     </div>
-  </div>
 
-  <div style="min-height: 26px; text-align: center; font-size: 18px; font-weight: 700; color: {{flashColor}}">{{flash}}</div>
+    <div style="min-height: 32px; font-size: 22px; font-weight: 700; color: {{flashColor}}; text-align: center">{{flash}}</div>
+    <div style="flex-grow: 1"></div>
 
-  <div style="display: flex; justify-content: center; gap: 8px">
-    <sc-for list="{{tray}}" as="t" hint-placeholder-count="6">
-      <button type="button" aria-label="{{t.aria}}" onClick="{{t.pick}}" style="width: 50px; height: 62px; border-radius: 14px; border: {{t.border}}; background: {{t.bg}}; color: #13161F; opacity: {{t.op}}; box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), 0 5px 0 {{t.shadow}}; transform: translateY({{t.lift}}); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 0; cursor: pointer; font-family: inherit; transition: all 0.15s">
-        <span style="font-size: 26px; font-weight: 700; line-height: 1">{{t.v}}</span>
-        <span style="font-size: 11px; font-weight: 600">×{{t.left}}</span>
-      </button>
-    </sc-for>
-  </div>
-
-  <div style="display: flex; justify-content: center; gap: 10px; padding-top: 4px">
-    <button type="button" onClick="{{undo}}" style="height: 44px; padding: 0 18px; border-radius: 22px; border: none; background: #1E2230; color: #F5F6FA; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Undo · {{undos}} free</button>
-    <button type="button" onClick="{{hint}}" style="height: 44px; padding: 0 18px; border-radius: 22px; border: none; background: #1E2230; color: #FFB547; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Hint · 40 ✦</button>
-    <button type="button" onClick="{{restart}}" style="height: 44px; padding: 0 18px; border-radius: 22px; border: none; background: #1E2230; color: #F5F6FA; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Restart</button>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+      <button type="button" onClick="{{undo}}" style="height: 60px; border-radius: 30px; border: none; background: #1E2230; color: #F5F6FA; font-family: inherit; font-size: 17px; font-weight: 600; cursor: pointer">Undo · {{undos}}</button>
+      <button type="button" onClick="{{hint}}" style="height: 60px; border-radius: 30px; border: none; background: #1E2230; color: #FFB547; font-family: inherit; font-size: 17px; font-weight: 600; cursor: pointer">Hint · 40 ✦</button>
+      <button type="button" onClick="{{restart}}" style="height: 60px; border-radius: 30px; border: none; background: #1E2230; color: #F5F6FA; font-family: inherit; font-size: 17px; font-weight: 600; cursor: pointer">Restart</button>
+    </div>
   </div>
 
   <sc-if value="{{showResult}}" hint-placeholder-val="{{false}}">
-    <div style="position: absolute; left: 12px; right: 12px; bottom: 12px; border-radius: 32px; background: #272C3D; border: 1.5px solid {{resultBorder}}; padding: 24px 20px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 -20px 60px rgba(0,0,0,0.55)">
-      <div style="font-size: 28px; font-weight: 700; color: {{resultColor}}">{{resultTitle}}</div>
-      <sc-if value="{{isWin}}" hint-placeholder-val="{{true}}">
-        <div style="display: flex; gap: 8px">
-          <sc-for list="{{stars}}" as="s" hint-placeholder-count="3">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="{{s.fill}}" stroke="#FFB547" stroke-width="1.6" stroke-linejoin="round"><polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21.5 12,17.3 5.5,21.5 7.5,14 2,9.3 9,9"></polygon></svg>
-          </sc-for>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 4px; font-size: 15px; color: #C3C8DA">
-          <sc-for list="{{breakdown}}" as="b" hint-placeholder-count="3">
-            <div style="display: flex; justify-content: space-between"><span>{{b.label}}</span><span style="color: #FFB547; font-weight: 700">+{{b.n}} ✦</span></div>
-          </sc-for>
-        </div>
-        <a href="Complete.dc.html" style="height: 56px; border-radius: 28px; background: #6B5CF0; color: #FFFFFF; font-size: 19px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 #4A3DC0">Collect {{earned}} Sparks</a>
-      </sc-if>
-      <sc-if value="{{isTimeUp}}" hint-placeholder-val="{{false}}">
-        <div style="font-size: 16px; line-height: 1.45; color: #C3C8DA">{{timeUpText}}</div>
-        <button type="button" onClick="{{restart}}" style="height: 56px; border-radius: 28px; border: none; background: #6B5CF0; color: #FFFFFF; font-family: inherit; font-size: 19px; font-weight: 700; cursor: pointer; box-shadow: 0 5px 0 #4A3DC0">Start Level 12 again</button>
-      </sc-if>
-      <sc-if value="{{showSkip}}" hint-placeholder-val="{{false}}">
-        <button type="button" onClick="{{skip}}" style="height: 50px; border-radius: 25px; border: 1.5px dashed rgba(255,181,71,0.6); background: transparent; color: #FFB547; font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer">Stuck? Skip this level · 400 ✦</button>
-      </sc-if>
-      <sc-if value="{{isSkipped}}" hint-placeholder-val="{{false}}">
-        <div style="font-size: 16px; line-height: 1.45; color: #C3C8DA">Level 13 is unlocked. Level 12 stays on your map as "skipped", so you can come back for the stars any time.</div>
-        <a href="LevelMap.dc.html" style="height: 56px; border-radius: 28px; background: #6B5CF0; color: #FFFFFF; font-size: 19px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 #4A3DC0">Continue to Level 13</a>
-      </sc-if>
-      <sc-if value="{{showMapLink}}" hint-placeholder-val="{{false}}">
-        <a href="LevelMap.dc.html" style="text-align: center; font-size: 15px; font-weight: 600; padding: 4px">Back to the map</a>
-      </sc-if>
-      <sc-if value="{{isLose}}" hint-placeholder-val="{{false}}">
-        <div style="font-size: 16px; line-height: 1.45; color: #C3C8DA">All 3 hearts are gone. Level 12 starts again with a fresh board and a full 150 seconds.</div>
-        <div style="display: flex; gap: 10px">
-          <button type="button" onClick="{{restart}}" style="flex-grow: 1; height: 54px; border-radius: 27px; border: none; background: #6B5CF0; color: #FFFFFF; font-family: inherit; font-size: 18px; font-weight: 700; cursor: pointer">Start again</button>
-          <a href="Failed.dc.html" style="flex-grow: 1; height: 54px; border-radius: 27px; background: rgba(255,255,255,0.1); color: #F5F6FA; font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center">More options</a>
-        </div>
-      </sc-if>
+    <div style="position: absolute; inset: 0; background: rgba(8,9,14,0.6); display: flex; align-items: center; justify-content: center">
+      <div style="width: 520px; border-radius: 36px; background: #272C3D; border: 1.5px solid {{resultBorder}}; padding: 32px 30px 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 80px rgba(0,0,0,0.55)">
+        <div style="font-size: 36px; font-weight: 700; color: {{resultColor}}">{{resultTitle}}</div>
+        <sc-if value="{{isWin}}" hint-placeholder-val="{{true}}">
+          <div style="display: flex; gap: 10px">
+            <sc-for list="{{stars}}" as="s" hint-placeholder-count="3">
+              <svg width="52" height="52" viewBox="0 0 24 24" fill="{{s.fill}}" stroke="#FFB547" stroke-width="1.6" stroke-linejoin="round"><polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21.5 12,17.3 5.5,21.5 7.5,14 2,9.3 9,9"></polygon></svg>
+            </sc-for>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 18px; color: #C3C8DA">
+            <sc-for list="{{breakdown}}" as="b" hint-placeholder-count="3">
+              <div style="display: flex; justify-content: space-between"><span>{{b.label}}</span><span style="color: #FFB547; font-weight: 700">+{{b.n}} ✦</span></div>
+            </sc-for>
+          </div>
+          <a href="Complete.dc.html" style="height: 62px; border-radius: 31px; background: #6B5CF0; color: #FFFFFF; font-size: 21px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 #4A3DC0">Collect {{earned}} Sparks</a>
+        </sc-if>
+        <sc-if value="{{isTimeUp}}" hint-placeholder-val="{{false}}">
+          <div style="font-size: 18px; line-height: 1.45; color: #C3C8DA">{{timeUpText}}</div>
+          <button type="button" onClick="{{restart}}" style="height: 62px; border-radius: 31px; border: none; background: #6B5CF0; color: #FFFFFF; font-family: inherit; font-size: 21px; font-weight: 700; cursor: pointer; box-shadow: 0 5px 0 #4A3DC0">Start Level 12 again</button>
+        </sc-if>
+        <sc-if value="{{isLose}}" hint-placeholder-val="{{false}}">
+          <div style="font-size: 18px; line-height: 1.45; color: #C3C8DA">All 3 hearts are gone. Level 12 starts again with a fresh board and a full 150 seconds.</div>
+          <button type="button" onClick="{{restart}}" style="height: 62px; border-radius: 31px; border: none; background: #6B5CF0; color: #FFFFFF; font-family: inherit; font-size: 21px; font-weight: 700; cursor: pointer; box-shadow: 0 5px 0 #4A3DC0">Start again</button>
+        </sc-if>
+        <sc-if value="{{showSkip}}" hint-placeholder-val="{{false}}">
+          <button type="button" onClick="{{skip}}" style="height: 54px; border-radius: 27px; border: 1.5px dashed rgba(255,181,71,0.6); background: transparent; color: #FFB547; font-family: inherit; font-size: 18px; font-weight: 600; cursor: pointer">Stuck? Skip this level · 400 ✦</button>
+        </sc-if>
+        <sc-if value="{{isSkipped}}" hint-placeholder-val="{{false}}">
+          <div style="font-size: 18px; line-height: 1.45; color: #C3C8DA">Level 13 is unlocked. Level 12 stays on your map as "skipped".</div>
+          <a href="LevelMap.dc.html" style="height: 62px; border-radius: 31px; background: #6B5CF0; color: #FFFFFF; font-size: 21px; font-weight: 700; display: flex; align-items: center; justify-content: center">Continue to Level 13</a>
+        </sc-if>
+        <sc-if value="{{showMapLink}}" hint-placeholder-val="{{false}}">
+          <a href="LevelMap.dc.html" style="text-align: center; font-size: 17px; font-weight: 600; padding: 4px">Back to the map</a>
+        </sc-if>
+      </div>
     </div>
   </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1376,"height":1032}}'>
 // Level 12 (6x6, boxes 2 rows x 3 cols). Generated and checked by the solver:
 // exactly one solution, and solvable by logic while respecting gravity.
 const N = 6, BR = 2, BC = 3, LIMIT = 150, SKIP_COST = 400, SKIP_AFTER_FAILS = 2, START_WALLET = 320;
@@ -228,7 +232,7 @@ class Component extends DCLogic {
       const cells = [];
       for (let r = 0; r < N; r++) {
         const v = s.grid[r][c];
-        const mt = r > 0 && r % BR === 0 ? '6px' : '0px';
+        const mt = r > 0 && r % BR === 0 ? '14px' : '0px';
         const glow = s.glow.indexOf(r + ',' + c) >= 0;
         let cell;
         if (s.crack && s.crack.r === r && s.crack.c === c) {
@@ -246,7 +250,7 @@ class Component extends DCLogic {
       }
       cols.push({
         cells,
-        ml: c > 0 && c % BC === 0 ? '8px' : '0px',
+        ml: c > 0 && c % BC === 0 ? '16px' : '0px',
         outline: s.hintCol === c ? '3px solid #FFB547' : '0px solid transparent',
         aria: 'Drop into column ' + (c + 1),
         drop: () => this.drop(c)
