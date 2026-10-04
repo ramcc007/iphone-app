@@ -8,9 +8,9 @@
   // Seconds per level: the same for each block of 5 levels, then +5s.
   // Must match tools/levelgen/validate.py (BOARDS) and ios/DropkuCore Level.swift (Board).
   const BOARDS = {
-    quick:   { name: 'Quick',   size: 4, levels: 30,  start: 30,  step: 5 },
-    classic: { name: 'Classic', size: 6, levels: 100, start: 75,  step: 5 },
-    master:  { name: 'Master',  size: 9, levels: 100, start: 240, step: 5 }
+    quick:   { name: 'Quick',   size: 4, levels: 30,  start: 20,  step: 5 },
+    classic: { name: 'Classic', size: 6, levels: 100, start: 55,  step: 5 },
+    master:  { name: 'Master',  size: 9, levels: 100, start: 180, step: 5 }
   };
   const BOARD_ORDER = ['quick', 'classic', 'master'];
 

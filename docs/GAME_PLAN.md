@@ -29,9 +29,9 @@ The player chooses a board on the home screen. **All three are open from the sta
 
 | Board | Grid | Boxes | Levels | Gaps per level | Clock per level |
 |---|---|---|---|---|---|
-| **Quick** | 4×4 | 2×2 | 30 | 5 → 9 | 30s → 55s |
-| **Classic** (starting choice) | 6×6 | 2×3 | 100 | 12 → 21 | 75s → 170s |
-| **Master** | 9×9 | 3×3 | 100 | 28 → 41 | 240s → 335s |
+| **Quick** | 4×4 | 2×2 | 30 | 5 → 9 | 20s → 45s |
+| **Classic** (starting choice) | 6×6 | 2×3 | 100 | 12 → 21 | 55s → 150s |
+| **Master** | 9×9 | 3×3 | 100 | 28 → 41 | 180s → 275s |
 
 - The tutorial is always on a 4×4 grid. When it ends, the player picks a board. Classic is selected by default.
 - Inside a board, levels unlock one after another (or by skipping). Clearing a Quick level never unlocks Classic levels.
@@ -66,8 +66,8 @@ You have **3 hearts** per level.
 ### Time limit (countdown in seconds)
 Every level has a hard countdown, shown in seconds (e.g. "85s"). The timer is always on: playing against the clock **is** the game. When it reaches **0s** the board locks and a pop-up says **"Time's up!"**, with:
 - **Start Level X again:** a fresh board and the full time. This is the main action.
-- After 2 failed attempts: **Skip this level · 400 Sparks** (earned Sparks only).
-- Back to the map.
+- **Skip this level · 400 Sparks** (earned Sparks only). The button is always shown, greyed with "Unlocks after 2 tries" until the second failed attempt.
+- A one-line **tip**, and **Switch board or level**.
 
 There is no way to buy or earn extra time.
 
@@ -77,9 +77,11 @@ Each board has its own table. The limit is the same for each block of 5 levels, 
 
 | Board | Levels 1–5 | Step every 5 levels | Last block | Seconds per gap (first → last level) |
 |---|---|---|---|---|
-| Quick 4×4 | 30s | +5s | 55s (levels 26–30) | about 6 → 6 |
-| Classic 6×6 | 75s | +5s | 170s (levels 96–100) | about 6 → 8 |
-| Master 9×9 | 240s | +5s | 335s (levels 96–100) | about 8.5 → 8 |
+| Quick 4×4 | 20s | +5s | 45s (levels 26–30) | about 4 → 5 |
+| Classic 6×6 | 55s | +5s | 150s (levels 96–100) | about 4.6 → 7 |
+| Master 9×9 | 180s | +5s | 275s (levels 96–100) | about 6.4 → 6.7 |
+
+The early levels are the tightest on purpose (4 seconds per gap on Quick level 1): they are easy to solve, so the clock is what makes them a race. The validator rejects any level under 3 (Quick), 4 (Classic) or 6 (Master) seconds per gap. The tutorial is the only untimed play.
 
 The first table (60s for the first 4×4 levels, 150s and more for 6×6) left 10–20 seconds per gap, which is why the early levels felt too easy. The new tables give 5–10 seconds per gap. Later levels also need more thinking per move (see section 7).
 
@@ -87,7 +89,7 @@ Fail-safes (details in `docs/FAILSAFE_REVIEW.md`):
 - The clock pauses whenever the app leaves the screen, on Pause and on the "?" help screen.
 - The board is hidden while paused, so pausing can't buy thinking time.
 - A drop tapped before 0s counts.
-- The validator rejects any level with fewer than 4 (Quick), 5 (Classic) or 6 (Master) seconds per gap.
+- The validator rejects any level with fewer than 3 (Quick), 4 (Classic) or 6 (Master) seconds per gap.
 - The table is the starting point. Real per-level times are tuned in beta from "time's up" rates.
 - No relaxed or untimed mode in v1 (owner's decision).
 
@@ -138,7 +140,9 @@ Game mechanics can't be owned (copyright protects code, art, text and names, not
 2. "But here, numbers fall." A number drops down a column and lands.
 3. "So the order matters." It shows a number that can't reach the top until the cells below are filled.
 
-**Then 3 playable tutorial levels** on a 4×4 grid. Each has one instruction, the right column highlighted, and a hand pointer:
+**First run, before the demo: "Who's playing?"** The player enters a name and an age (5 to 99). They are saved on the device and in the player's own iCloud (never on our servers), the name shows at the top of the home screen, and every level attempt is saved as a session (level, result, time used, date) so the player can review their history. Both can be changed or deleted in Settings. See `docs/APP_STORE_COMPLIANCE.md` section 4.
+
+**Then 3 playable tutorial levels** (called "Tutorial · Level 1 of 3") on a 4×4 grid. Each has one instruction, the right column highlighted, and a hand pointer:
 1. **Drop it:** choose a number and tap a column. Only 3 numbers are missing.
 2. **Order matters:** the top cell needs a 4, so fill the cells below first.
 3. **Mistakes and hearts:** a deliberately tempting wrong drop. It cracks, you lose a heart, and the tutorial explains why.
@@ -257,3 +261,4 @@ The whole set is generated deterministically (`python3 tools/levelgen/build_leve
 - **Three boards** (owner's idea, 3 October 2026): Quick 4×4 (30 levels), Classic 6×6 (100) and Master 9×9 (100), all open from the start. 4×4 instead of 3×3, because a 3×3 grid can't hold boxes.
 - Reward balance after simulating a full 6×6 level: line +1, Double +3, Triple +8. A perfect level earns about 52 Sparks (measured), so a 400-Spark skip takes about 8 perfect levels.
 - Level generator prototype: `tools/levelgen/gen.py`. It builds bottom-stacked levels with a unique solution that can be solved by logic while respecting gravity.
+- **Shorter clocks, intro and player profile** (owner's feedback, 4 October 2026): the first levels of each board get much less time (Quick 20s, Classic 55s, Master 180s, +5s every 5 levels) so the player races the clock from the start. First run asks for a name and an age, saved on the device and in the player's own iCloud, with the name shown on the home screen and every attempt kept as a session record. Time's up always shows Skip (locked until the 2nd try), a tip and a way to switch board. The tutorial's steps are called levels. [Check] The age field has no function yet and needs a legal check for young players (see the compliance doc).

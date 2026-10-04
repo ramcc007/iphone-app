@@ -2,8 +2,9 @@ import Foundation
 import SwiftUI
 import DropkuCore
 
-/// Where the app is: first-run tutorial, home (board picker and level map), or playing a level.
+/// Where the app is: first-run Welcome screen, the tutorial, home (board picker and level map), or playing a level.
 enum Route: Hashable {
+    case welcome
     case tutorial(lesson: Int)
     case home
     case level(board: BoardKind, index: Int)
@@ -48,13 +49,19 @@ final class AppModel: ObservableObject {
         fileURL = url
         progress = loaded
         selectedBoard = defaults.string(forKey: "dropku.board").flatMap(BoardKind.init(rawValue:)) ?? .classic
-        route = loaded.tutorialDone ? .home : .tutorial(lesson: 0)
+        route = Self.startRoute(for: loaded)
 
         NotificationCenter.default.addObserver(forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
                                                object: store, queue: .main) { [weak self] _ in
             Task { @MainActor in self?.pullFromCloud() }
         }
         store.synchronize()
+    }
+
+    /// First launch (no profile yet) starts at the Welcome screen; after that the tutorial (once), then home.
+    private static func startRoute(for progress: PlayerProgress) -> Route {
+        if progress.profile == nil { return .welcome }
+        return progress.tutorialDone ? .home : .tutorial(lesson: 0)
     }
 
     /// Change progress and save it immediately (fail-safe A6: progress is never only in memory).
@@ -76,6 +83,8 @@ final class AppModel: ObservableObject {
         if merged != progress {
             progress = merged
             save()
+            // Another device of the same player already answered the Welcome questions.
+            if route == .welcome, merged.profile != nil { route = Self.startRoute(for: merged) }
         }
     }
 
@@ -104,9 +113,29 @@ final class AppModel: ObservableObject {
         update { $0.finishTutorial(device: deviceID) }
     }
 
+    /// Saves the player's name and age (both must be valid). From the Welcome screen it moves on to the
+    /// tutorial (first time) or home; from Settings it only saves. Stays on this device and the player's own iCloud.
+    @discardableResult
+    func saveProfile(name: String, age: Int) -> Bool {
+        var updated = progress
+        guard updated.setProfile(name: name, age: age, now: Date().timeIntervalSince1970) else { return false }
+        progress = updated
+        save()
+        if route == .welcome { route = progress.tutorialDone ? .home : .tutorial(lesson: 0) }
+        return true
+    }
+
+    /// Adds one finished attempt at a real level to the session history.
+    func recordSession(levelID: String, startedAt: Double, seconds: Int, outcome: SessionRecord.Outcome, stars: Int, sparks: Int) {
+        let record = SessionRecord(levelID: levelID, startedAt: startedAt, seconds: max(0, seconds),
+                                   outcome: outcome, stars: stars, sparks: sparks)
+        update { $0.record(record) }
+    }
+
+    /// Removes everything, including the name, age and session history, and starts again at Welcome.
     func resetProgress() {
         progress = PlayerProgress()
         save()
-        route = .tutorial(lesson: 0)
+        route = .welcome
     }
 }

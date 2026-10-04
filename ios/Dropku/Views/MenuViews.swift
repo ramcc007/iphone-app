@@ -75,6 +75,17 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    LabeledContent("Name", value: app.progress.profile?.name ?? "Not set")
+                    LabeledContent("Age", value: app.progress.profile.map { "\($0.age)" } ?? "Not set")
+                    NavigationLink("Edit name and age") { ProfileEditView() }
+                    LabeledContent("Sessions played", value: "\(app.progress.sessions.count)")
+                    NavigationLink("Recent sessions") { SessionsView() }
+                } header: {
+                    Text("Player")
+                } footer: {
+                    Text("Saved on this device and in your iCloud")
+                }
                 Section("Game") {
                     Toggle("Haptics", isOn: Binding(
                         get: { app.progress.hapticsOn },
@@ -103,13 +114,142 @@ struct SettingsView: View {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
             }
             .confirmationDialog("Reset all progress?", isPresented: $confirmReset, titleVisibility: .visible) {
-                Button("Delete stars and Sparks", role: .destructive) {
+                Button("Delete everything", role: .destructive) {
                     dismiss()
                     app.resetProgress()
                 }
             } message: {
-                Text("This removes your stars, skipped levels and Sparks on this device and in iCloud.")
+                Text("This removes your name and age, stars, skipped levels, Sparks and session history on this device and in iCloud, and starts again from the Welcome screen.")
             }
+        }
+    }
+}
+
+/// Change the name and age (same checks as the Welcome screen). Saved on the device and in the player's own iCloud only.
+struct ProfileEditView: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var app: AppModel
+    @State private var name = ""
+    @State private var age = 18
+    @State private var loaded = false
+    @FocusState private var nameFocused: Bool
+
+    private var valid: Bool { PlayerProfile.cleanName(name) != nil && PlayerProfile.validAge(age) }
+
+    var body: some View {
+        Form {
+            Section {
+                NameField(name: $name, focused: $nameFocused)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                    .listRowBackground(Color.clear)
+                if let problem = nameProblem(name, showEmpty: true) {
+                    Text(problem).font(.footnote).foregroundStyle(Theme.bad)
+                }
+            } header: {
+                Text("Name")
+            }
+            Section("Age") {
+                AgeRow(age: $age)
+            }
+            Section {
+                Button("Save") {
+                    nameFocused = false
+                    if app.saveProfile(name: name, age: age) { dismiss() }
+                }
+                .disabled(!valid)
+            } footer: {
+                Text("Your name and age stay on this device and in your own iCloud. We never receive them.")
+            }
+        }
+        .navigationTitle("Your name and age")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            guard !loaded else { return }
+            loaded = true
+            name = app.progress.profile?.name ?? ""
+            age = app.progress.profile?.age ?? 18
+        }
+    }
+}
+
+/// The latest 30 attempts at real levels, newest first.
+struct SessionsView: View {
+    @EnvironmentObject private var app: AppModel
+
+    private var recent: [SessionRecord] { Array(app.progress.sessions.suffix(30).reversed()) }
+
+    var body: some View {
+        List {
+            Section {
+                if recent.isEmpty {
+                    Text("No sessions yet. Play a level and it shows up here.")
+                        .foregroundStyle(Theme.muted)
+                }
+                ForEach(recent) { session in
+                    SessionRow(session: session, title: title(for: session))
+                }
+            } footer: {
+                Text("Saved on this device and in your iCloud")
+            }
+        }
+        .navigationTitle("Recent sessions")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func title(for session: SessionRecord) -> String {
+        for board in app.boards {
+            if let level = board.levels.first(where: { $0.id == session.levelID }) {
+                return "\(board.name) \u{00B7} Level \(level.number)"
+            }
+        }
+        return "Level"
+    }
+}
+
+private struct SessionRow: View {
+    let session: SessionRecord
+    let title: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(title).font(.headline)
+                Spacer()
+                Text(outcomeText).font(.subheadline.weight(.semibold)).foregroundStyle(outcomeColor)
+            }
+            HStack(spacing: 8) {
+                if session.outcome == .won {
+                    Text(String(repeating: "\u{2605}", count: max(0, min(3, session.stars)))
+                         + String(repeating: "\u{2606}", count: 3 - max(0, min(3, session.stars))))
+                        .foregroundStyle(Theme.spark)
+                        .accessibilityLabel("\(session.stars) of 3 stars")
+                }
+                Text("\(clockText(session.seconds)) used")
+                if session.sparks > 0 { Text("+\(session.sparks) \u{2726}").foregroundStyle(Theme.spark) }
+                Spacer()
+                Text(Date(timeIntervalSince1970: session.startedAt).formatted(date: .abbreviated, time: .shortened))
+            }
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var outcomeText: String {
+        switch session.outcome {
+        case .won: return "Won"
+        case .timeUp: return "Time\u{2019}s up"
+        case .outOfHearts: return "Out of hearts"
+        case .left: return "Left early"
+        }
+    }
+
+    private var outcomeColor: Color {
+        switch session.outcome {
+        case .won: return Theme.good
+        case .timeUp, .outOfHearts: return Theme.bad
+        case .left: return Theme.muted
         }
     }
 }

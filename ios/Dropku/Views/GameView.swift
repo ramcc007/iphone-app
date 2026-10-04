@@ -159,7 +159,7 @@ private struct TopBar: View {
     }
 
     private var title: String {
-        if case .lesson(let index) = session.mode { return "Lesson \(index + 1) of \(Lesson.all.count)" }
+        if case .lesson(let index) = session.mode { return "Tutorial \u{00B7} Level \(index + 1) of \(Lesson.all.count)" }
         return "\(session.board?.name ?? "") \u{00B7} Level \(session.level.number)"
     }
 
@@ -202,14 +202,18 @@ private struct StatusPanel: View {
             .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Theme.surface))
         } else if wide {
             VStack(spacing: 12) {
-                HStack {
-                    Text("Time left").font(Theme.rounded(18, .semibold))
-                    Spacer()
-                    Text("\(session.game.timeLeft)s").font(Theme.rounded(48)).monospacedDigit()
+                VStack(spacing: 6) {
+                    HStack {
+                        Text("Time left").font(Theme.rounded(18, .semibold))
+                        Spacer()
+                        Text("\(session.game.timeLeft)s").font(Theme.rounded(48)).monospacedDigit()
+                    }
+                    TimerBar(timeLeft: session.game.timeLeft, limit: session.level.timeLimit)
                 }
                 .padding(.horizontal, 14).padding(.vertical, 8)
                 .foregroundStyle(timeColor)
                 .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(timeBackground))
+                .pulse(session.game.timeLeft <= 10 && session.game.status == .playing, scale: 1.03, duration: 0.5)
                 HStack {
                     Hearts(count: session.game.hearts, size: 30)
                     Spacer()
@@ -224,8 +228,15 @@ private struct StatusPanel: View {
                 Label("\(session.game.timeLeft)s", systemImage: "timer")
                     .font(Theme.rounded(18)).monospacedDigit()
                     .foregroundStyle(timeColor)
-                    .padding(.horizontal, 12).frame(height: 32)
+                    .padding(.horizontal, 12).padding(.bottom, 5)
+                    .frame(height: 36)
+                    .overlay(alignment: .bottom) {
+                        TimerBar(timeLeft: session.game.timeLeft, limit: session.level.timeLimit)
+                            .padding(.horizontal, 12).padding(.bottom, 4)
+                    }
                     .background(Capsule().fill(timeBackground))
+                    .pulse(session.game.timeLeft <= 10 && session.game.status == .playing, scale: 1.06, duration: 0.5)
+                    .accessibilityElement(children: .ignore)
                     .accessibilityLabel("\(session.game.timeLeft) seconds left")
                 Spacer()
                 Hearts(count: session.game.hearts, size: 22)
@@ -243,6 +254,34 @@ private struct StatusPanel: View {
 
     private var timeBackground: Color {
         session.game.timeLeft <= 10 ? Theme.bad.opacity(0.2) : session.game.timeLeft <= 30 ? Theme.spark.opacity(0.15) : .clear
+    }
+}
+
+/// A thin bar under the clock that drains as time runs out: green, amber under 30 seconds, red under 10.
+struct TimerBar: View {
+    let timeLeft: Int
+    let limit: Int
+
+    private var fraction: CGFloat {
+        guard limit > 0 else { return 0 }
+        return CGFloat(min(1.0, max(0.0, Double(timeLeft) / Double(limit))))
+    }
+
+    private var colour: Color {
+        timeLeft <= 10 ? Theme.bad : timeLeft <= 30 ? Theme.spark : Theme.good
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.white.opacity(0.14))
+                Capsule().fill(colour)
+                    .frame(width: max(4, geo.size.width * fraction))
+                    .animation(.linear(duration: 1), value: timeLeft)
+            }
+        }
+        .frame(height: 4)
+        .accessibilityHidden(true)
     }
 }
 
@@ -348,6 +387,23 @@ private struct BoardView: View {
                 .accessibilityHint(session.selected.map { "Drops the \($0)" } ?? "Pick a number first")
             }
         }
+        .overlay(alignment: .topLeading) {
+            if let gain = session.floatingGain {
+                let column = gain.position.column
+                let row = gain.position.row
+                let boxCols = max(1, game.level.boxCols)
+                let boxRows = max(1, game.level.boxRows)
+                let step: CGFloat = layout.tile + layout.gap
+                let boxShiftX: CGFloat = CGFloat(column / boxCols) * layout.boxGap
+                let boxShiftY: CGFloat = CGFloat(row / boxRows) * layout.boxGap
+                let centreX: CGFloat = CGFloat(column) * step + boxShiftX + layout.tile / 2
+                let centreY: CGFloat = CGFloat(row) * step + boxShiftY + layout.tile / 2
+                FloatingGainView(text: "+\(gain.amount) \u{2726}", tile: layout.tile)
+                    .id(gain.id)
+                    .position(x: centreX, y: centreY)
+                    .allowsHitTesting(false)
+            }
+        }
         .padding(10)
         .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Theme.surface))
         .blur(radius: session.paused ? 14 : 0)
@@ -381,6 +437,26 @@ private struct BoardView: View {
         CellView(kind: kind, size: layout.tile, glowing: session.glow.contains(position) && value != 0,
                  fallRows: session.justPlaced == position ? row + 1 : nil, gap: layout.gap)
             .id("\(row)-\(column)-\(value)")   // a new tile appears as a new view, so it can fall into place
+    }
+}
+
+/// "+N ✦" that rises from the tile that just completed a row, column or box, then fades away.
+struct FloatingGainView: View {
+    let text: String
+    let tile: CGFloat
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var risen = false
+
+    var body: some View {
+        Text(text)
+            .font(Theme.rounded(max(16, tile * 0.4)))
+            .foregroundStyle(Theme.spark)
+            .shadow(color: .black.opacity(0.6), radius: 3)
+            .fixedSize()
+            .offset(y: risen && !reduceMotion ? -tile * 1.2 : 0)
+            .opacity(risen ? 0 : 1)
+            .onAppear { withAnimation(.easeOut(duration: 1.2)) { risen = true } }
+            .accessibilityHidden(true)   // the Sparks gain is already announced by the flash message
     }
 }
 

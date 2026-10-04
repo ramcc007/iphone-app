@@ -56,16 +56,16 @@ final class GameRulesTests: XCTestCase {
             let kind = try! XCTUnwrap(BoardKind(rawValue: level.board))
             XCTAssertEqual(level.timeLimit, TimeTable.limit(board: kind, level: level.number), level.id)
         }
-        XCTAssertEqual(TimeTable.limit(board: .quick, level: 1), 30)
-        XCTAssertEqual(TimeTable.limit(board: .quick, level: 5), 30)
-        XCTAssertEqual(TimeTable.limit(board: .quick, level: 6), 35)
-        XCTAssertEqual(TimeTable.limit(board: .quick, level: 30), 55)
-        XCTAssertEqual(TimeTable.limit(board: .classic, level: 1), 75)
-        XCTAssertEqual(TimeTable.limit(board: .classic, level: 12), 85)
-        XCTAssertEqual(TimeTable.limit(board: .classic, level: 100), 170)
-        XCTAssertEqual(TimeTable.limit(board: .master, level: 1), 240)
-        XCTAssertEqual(TimeTable.limit(board: .master, level: 6), 245)
-        XCTAssertEqual(TimeTable.limit(board: .master, level: 100), 335)
+        XCTAssertEqual(TimeTable.limit(board: .quick, level: 1), 20)
+        XCTAssertEqual(TimeTable.limit(board: .quick, level: 5), 20)
+        XCTAssertEqual(TimeTable.limit(board: .quick, level: 6), 25)
+        XCTAssertEqual(TimeTable.limit(board: .quick, level: 30), 45)
+        XCTAssertEqual(TimeTable.limit(board: .classic, level: 1), 55)
+        XCTAssertEqual(TimeTable.limit(board: .classic, level: 12), 65)
+        XCTAssertEqual(TimeTable.limit(board: .classic, level: 100), 150)
+        XCTAssertEqual(TimeTable.limit(board: .master, level: 1), 180)
+        XCTAssertEqual(TimeTable.limit(board: .master, level: 6), 185)
+        XCTAssertEqual(TimeTable.limit(board: .master, level: 100), 275)
     }
 
     func testTimeUpLocksBoardAndClockNeverNegative() {
@@ -184,9 +184,9 @@ final class GameRulesTests: XCTestCase {
     }
 
     func testEconomyRangeAtStrongPace() {
-        // No mistakes at 3/5/7 seconds per gap on 4x4/6x6/9x9, same as engine.test.js.
-        let pace = [4: 3, 6: 5, 9: 7]
-        let ranges = [4: 25...50, 6: 40...70, 9: 50...90]
+        // No mistakes at 2/3/4 seconds per gap on 4x4/6x6/9x9, same as engine.test.js.
+        let pace = [4: 2, 6: 3, 9: 4]
+        let ranges = [4: 30...50, 6: 40...70, 9: 50...85]
         for level in levels {
             var game = Game(level: level)
             game.tick(seconds: level.gaps * pace[level.size]!)
@@ -331,5 +331,132 @@ final class ProgressTests: XCTestCase {
         progress.skipped.insert("classic-002")
         let data = try JSONEncoder().encode(progress)
         XCTAssertEqual(try JSONDecoder().decode(PlayerProgress.self, from: data), progress)
+    }
+}
+
+final class ProfileAndSessionTests: XCTestCase {
+    private func session(_ id: String, at start: Double, outcome: SessionRecord.Outcome = .won) -> SessionRecord {
+        SessionRecord(id: id, levelID: "quick-001", startedAt: start, seconds: 12, outcome: outcome, stars: 2, sparks: 30)
+    }
+
+    func testCleanNameTrimsAndCollapsesSpaces() {
+        XCTAssertEqual(PlayerProfile.cleanName("  Ada   Lovelace \n"), "Ada Lovelace")
+        XCTAssertEqual(PlayerProfile.cleanName("Ada\tB"), "Ada B")
+        XCTAssertEqual(PlayerProfile.cleanName("A\u{0007}da"), "Ada")
+    }
+
+    func testCleanNameLimitsLengthAndKeepsEmoji() {
+        let long = String(repeating: "a", count: 25)
+        XCTAssertEqual(PlayerProfile.cleanName(long), String(repeating: "a", count: 20))
+        XCTAssertEqual(PlayerProfile.cleanName(String(repeating: "\u{1F600}", count: 25))?.count, 20)
+        XCTAssertEqual(PlayerProfile.cleanName("Sam \u{1F680}"), "Sam \u{1F680}")
+        // Cutting at 20 never leaves a trailing space.
+        XCTAssertEqual(PlayerProfile.cleanName(String(repeating: "a", count: 19) + " bbbb"), String(repeating: "a", count: 19))
+    }
+
+    func testCleanNameRejectsEmpty() {
+        XCTAssertNil(PlayerProfile.cleanName(""))
+        XCTAssertNil(PlayerProfile.cleanName("   \n\t "))
+        XCTAssertNil(PlayerProfile.cleanName("\u{0007}\u{0008}"))
+    }
+
+    func testAgeBounds() {
+        XCTAssertFalse(PlayerProfile.validAge(4))
+        XCTAssertTrue(PlayerProfile.validAge(5))
+        XCTAssertTrue(PlayerProfile.validAge(99))
+        XCTAssertFalse(PlayerProfile.validAge(100))
+        XCTAssertFalse(PlayerProfile.validAge(-1))
+    }
+
+    func testSetProfileValidatesAndEditKeepsCreatedAt() {
+        var progress = PlayerProgress()
+        XCTAssertNil(progress.profile)
+        XCTAssertFalse(progress.setProfile(name: "  ", age: 20, now: 1))
+        XCTAssertFalse(progress.setProfile(name: "Ada", age: 4, now: 1))
+        XCTAssertNil(progress.profile)
+        XCTAssertTrue(progress.setProfile(name: "  Ada  ", age: 30, now: 100))
+        XCTAssertEqual(progress.profile, PlayerProfile(name: "Ada", age: 30, createdAt: 100, updatedAt: 100))
+        XCTAssertTrue(progress.setProfile(name: "Ada L", age: 31, now: 500))
+        XCTAssertEqual(progress.profile, PlayerProfile(name: "Ada L", age: 31, createdAt: 100, updatedAt: 500))
+        XCTAssertFalse(progress.setProfile(name: "", age: 31, now: 900))
+        XCTAssertEqual(progress.profile?.updatedAt, 500, "a refused edit changes nothing")
+    }
+
+    func testMergePicksNewerProfile() {
+        var a = PlayerProgress(), b = PlayerProgress()
+        _ = a.setProfile(name: "Old", age: 10, now: 100)
+        _ = b.setProfile(name: "New", age: 11, now: 200)
+        XCTAssertEqual(a.merged(with: b).profile?.name, "New")
+        XCTAssertEqual(b.merged(with: a).profile?.name, "New")
+        XCTAssertEqual(a.merged(with: PlayerProgress()).profile?.name, "Old", "nil loses to a profile")
+        XCTAssertEqual(PlayerProgress().merged(with: a).profile?.name, "Old")
+        XCTAssertNil(PlayerProgress().merged(with: PlayerProgress()).profile)
+    }
+
+    func testMergeUnionsSessionsWithoutDuplicates() {
+        var a = PlayerProgress(), b = PlayerProgress()
+        a.record(session("s1", at: 10)); a.record(session("s3", at: 30))
+        b.record(session("s2", at: 20)); b.record(session("s3", at: 30))
+        let merged = a.merged(with: b)
+        XCTAssertEqual(merged.sessions.map(\.id), ["s1", "s2", "s3"])
+        XCTAssertEqual(merged, b.merged(with: a), "merge must not depend on order")
+        XCTAssertEqual(merged.merged(with: merged), merged)
+    }
+
+    func testSessionsCapAtNewest300() {
+        var progress = PlayerProgress()
+        for i in 0..<305 { progress.record(session("s\(i)", at: Double(i))) }
+        XCTAssertEqual(progress.sessions.count, 300)
+        XCTAssertEqual(progress.sessions.first?.id, "s5")
+        XCTAssertEqual(progress.sessions.last?.id, "s304")
+        progress.record(session("s304", at: 304))
+        XCTAssertEqual(progress.sessions.count, 300, "the same record is never added twice")
+
+        var other = PlayerProgress()
+        for i in 305..<330 { other.record(session("s\(i)", at: Double(i))) }
+        let merged = progress.merged(with: other)
+        XCTAssertEqual(merged.sessions.count, 300)
+        XCTAssertEqual(merged.sessions.first?.id, "s30")
+        XCTAssertEqual(merged.sessions.last?.id, "s329")
+    }
+
+    func testProfileAndSessionsRoundTripThroughJSON() throws {
+        var progress = PlayerProgress()
+        progress.earn(50, device: "A")
+        _ = progress.setProfile(name: "Ada", age: 30, now: 1_700_000_000)
+        progress.record(session("s1", at: 1_700_000_100, outcome: .timeUp))
+        progress.record(session("s2", at: 1_700_000_200, outcome: .outOfHearts))
+        let data = try JSONEncoder().encode(progress)
+        XCTAssertEqual(try JSONDecoder().decode(PlayerProgress.self, from: data), progress)
+    }
+
+    func testOldSaveWithoutProfileOrSessionsStillLoads() throws {
+        let old = #"{"earnedByDevice":{"A":120},"spentByDevice":{"A":20},"bestStars":{"quick-001":3},"skipped":[],"failedAttempts":{},"chestsOpened":[],"tutorialDone":true,"soundOn":true,"hapticsOn":false}"#
+        let progress = try JSONDecoder().decode(PlayerProgress.self, from: Data(old.utf8))
+        XCTAssertEqual(progress.sparks, 100)
+        XCTAssertEqual(progress.bestStars["quick-001"], 3)
+        XCTAssertTrue(progress.tutorialDone)
+        XCTAssertFalse(progress.hapticsOn)
+        XCTAssertNil(progress.profile)
+        XCTAssertTrue(progress.sessions.isEmpty)
+    }
+
+    func testEmptyOrFutureSaveStillLoads() throws {
+        XCTAssertEqual(try JSONDecoder().decode(PlayerProgress.self, from: Data("{}".utf8)), PlayerProgress())
+        // A newer app wrote an unknown outcome, an unknown field, and one broken session: nothing else is lost.
+        let future = #"{"bestStars":{"quick-001":2},"newField":1,"sessions":[{"id":"a","levelID":"quick-001","startedAt":1,"seconds":3,"outcome":"somethingNew","stars":0,"sparks":0},{"nonsense":true}]}"#
+        let progress = try JSONDecoder().decode(PlayerProgress.self, from: Data(future.utf8))
+        XCTAssertEqual(progress.bestStars["quick-001"], 2)
+        XCTAssertEqual(progress.sessions.map(\.id), ["a"])
+        XCTAssertEqual(progress.sessions.first?.outcome, .left)
+    }
+
+    func testResetProgressHasNoProfileOrSessions() {
+        var progress = PlayerProgress()
+        _ = progress.setProfile(name: "Ada", age: 30, now: 1)
+        progress.record(session("s1", at: 1))
+        progress = PlayerProgress()   // what AppModel.resetProgress does
+        XCTAssertNil(progress.profile)
+        XCTAssertTrue(progress.sessions.isEmpty)
     }
 }

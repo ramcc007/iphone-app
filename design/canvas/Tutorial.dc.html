@@ -67,7 +67,7 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
       <div style="font-size: 26px; font-weight: 700; color: {{resultColor}}">{{resultTitle}}</div>
       <div style="font-size: 16px; line-height: 1.45; color: #D7DBE8">{{resultText}}</div>
       <sc-if value="{{hasNext}}" hint-placeholder-val="{{true}}">
-        <button type="button" onClick="{{nextLesson}}" style="height: 56px; border-radius: 28px; border: none; background: #6B5CF0; color: #FFFFFF; font-family: inherit; font-size: 19px; font-weight: 700; cursor: pointer; box-shadow: 0 5px 0 #4A3DC0">Next lesson</button>
+        <button type="button" onClick="{{nextLesson}}" style="height: 56px; border-radius: 28px; border: none; background: #6B5CF0; color: #FFFFFF; font-family: inherit; font-size: 19px; font-weight: 700; cursor: pointer; box-shadow: 0 5px 0 #4A3DC0">Next level</button>
       </sc-if>
       <sc-if value="{{isFinal}}" hint-placeholder-val="{{false}}">
         <a href="Home.dc.html" style="height: 56px; border-radius: 28px; background: #6B5CF0; color: #FFFFFF; font-size: 19px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 #4A3DC0">Start Level 1 · +50 ✦ welcome gift</a>
@@ -211,7 +211,7 @@ class Component extends DCLogic {
     });
     const last = s.li === LESSONS.length - 1;
     return {
-      lessonTag: 'LESSON ' + (s.li + 1) + ' OF 3',
+      lessonTag: 'TUTORIAL · LEVEL ' + (s.li + 1) + ' OF 3',
       title: L.title, text: L.text,
       stepText: guide ? L.stepTexts[s.step] : (L.hearts ? 'Hearts' : ''),
       showHearts: L.hearts,
@@ -222,7 +222,7 @@ class Component extends DCLogic {
       flash: s.flash, flashColor: s.flashColor,
       showResult: s.status !== 'play',
       hasNext: s.status === 'win' && !last, isFinal: s.status === 'win' && last, isLose: s.status === 'lose',
-      resultTitle: s.status === 'win' ? (last ? 'You’re ready!' : 'Lesson ' + (s.li + 1) + ' done!') : 'Out of hearts',
+      resultTitle: s.status === 'win' ? (last ? 'You’re ready!' : 'Level ' + (s.li + 1) + ' done!') : 'Out of hearts',
       resultText: s.status === 'win' ? L.win : 'That’s how a level is lost. No penalty here: try again!',
       resultColor: s.status === 'win' ? '#6EE7A8' : '#FF6B7A',
       resultBorder: s.status === 'win' ? 'rgba(110,231,168,0.5)' : 'rgba(255,107,122,0.5)',

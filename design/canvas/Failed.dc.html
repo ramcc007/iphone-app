@@ -14,7 +14,7 @@ body{margin:0}
 a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
 </style>
 </helmet>
-<div style="width: 390px; height: 844px; box-sizing: border-box; background: #13161F; color: #F5F6FA; font-family: Fredoka, ui-rounded, system-ui, sans-serif; display: flex; flex-direction: column; padding: 70px 22px 28px; gap: 14px; overflow: hidden">
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #13161F; color: #F5F6FA; font-family: Fredoka, ui-rounded, system-ui, sans-serif; display: flex; flex-direction: column; padding: 56px 22px 24px; gap: 10px; overflow: hidden">
   <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
     <div style="font-size: 15px; font-weight: 600; color: #FF6B7A; letter-spacing: 2px">CLASSIC · LEVEL 12 · ATTEMPT 2</div>
     <sc-if value="{{isTime}}" hint-placeholder-val="{{true}}">
@@ -48,10 +48,11 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
     <div style="font-size: 15px; font-weight: 700">Stuck? Skip this level</div>
     <div aria-label="Skip costs 400 Sparks. You have 320." style="height: 50px; box-sizing: border-box; border-radius: 25px; border: 1.5px dashed rgba(255,181,71,0.35); color: rgba(255,181,71,0.6); font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px">Skip for 400 ✦ <span style="font-size: 13px; color: #A3A9BF; font-weight: 500">you have 320</span></div>
     <div style="font-size: 12px; line-height: 1.45; color: #C3C8DA">80 more to go: the Daily Drop (+25), better stars on earlier levels, and every level you clear.</div>
-    <div style="font-size: 12px; line-height: 1.45; color: #A3A9BF">Skipping appears after 2 tries. Skipped levels stay on your map so you can come back for the stars.</div>
+    <div style="font-size: 12px; line-height: 1.45; color: #A3A9BF">The Skip button is always shown, and unlocks after 2 tries. Skipped levels stay on your map so you can come back for the stars.</div>
   </div>
 
-  <a href="Home.dc.html" style="text-align: center; font-size: 15px; font-weight: 600; padding: 4px">Back to Home</a>
+  <div style="background: rgba(255,255,255,0.05); border-radius: 14px; padding: 10px 14px; font-size: 14px; line-height: 1.4; color: #D7DBE8"><b>Tip:</b> Look for a number that has only one place left in its row, column or box.</div>
+  <a href="Home.dc.html" style="height: 50px; border-radius: 25px; background: #1E2230; color: #F5F6FA; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center">Switch board or level</a>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"reason":{"editor":"enum","options":["hearts","timeup"],"default":"hearts"},"$preview":{"width":390,"height":844}}'>
@@ -63,7 +64,7 @@ class Component extends DCLogic {
       emptyHearts: [0, 1, 2].map((i) => ({ i })),
       title: time ? 'Time’s up!' : 'Out of hearts',
       body: time
-        ? 'You filled 12 of 16 gaps in 85 seconds. Level 12 starts again with a fresh board and a full 85 seconds.'
+        ? 'You filled 12 of 16 gaps in 65 seconds. Level 12 starts again with a fresh board and a full 65 seconds.'
         : 'So close: 4 gaps left! Your last drop put a 5 where a 3 belonged.'
     };
   }

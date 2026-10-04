@@ -13,6 +13,113 @@ public enum Economy {
     public static let sparksPerNewStar = 10
 }
 
+/// Who is playing. Asked once on the Welcome screen. Saved on the device and in the player's OWN iCloud only:
+/// there is no developer server, so the name and age are never received by anyone else.
+public struct PlayerProfile: Codable, Equatable, Sendable {
+    public var name: String
+    public var age: Int
+    /// Seconds since 1970.
+    public var createdAt: Double
+    public var updatedAt: Double
+
+    public init(name: String, age: Int, createdAt: Double, updatedAt: Double) {
+        self.name = name
+        self.age = age
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+
+    public static let maxNameLength = 20
+    public static let ageRange = 5...99
+
+    public static func validAge(_ age: Int) -> Bool {
+        ageRange.contains(age)
+    }
+
+    /// Trims, turns every run of whitespace into one space, drops control characters and keeps at most
+    /// 20 characters (by Character, so an emoji is never cut in half). Returns nil when nothing is left.
+    public static func cleanName(_ raw: String) -> String? {
+        var collapsed = ""
+        var lastWasSpace = true   // true at the start, so leading whitespace is dropped
+        for character in raw {
+            if character.isWhitespace {
+                if !lastWasSpace { collapsed.append(" ") }
+                lastWasSpace = true
+            } else if character.unicodeScalars.allSatisfy({ $0.properties.generalCategory == .control }) {
+                continue
+            } else {
+                collapsed.append(character)
+                lastWasSpace = false
+            }
+        }
+        var name = String(collapsed.prefix(maxNameLength))
+        while name.last == " " { name.removeLast() }
+        return name.isEmpty ? nil : name
+    }
+
+    /// Which of two copies of the profile wins when two devices disagree: the newer one.
+    /// Equal times fall back to a fixed order so that merging never depends on which copy is "self".
+    fileprivate static func newer(_ a: PlayerProfile?, _ b: PlayerProfile?) -> PlayerProfile? {
+        guard let a else { return b }
+        guard let b else { return a }
+        if a.updatedAt != b.updatedAt { return a.updatedAt > b.updatedAt ? a : b }
+        if a.name != b.name { return a.name > b.name ? a : b }
+        return a.age >= b.age ? a : b
+    }
+}
+
+/// One attempt at a real level (never the tutorial), kept so the player can look back at their sessions.
+public struct SessionRecord: Codable, Equatable, Identifiable, Sendable {
+    public enum Outcome: String, Codable, Sendable {
+        case won, timeUp, outOfHearts, left
+    }
+
+    public let id: String
+    public let levelID: String
+    /// Seconds since 1970.
+    public let startedAt: Double
+    /// Time used on the clock.
+    public let seconds: Int
+    public let outcome: Outcome
+    public let stars: Int
+    public let sparks: Int
+
+    public init(id: String = UUID().uuidString, levelID: String, startedAt: Double, seconds: Int,
+                outcome: Outcome, stars: Int, sparks: Int) {
+        self.id = id
+        self.levelID = levelID
+        self.startedAt = startedAt
+        self.seconds = seconds
+        self.outcome = outcome
+        self.stars = stars
+        self.sparks = sparks
+    }
+
+    /// An outcome written by a newer version of the app reads as "left" instead of failing the whole save.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        levelID = try c.decode(String.self, forKey: .levelID)
+        startedAt = (try? c.decode(Double.self, forKey: .startedAt)) ?? 0
+        seconds = (try? c.decode(Int.self, forKey: .seconds)) ?? 0
+        outcome = (try? c.decode(Outcome.self, forKey: .outcome)) ?? .left
+        stars = (try? c.decode(Int.self, forKey: .stars)) ?? 0
+        sparks = (try? c.decode(Int.self, forKey: .sparks)) ?? 0
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, levelID, startedAt, seconds, outcome, stars, sparks
+    }
+}
+
+/// Decodes one array element without letting a single bad element fail the whole array.
+private struct Lossy<Value: Decodable>: Decodable {
+    let value: Value?
+    init(from decoder: Decoder) throws {
+        value = try? Value(from: decoder)
+    }
+}
+
 /// Everything saved for the player: on the device, and synced through their own iCloud.
 public struct PlayerProgress: Codable, Equatable, Sendable {
     /// Sparks are stored as a per-device ledger (earned and spent totals), never as a single balance,
@@ -26,8 +133,37 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
     public var tutorialDone = false
     public var soundOn = true
     public var hapticsOn = true
+    /// Asked once on the Welcome screen. nil until then (and again after "Reset all progress").
+    public var profile: PlayerProfile?
+    /// Most recent last. Only the newest 300 are kept.
+    public var sessions: [SessionRecord] = []
+
+    public static let maxSessions = 300
 
     public init() {}
+
+    private enum CodingKeys: String, CodingKey {
+        case earnedByDevice, spentByDevice, bestStars, skipped, failedAttempts, chestsOpened
+        case tutorialDone, soundOn, hapticsOn, profile, sessions
+    }
+
+    /// Fail-safe: every field is optional on disk, so a saved file from an older or newer version
+    /// of the app always loads (missing or unreadable fields fall back to their defaults).
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        earnedByDevice = (try? c.decodeIfPresent([String: Int].self, forKey: .earnedByDevice)) ?? [:]
+        spentByDevice = (try? c.decodeIfPresent([String: Int].self, forKey: .spentByDevice)) ?? [:]
+        bestStars = (try? c.decodeIfPresent([String: Int].self, forKey: .bestStars)) ?? [:]
+        skipped = (try? c.decodeIfPresent(Set<String>.self, forKey: .skipped)) ?? []
+        failedAttempts = (try? c.decodeIfPresent([String: Int].self, forKey: .failedAttempts)) ?? [:]
+        chestsOpened = (try? c.decodeIfPresent(Set<String>.self, forKey: .chestsOpened)) ?? []
+        tutorialDone = (try? c.decodeIfPresent(Bool.self, forKey: .tutorialDone)) ?? false
+        soundOn = (try? c.decodeIfPresent(Bool.self, forKey: .soundOn)) ?? true
+        hapticsOn = (try? c.decodeIfPresent(Bool.self, forKey: .hapticsOn)) ?? true
+        profile = try? c.decodeIfPresent(PlayerProfile.self, forKey: .profile)
+        let lossy = (try? c.decodeIfPresent([Lossy<SessionRecord>].self, forKey: .sessions)) ?? []
+        sessions = Array(lossy.compactMap(\.value).suffix(Self.maxSessions))
+    }
 
     public var sparks: Int {
         earnedByDevice.values.reduce(0, +) - spentByDevice.values.reduce(0, +)
@@ -44,6 +180,23 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         guard amount > 0, sparks >= amount else { return false }
         spentByDevice[device, default: 0] += amount
         return true
+    }
+
+    // MARK: - Profile and sessions
+
+    /// Saves the player's name and age if both are valid (see PlayerProfile). Editing keeps `createdAt`.
+    @discardableResult
+    public mutating func setProfile(name: String, age: Int, now: Double) -> Bool {
+        guard let clean = PlayerProfile.cleanName(name), PlayerProfile.validAge(age) else { return false }
+        profile = PlayerProfile(name: clean, age: age, createdAt: profile?.createdAt ?? now, updatedAt: now)
+        return true
+    }
+
+    /// Adds one finished attempt. Only the newest 300 are kept; the same record is never added twice.
+    public mutating func record(_ session: SessionRecord) {
+        guard !sessions.contains(where: { $0.id == session.id }) else { return }
+        sessions.append(session)
+        if sessions.count > Self.maxSessions { sessions.removeFirst(sessions.count - Self.maxSessions) }
     }
 
     // MARK: - Level flow
@@ -119,6 +272,11 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         result.failedAttempts.merge(other.failedAttempts) { max($0, $1) }
         result.chestsOpened = chestsOpened.union(other.chestsOpened)
         result.tutorialDone = tutorialDone || other.tutorialDone
+        result.profile = PlayerProfile.newer(profile, other.profile)
+        var byID: [String: SessionRecord] = [:]
+        for session in sessions + other.sessions where byID[session.id] == nil { byID[session.id] = session }
+        let ordered = byID.values.sorted { $0.startedAt != $1.startedAt ? $0.startedAt < $1.startedAt : $0.id < $1.id }
+        result.sessions = Array(ordered.suffix(Self.maxSessions))
         return result
     }
 }

@@ -70,8 +70,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
 .cell.ghost { border: 2px dashed var(--t-base); color: var(--t-base); opacity: 0.75; background: rgba(255,255,255,0.02); }
 .cell.crack { background: rgba(255,107,122,0.22); border: 2px dashed var(--bad); color: var(--bad); animation: shake 0.4s; }
 .cell.glow { box-shadow: 0 0 0 3px #FFFFFF, 0 0 18px rgba(255,255,255,0.6); }
-.cell.fall { animation: fall 0.32s cubic-bezier(0.3, 0, 0.6, 1.25); }
-@keyframes fall { from { transform: translateY(calc(-1 * var(--fall) * (var(--tile) + var(--gap)))); } to { transform: translateY(0); } }
+.cell.fall { animation: fall 0.42s linear; }
+@keyframes fall { 0% { transform: translateY(calc(-1 * var(--fall) * (var(--tile) + var(--gap)))); animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6); } 62% { transform: translateY(0) scale(1.08, 0.86); animation-timing-function: ease-out; } 80% { transform: translateY(-5px) scale(0.97, 1.05); } 100% { transform: translateY(0) scale(1); } }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
 /* Tray and controls */
@@ -157,10 +157,78 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
 .lesson .tag { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 1.5px; }
 .lesson b { font-size: 20px; } .lesson p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--soft); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-@media (prefers-reduced-motion: reduce) { .cell.fall, .cell.crack { animation: none; } .num { transition: none; } }
+input { font-family: inherit; -webkit-user-select: text; user-select: text; }
+
+/* Backdrop, effects and motion */
+#bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; background: radial-gradient(120% 70% at 12% -10%, rgba(107,92,240,0.30), transparent 60%), radial-gradient(90% 60% at 105% 108%, rgba(79,195,247,0.16), transparent 60%), radial-gradient(70% 50% at 50% 50%, rgba(255,138,216,0.05), transparent 70%), var(--bg); }
+#bg i { position: absolute; display: block; top: 0; left: var(--x); width: var(--s); height: var(--s); border-radius: 24%; background: var(--c); opacity: 0.17; animation: drift var(--d) linear infinite; animation-delay: var(--dl); }
+@keyframes drift { from { transform: translateY(-20vh) rotate(0deg); } to { transform: translateY(120vh) rotate(var(--r)); } }
+#app { position: relative; z-index: 1; }
+#fx { position: fixed; inset: 0; pointer-events: none; z-index: 30; overflow: hidden; }
+.pf { position: absolute; width: 7px; height: 7px; margin: -3px 0 0 -3px; border-radius: 2px; animation: fly 0.8s ease-out forwards; }
+@keyframes fly { to { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.4); opacity: 0; } }
+.conf { position: absolute; top: -24px; width: 10px; height: 15px; border-radius: 2px; animation: confetti var(--t) cubic-bezier(0.25, 0.6, 0.45, 1) forwards; }
+@keyframes confetti { to { transform: translate(var(--dx), 110vh) rotate(var(--rot)); } }
+.gain { position: absolute; font-size: 22px; font-weight: 700; color: var(--spark); text-shadow: 0 2px 8px rgba(0,0,0,0.6); white-space: nowrap; animation: rise 1.05s ease-out forwards; }
+@keyframes rise { 0% { transform: translate(-50%, 6px) scale(0.6); opacity: 0; } 18% { transform: translate(-50%, -8px) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -64px) scale(1); opacity: 0; } }
+#app[data-anim-screen] .screen { animation: enter 0.42s cubic-bezier(0.2, 0.8, 0.2, 1); }
+#app[data-anim-sheet] .sheet { animation: sheetIn 0.5s cubic-bezier(0.2, 1.15, 0.3, 1); }
+#app[data-anim-sheet] .veil { animation: fadeIn 0.25s ease-out; }
+#app[data-anim-sheet] .stars svg { animation: starIn 0.6s cubic-bezier(0.2, 1.5, 0.4, 1) both; animation-delay: calc(var(--i) * 0.2s + 0.25s); }
+@keyframes enter { from { opacity: 0; transform: translateY(16px); } }
+@keyframes sheetIn { from { opacity: 0; transform: translateY(46px) scale(0.95); } }
+@keyframes fadeIn { from { opacity: 0; } }
+@keyframes starIn { from { opacity: 0; transform: scale(0) rotate(-60deg); } }
+.jolt { animation: jolt 0.4s; }
+@keyframes jolt { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
+.logo i { animation: bob 3.2s ease-in-out infinite; } .logo i:nth-child(2) { animation-delay: 0.4s; } .logo i:nth-child(3) { animation-delay: 0.8s; } .logo i:nth-child(4) { animation-delay: 1.2s; }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+.pulse { animation: pulse 2.2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 5px 0 var(--accent-edge), 0 0 0 0 rgba(107,92,240,0.55); } 50% { box-shadow: 0 5px 0 var(--accent-edge), 0 0 0 14px rgba(107,92,240,0); } }
+.lv.next { animation: glow 2s ease-in-out infinite; }
+@keyframes glow { 0%, 100% { box-shadow: 0 4px 0 var(--accent-edge), 0 0 10px rgba(107,92,240,0.4); } 50% { box-shadow: 0 4px 0 var(--accent-edge), 0 0 26px rgba(107,92,240,0.85); } }
+.bd, .lv, .ctl, .primary, .secondary { transition: transform 0.12s, background 0.2s, border-color 0.2s; }
+.bd:active, .lv:active, .ctl:active { transform: scale(0.94); } .primary:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--accent-edge); }
+.bd.on { box-shadow: 0 0 24px rgba(107,92,240,0.35); }
+.num.on { animation: popnum 0.25s ease-out; } @keyframes popnum { 0% { transform: translateY(0) scale(1); } 60% { transform: translateY(-9px) scale(1.08); } 100% { transform: translateY(-6px) scale(1); } }
+.cell.ghost { animation: ghost 1.1s ease-in-out infinite; } @keyframes ghost { 50% { opacity: 0.35; } }
+.flash { animation: flashIn 0.35s cubic-bezier(0.2, 1.4, 0.4, 1); } @keyframes flashIn { from { transform: scale(0.7); opacity: 0; } }
+.timer.danger { animation: tick 1s ease-in-out infinite; } @keyframes tick { 50% { transform: scale(1.1); } }
+.status { position: relative; overflow: hidden; }
+.tbar { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: rgba(255,255,255,0.07); }
+.tbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-soft)); border-radius: 0 3px 3px 0; transition: width 1s linear; }
+.tbar.warn i { background: var(--spark); } .tbar.danger i { background: var(--bad); }
+.sheet .sub { font-size: 13px; line-height: 1.4; color: var(--muted); text-align: center; margin-top: -6px; }
+.sheet .tip { font-size: 14px; line-height: 1.4; color: var(--soft); background: rgba(255,255,255,0.05); border-radius: 14px; padding: 10px 12px; }
+.primary:disabled { opacity: 0.4; box-shadow: none; cursor: default; }
+/* Welcome and player */
+.welcome { gap: 14px; padding-block: 20px; }
+.welcome h1 { margin: 4px 0 0; font-size: 34px; line-height: 1.1; text-align: center; }
+.wl-p { margin: 0; text-align: center; font-size: 16px; line-height: 1.45; color: var(--soft); }
+.wl-board { align-self: center; display: flex; gap: 6px; padding: 10px; border-radius: 22px; background: var(--surface); box-shadow: 0 10px 40px rgba(0,0,0,0.35); }
+.wl-col { display: flex; flex-direction: column; gap: 6px; }
+.wl-col span { width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; box-sizing: border-box; }
+.wl-col .g { background: linear-gradient(180deg, var(--given-top) 0%, var(--given) 60%); color: #E6E9F2; box-shadow: 0 4px 0 var(--given-edge); font-weight: 600; }
+.wl-col .t { background: linear-gradient(180deg, var(--t-light) 0%, var(--t-base) 58%); color: #13161F; box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), 0 4px 0 var(--t-edge); animation: dropLoop 5s infinite; animation-delay: var(--dl); }
+@keyframes dropLoop { 0% { transform: translateY(-150px); opacity: 0; } 6% { opacity: 1; } 16% { transform: translateY(0) scale(1.1, 0.85); } 22% { transform: translateY(-6px) scale(0.98, 1.04); } 28%, 86% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(0); opacity: 0; } }
+.fld { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: var(--soft); }
+.fld input { height: 54px; border-radius: 16px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); font-size: 20px; font-weight: 600; padding: 0 16px; box-sizing: border-box; width: 100%; outline: none; }
+.fld input:focus { border-color: var(--accent-soft); box-shadow: 0 0 0 4px rgba(107,92,240,0.25); }
+.fmsg { min-height: 18px; font-size: 13px; color: var(--spark); text-align: center; }
+.priv { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); text-align: center; }
+.who { min-width: 0; max-width: 56%; padding-left: 5px; }
+.who .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.av { width: 30px; height: 30px; border-radius: 15px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex-shrink: 0; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat { background: var(--surface); border-radius: 14px; padding: 10px 6px; text-align: center; } .stat b { display: block; font-size: 22px; } .stat span { font-size: 12px; color: var(--muted); }
+.hist { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--soft); max-height: 190px; overflow-y: auto; }
+.hist div { display: flex; justify-content: space-between; gap: 8px; background: var(--surface); border-radius: 10px; padding: 7px 10px; } .hist small { color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } #bg i { display: none; } }
 </style>
 
+<div id="bg" aria-hidden="true"></div>
 <div id="app" aria-live="off"></div>
+<div id="fx" aria-hidden="true"></div>
 <div id="live" class="sr" aria-live="polite"></div>
 
 <script src="engine.js"></script>
@@ -172,6 +240,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
   var TILE = { 1: ['#FF6B7A', '#FF97A2', '#C94656'], 2: ['#FFB547', '#FFCF85', '#C9862A'], 3: ['#F5E663', '#FAF29A', '#BFB244'],
     4: ['#6EE7A8', '#A0F2C6', '#3FB27A'], 5: ['#4FC3F7', '#8ADAFB', '#2E8DB8'], 6: ['#9D8CFF', '#BDB2FF', '#6F5ED1'],
     7: ['#FF8AD8', '#FFB3E6', '#C25CA6'], 8: ['#2DD4BF', '#7EE6D7', '#1E9E8E'], 9: ['#C0C7D6', '#DDE1EA', '#8A91A3'] };
+  var TIPS = ['Start with a gap where only one number fits: every drop makes the next one easier.', 'Look for a number that has only one place left in its row, column or box.', 'Fill lower gaps first. Higher gaps can only be reached once the ones below are filled.', 'Short on time? Pick a number once, then tap several columns: it stays selected.'];
   var COST = { hint: 40, undo: 15, heart: 60, skip: 400 }, SKIP_AFTER = 2, CHEST = 150, WELCOME = 50;
   var HEART = '<path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.3 5 6.8 5c2 0 3.6 1.1 5.2 3 1.6-1.9 3.2-3 5.2-3 3.5 0 5.6 3.6 4.3 6.8C19.5 16.4 12 21 12 21z"/>';
   var STAR = '<polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21.5 12,17.3 5.5,21.5 7.5,14 2,9.3 9,9"/>';
@@ -182,10 +251,11 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
 
   // ---------- saved progress (this browser only; the real app uses iCloud) ----------
   var KEY = 'dropku.web.v2';
-  function fresh() { return { wallet: 0, best: {}, skipped: {}, fails: {}, chests: {}, tutorialDone: false, muted: false, board: 'classic' }; }
+  function fresh() { return { wallet: 0, best: {}, skipped: {}, fails: {}, chests: {}, tutorialDone: false, muted: false, board: 'classic', profile: null, sessions: [] }; }
   function load() { try { var raw = localStorage.getItem(KEY); if (raw) { var p = JSON.parse(raw); var f = fresh(); for (var k in f) if (p[k] !== undefined) f[k] = p[k]; return f; } } catch (e) {} return fresh(); }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} }
   var P = load();
+  if (!Array.isArray(P.sessions)) P.sessions = [];
   function setBoard(id) { var b = boardById(id); P.board = b.id; LEVELS = b.levels; }
   setBoard(P.board);
 
@@ -199,8 +269,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
   ];
 
   // ---------- app state ----------
-  var S = { screen: 'home', game: null, levelIndex: 0, lesson: -1, step: 0, sel: null, cursor: 0, hintCol: null, flash: '', flashKind: 'info', guideOverride: '', paused: false, overlay: null, anim: null, crack: null, glow: [], result: null, award: 0, chest: 0, copied: '', confirmReset: false };
-  if (!P.tutorialDone) startLesson(0);
+  var S = { form: { name: '', age: '', edit: false }, attempt: null, screen: 'home', game: null, levelIndex: 0, lesson: -1, step: 0, sel: null, cursor: 0, hintCol: null, flash: '', flashKind: 'info', guideOverride: '', paused: false, overlay: null, anim: null, crack: null, glow: [], result: null, award: 0, chest: 0, copied: '', confirmReset: false };
+  // First run: who's playing -> tutorial -> home. Anyone with saved progress but no profile is asked once.
+  if (!P.profile) S.screen = 'welcome'; else if (!P.tutorialDone) startLesson(0);
 
   // ---------- sound (synthesised, no files; starts after the first tap) ----------
   var ac = null;
@@ -216,6 +287,40 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
   };
 
   // ---------- helpers ----------
+  // Name and age stay in this browser (the iPhone app also keeps them in the player's own iCloud). Same rules as DropkuCore.
+  function cleanName(raw) { var t = String(raw || '').replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ').replace(/\s+/g, ' ').trim(); t = Array.from(t).slice(0, 20).join('').trim(); return t || null; }
+  function parseAge(v) { return /^\d{1,2}$/.test(String(v).trim()) ? Number(v) : NaN; }
+  function validAge(n) { return Number.isInteger(n) && n >= 5 && n <= 99; }
+  function formOk() { return !!cleanName(S.form.name) && validAge(parseAge(S.form.age)); }
+  function formMessage() {
+    if (S.form.name && !cleanName(S.form.name)) return 'Please enter your name.';
+    if (S.form.age && !validAge(parseAge(S.form.age))) return 'Age must be a whole number from 5 to 99.';
+    return '';
+  }
+  var REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var CONF = ['#FF6B7A', '#FFB547', '#F5E663', '#6EE7A8', '#4FC3F7', '#9D8CFF', '#FF8AD8'];
+  function fxEl(cls, css, text, life) {
+    var host = document.getElementById('fx'); if (REDUCED || !host) return;
+    var e = document.createElement('div'); e.className = cls; e.style.cssText = css; if (text) e.textContent = text; host.appendChild(e);
+    setTimeout(function () { if (e.parentNode) e.parentNode.removeChild(e); }, life);
+  }
+  function burst(x, y, color, n) { for (var i = 0; i < n; i++) { var a = Math.random() * 6.283, d = 22 + Math.random() * 38; fxEl('pf', 'left:' + Math.round(x) + 'px;top:' + Math.round(y) + 'px;background:' + color + ';--dx:' + Math.round(Math.cos(a) * d) + 'px;--dy:' + Math.round(Math.sin(a) * d - 8) + 'px;--rot:' + Math.round(Math.random() * 360) + 'deg', '', 850); } }
+  function confetti(n) { for (var i = 0; i < n; i++) fxEl('conf', 'left:' + Math.round(Math.random() * 100) + 'vw;background:' + CONF[i % CONF.length] + ';--dx:' + Math.round(Math.random() * 180 - 90) + 'px;--rot:' + Math.round(Math.random() * 720 - 360) + 'deg;--t:' + (1.7 + Math.random() * 1.5).toFixed(2) + 's;animation-delay:' + (Math.random() * 0.5).toFixed(2) + 's', '', 4000); }
+  function floatText(x, y, text) { fxEl('gain', 'left:' + Math.round(x) + 'px;top:' + Math.round(y) + 'px', text, 1150); }
+  function buzz(ms) { try { if (navigator.vibrate && !P.muted) navigator.vibrate(ms); } catch (e) {} }
+  // Centre of a board cell in page pixels, from the column box (not from the animated tile).
+  function cellCenter(r, c) {
+    var col = document.querySelector('.col[data-c="' + c + '"]'); if (!col || !S.game) return null;
+    var cs = getComputedStyle(document.documentElement), t = parseFloat(cs.getPropertyValue('--tile')), gp = parseFloat(cs.getPropertyValue('--gap')), bg = parseFloat(cs.getPropertyValue('--boxgap'));
+    var b = col.getBoundingClientRect();
+    return { x: b.left + b.width / 2, y: b.top + r * (t + gp) + Math.floor(r / S.game.br) * bg + t / 2 };
+  }
+  (function backdrop() {
+    var bgEl = document.getElementById('bg'); if (!bgEl || REDUCED) return;
+    var h = '';
+    for (var i = 0; i < 14; i++) h += '<i style="--x:' + Math.round((i * 7.3 + (i % 3) * 5) % 100) + '%;--s:' + (22 + (i * 11) % 38) + 'px;--c:' + CONF[i % CONF.length] + ';--d:' + (26 + (i * 5) % 22) + 's;--dl:-' + (i * 3.7).toFixed(1) + 's;--r:' + (180 + (i * 53) % 360) + 'deg"></i>';
+    bgEl.innerHTML = h;
+  })();
   function esc(s) { return String(s).replace(/[&<>"]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]; }); }
   function tileVars(v) { var t = TILE[v]; return '--t-base:' + t[0] + ';--t-light:' + t[1] + ';--t-edge:' + t[2]; }
   function isWide() { return window.innerWidth >= 900 && window.innerWidth > window.innerHeight * 1.1; }
@@ -227,7 +332,19 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
   function currentLevel() { return S.game ? S.game.level : null; }
 
   // ---------- flow ----------
+  // One session record per attempt at a real level: written when it ends (won, time's up, out of hearts) or when the player leaves it.
+  function newAttempt() { S.attempt = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8), start: Date.now(), recId: null }; }
+  function logSession(outcome, stars, sparks) {
+    var a = S.attempt, g = S.game; if (!a || a.recId || !g || inLesson()) return;
+    var lv = g.level;
+    P.sessions.push({ id: a.id, level: lv.id, board: lv.board, n: lv.number, t: a.start, secs: Math.max(0, lv.timeLimit - g.timeLeft), out: outcome, stars: stars || 0, sparks: sparks || 0 });
+    if (P.sessions.length > 300) P.sessions = P.sessions.slice(-300);
+    a.recId = a.id; save();
+  }
+  function leaveAttempt() { var g = S.game; if (S.screen === 'game' && S.attempt && !S.attempt.recId && g && g.status === 'play' && (g.history.length || g.mistakes)) logSession('left'); }
+
   function startLevel(i) {
+    leaveAttempt(); newAttempt();
     S.levelIndex = i; S.game = D.newGame(LEVELS[i]); S.screen = 'game'; S.lesson = -1;
     resetTurn(); S.paused = false; S.overlay = null; render();
   }
@@ -236,7 +353,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
     resetTurn(); S.overlay = null;
   }
   function resetTurn() { S.sel = null; S.cursor = 0; S.hintCol = null; S.flash = ''; S.guideOverride = ''; S.anim = null; S.crack = null; S.glow = []; S.result = null; S.copied = ''; }
-  function goHome() { S.screen = 'home'; S.game = null; S.overlay = null; S.paused = false; render(); }
+  function goHome() { leaveAttempt(); S.screen = 'home'; S.game = null; S.overlay = null; S.paused = false; render(); }
 
   function pick(v) {
     var g = S.game; if (!g || g.status !== 'play' || S.paused) return;
@@ -256,7 +373,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
       if (lesson && S.lesson === 1 && res.v === 4 && c === 3) why = 'See? The 4 fell to the LOWER gap, where it doesn’t fit. Fill the lower gap first.';
       if (lesson && !lesson.hearts) { g.hearts = D.HEARTS; g.mistakes = 0; g.status = 'play'; }
       S.crack = { r: res.r, c: res.c, v: res.v }; S.hintCol = null;
-      setFlash('Crack! ' + why + (lesson && !lesson.hearts ? '' : ' (−1 heart)'), 'bad'); sfx.crack();
+      setFlash('Crack! ' + why + (lesson && !lesson.hearts ? '' : ' (−1 heart)'), 'bad'); sfx.crack(); buzz(80);
+      var appEl = document.getElementById('app'); appEl.classList.remove('jolt'); void appEl.offsetWidth; appEl.classList.add('jolt'); setTimeout(function () { appEl.classList.remove('jolt'); }, 420);
       setTimeout(function () { S.crack = null; render(); }, 650);
       if (g.status === 'lost') onLost();
       render(); return;
@@ -276,12 +394,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
     setTimeout(function () { S.glow = []; render(); }, 800);
     if (res.won) onWon();
     render();
+    var cc = cellCenter(res.r, res.c);
+    if (cc) { burst(cc.x, cc.y + 8, TILE[res.v][0], res.combo ? 16 : 6); if (res.gain > 0) floatText(cc.x, cc.y - 12, '+' + res.gain + ' ✦'); }
   }
   function onWon() {
     var g = S.game; sfx.win();
     if (inLesson()) {
       if (S.lesson === LESSONS.length - 1 && !P.tutorialDone) { P.tutorialDone = true; P.wallet += WELCOME; save(); }
-      S.overlay = 'lessonWon'; return;
+      S.overlay = 'lessonWon'; confetti(45); return;
     }
     var lv = currentLevel(), res = D.result(g), prev = P.best[lv.id] || 0;
     var award = prev ? Math.max(0, res.stars - prev) * 10 : res.earned;   // replays only pay for better stars
@@ -289,9 +409,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
     if (lv.role === 'milestone' && !P.chests[lv.id]) { chest = CHEST; P.chests[lv.id] = true; }
     P.wallet += award + chest; P.best[lv.id] = Math.max(prev, res.stars); delete P.skipped[lv.id]; P.fails[lv.id] = 0; save();
     S.result = res; S.award = award; S.chest = chest; S.replay = !!prev; S.overlay = 'won';
+    logSession('won', res.stars, award + chest); confetti(res.stars === 3 ? 100 : 45); buzz(60);
   }
-  function onLost() { if (inLesson()) { S.overlay = 'lessonLost'; return; } var id = currentLevel().id; P.fails[id] = (P.fails[id] || 0) + 1; save(); S.overlay = 'lost'; }
-  function onTimeUp() { var id = currentLevel().id; P.fails[id] = (P.fails[id] || 0) + 1; save(); S.sel = null; S.overlay = 'timeup'; sfx.timeup(); say('Time’s up'); render(); }
+  function onLost() { if (inLesson()) { S.overlay = 'lessonLost'; return; } var id = currentLevel().id; P.fails[id] = (P.fails[id] || 0) + 1; save(); S.overlay = 'lost'; logSession('outOfHearts'); }
+  function onTimeUp() { var id = currentLevel().id; P.fails[id] = (P.fails[id] || 0) + 1; save(); S.sel = null; S.overlay = 'timeup'; logSession('timeUp'); sfx.timeup(); buzz(200); say('Time’s up'); render(); }
 
   // ---------- timer: pauses whenever the page is hidden ----------
   setInterval(function () {
@@ -304,15 +425,19 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
     if (g.timeLeft < 10) sfx.tick();
     var el = document.getElementById('timer');
     if (el) { el.className = timerClass(g); el.innerHTML = timerInner(g); }
+    var fill = document.getElementById('tfill');
+    if (fill) { fill.style.width = timerPct(g) + '%'; fill.parentNode.className = 'tbar ' + (g.timeLeft <= 10 ? 'danger' : g.timeLeft <= 30 ? 'warn' : ''); }
   }, 1000);
   document.addEventListener('visibilitychange', function () { if (document.visibilityState !== 'visible' && S.screen === 'game' && S.game && S.game.status === 'play' && !S.overlay) { S.paused = true; render(); } });
-  window.addEventListener('resize', function () { render(); });
+  window.addEventListener('resize', function () { var a = document.activeElement; if (a && a.tagName === 'INPUT') return; render(); });
 
   // ---------- rendering ----------
+  function timerPct(g) { return Math.max(0, Math.round(g.timeLeft / g.level.timeLimit * 1000) / 10); }
+  function timerBar(g) { return '<div class="tbar ' + (g.timeLeft <= 10 ? 'danger' : g.timeLeft <= 30 ? 'warn' : '') + '" aria-hidden="true"><i id="tfill" style="width:' + timerPct(g) + '%"></i></div>'; }
   function timerClass(g) { return 'timer' + (g.timeLeft <= 10 ? ' danger' : g.timeLeft <= 30 ? ' warn' : ''); }
   function timerInner(g) { return isWide() ? '<span>Time left</span><b>' + g.timeLeft + 's</b>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><line x1="12" y1="13" x2="12" y2="9"/><line x1="10" y1="2" x2="14" y2="2"/></svg><b>' + g.timeLeft + 's</b>'; }
   function hearts(g, size) { var h = ''; for (var i = 0; i < D.HEARTS; i++) h += '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + (i < g.hearts ? '#FF6B7A' : 'none') + '" stroke="#FF6B7A" stroke-width="2" aria-hidden="true">' + HEART + '</svg>'; return '<div class="hearts" role="img" aria-label="' + g.hearts + ' hearts left">' + h + '</div>'; }
-  function starsSvg(n, size) { var h = ''; for (var i = 0; i < 3; i++) h += '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + (i < n ? '#FFB547' : 'none') + '" stroke="#FFB547" stroke-width="1.6" aria-hidden="true">' + STAR + '</svg>'; return '<div class="stars" role="img" aria-label="' + n + ' of 3 stars">' + h + '</div>'; }
+  function starsSvg(n, size) { var h = ''; for (var i = 0; i < 3; i++) h += '<svg style="--i:' + i + '" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + (i < n ? '#FFB547' : 'none') + '" stroke="#FFB547" stroke-width="1.6" aria-hidden="true">' + STAR + '</svg>'; return '<div class="stars" role="img" aria-label="' + n + ' of 3 stars">' + h + '</div>'; }
 
   // Tile size from the space the board really has: everything else is laid out first, then the board
   // fills what is left (the .boardwrap box). Before the first layout, a fair estimate is used.
@@ -386,10 +511,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
     sizeBoard(g.n);
     var top = '<div class="topbar">' +
       (lesson ? '<button class="iconbtn" data-act="rules" aria-label="How to play">?</button>' : '<button class="iconbtn" data-act="pause" aria-label="Pause"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg></button>') +
-      '<div class="title-block"><div class="t">' + (lesson ? 'Lesson ' + (S.lesson + 1) + ' of 3' : boardById(lv.board).name + ' · Level ' + lv.number) + '</div><div class="s">' + (lesson ? 'No timer while you learn' : 'Chapter ' + lv.chapter + ' · ' + lv.timeLimit + '-second limit') + '</div></div>' +
+      '<div class="title-block"><div class="t">' + (lesson ? 'Tutorial · Level ' + (S.lesson + 1) + ' of 3' : boardById(lv.board).name + ' · Level ' + lv.number) + '</div><div class="s">' + (lesson ? 'No timer while you learn' : (P.profile ? esc(P.profile.name) + ' · ' : '') + lv.timeLimit + '-second limit') + '</div></div>' +
       (lesson ? '<button class="pill" data-act="skipTutorial">Skip</button>' : '<button class="iconbtn" data-act="rules" aria-label="How to play">?</button>') + '</div>';
     var status = lesson ? (lesson.hearts ? '<div class="status">' + hearts(g, 24) + '<span style="color:var(--muted);font-size:14px">3 hearts</span></div>' : '<div class="lesson"><span class="tag">' + esc(lesson.title.toUpperCase()) + '</span><p>' + esc(lesson.text) + '</p></div>') :
-      '<div class="status"><div id="timer" class="' + timerClass(g) + '" aria-label="' + g.timeLeft + ' seconds left">' + timerInner(g) + '</div><div class="status-row2">' + hearts(g, isWide() ? 30 : 22) + '<span class="pill spark" style="background:transparent;padding:0" aria-label="' + P.wallet + ' Sparks">' + SPARK + P.wallet + '</span></div></div>';
+      '<div class="status"><div id="timer" class="' + timerClass(g) + '" aria-label="' + g.timeLeft + ' seconds left">' + timerInner(g) + '</div><div class="status-row2">' + hearts(g, isWide() ? 30 : 22) + '<span class="pill spark" style="background:transparent;padding:0" aria-label="' + P.wallet + ' Sparks">' + SPARK + P.wallet + '</span></div>' + timerBar(g) + '</div>';
     if (lesson && lesson.hearts) status = '<div class="lesson"><span class="tag">' + esc(lesson.title.toUpperCase()) + '</span><p>' + esc(lesson.text) + '</p></div>' + status;
     var controls = lesson ? '<div class="controls"><button class="ctl" data-act="undo">Undo</button><button class="ctl" data-act="restart">Restart</button></div>' :
       '<div class="controls"><button class="ctl" data-act="undo" aria-label="Undo, ' + (g.undosLeft > 0 ? g.undosLeft + ' free' : COST.undo + ' Sparks') + '">Undo · ' + (g.undosLeft > 0 ? g.undosLeft : COST.undo + ' ✦') + '</button><button class="ctl gold" data-act="hint">Hint · ' + COST.hint + ' ✦</button><button class="ctl" data-act="restart">Restart</button></div>';
@@ -406,8 +531,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
     if (S.paused && !o) return '<div class="veil"><div class="sheet"><h2>Paused</h2><p>The clock is stopped and the board is hidden, so pausing can’t buy thinking time.</p><button class="primary" data-act="resume">Resume</button><button class="secondary" data-act="restart">Restart level</button><button class="secondary" data-act="rules">How to play</button><button class="link" data-act="home">Back to the map</button></div></div>';
     if (!o) return '';
     var lv = g ? g.level : null, fails = lv ? (P.fails[lv.id] || 0) : 0;
-    var skip = '';
-    if (lv && lv.number && fails >= SKIP_AFTER) skip = '<button class="dashed" data-act="skip"' + (P.wallet < COST.skip ? ' disabled' : '') + '>Stuck? Skip this level · ' + COST.skip + ' ✦' + (P.wallet < COST.skip ? ' (you have ' + P.wallet + ')' : '') + '</button>';
+    var skip = '', tip = '';
+    if (lv && lv.number) {
+      var more = SKIP_AFTER - fails;
+      skip = more > 0
+        ? '<button class="dashed" data-act="skip" disabled>Skip this level · ' + COST.skip + ' ✦</button><div class="sub">Unlocks after ' + SKIP_AFTER + ' tries (' + more + ' more). Skipped levels stay on your map.</div>'
+        : '<button class="dashed" data-act="skip"' + (P.wallet < COST.skip ? ' disabled' : '') + '>Stuck? Skip this level · ' + COST.skip + ' ✦' + (P.wallet < COST.skip ? ' (you have ' + P.wallet + ')' : '') + '</button>';
+      tip = '<div class="tip"><b>Tip:</b> ' + esc(TIPS[fails % TIPS.length]) + '</div>';
+    }
     if (o === 'won') {
       var r = S.result, last = S.levelIndex === LEVELS.length - 1;
       var rows = S.replay ? '<div><span>Replay: ' + (S.award ? 'new stars' : 'no new stars') + '</span><b>+' + S.award + ' ✦</b></div>' : r.breakdown.map(function (b) { return '<div><span>' + esc(b.label) + '</span><b>+' + b.n + ' ✦</b></div>'; }).join('');
@@ -419,23 +550,23 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
         '<button class="secondary" data-act="share" data-text="' + esc(share) + '">' + (S.copied ? 'Copied!' : 'Share result') + '</button>' + (S.copied === 'fail' ? '<div class="sharebox">' + esc(share) + '</div>' : '') +
         (last ? '' : '<button class="link" data-act="home">Back to the map</button>') + '</div></div>';
     }
-    if (o === 'timeup') return '<div class="veil"><div class="sheet lose"><h2>Time’s up!</h2><p>You filled ' + g.history.length + ' of ' + lv.gaps + ' gaps. Level ' + lv.number + ' starts again with a fresh board and the full ' + lv.timeLimit + ' seconds.</p><button class="primary" data-act="restart">Start Level ' + lv.number + ' again</button>' + skip + '<button class="link" data-act="home">Back to the map</button></div></div>';
+    if (o === 'timeup') return '<div class="veil"><div class="sheet lose"><h2>Time’s up!</h2><p>You filled ' + g.history.length + ' of ' + lv.gaps + ' gaps. Level ' + lv.number + ' starts again with a fresh board and the full ' + lv.timeLimit + ' seconds.</p><button class="primary" data-act="restart">Start Level ' + lv.number + ' again</button>' + skip + tip + '<button class="secondary" data-act="home">Switch board or level</button></div></div>';
     if (o === 'lost') return '<div class="veil"><div class="sheet lose"><h2>Out of hearts</h2><p>Level ' + lv.number + ' starts again with a fresh board and the full ' + lv.timeLimit + ' seconds.</p><button class="primary" data-act="restart">Start again</button>' +
-      (g.heartBought ? '' : '<button class="secondary" data-act="heart"' + (P.wallet < COST.heart ? ' disabled style="opacity:0.45"' : '') + '>+1 heart, keep this board · ' + COST.heart + ' ✦</button>') + skip + '<button class="link" data-act="home">Back to the map</button></div></div>';
+      (g.heartBought ? '' : '<button class="secondary" data-act="heart"' + (P.wallet < COST.heart ? ' disabled style="opacity:0.45"' : '') + '>+1 heart, keep this board · ' + COST.heart + ' ✦</button>') + skip + tip + '<button class="secondary" data-act="home">Switch board or level</button></div></div>';
     if (o === 'skipped') { var end = S.levelIndex === LEVELS.length - 1; return '<div class="veil"><div class="sheet"><h2 style="color:var(--spark)">Level skipped</h2><p>' + (end ? '' : 'Level ' + (lv.number + 1) + ' is unlocked. ') + 'Level ' + lv.number + ' stays on your map so you can come back for the stars.</p>' + (end ? '' : '<button class="primary" data-act="next">Play Level ' + (lv.number + 1) + '</button>') + '<button class="' + (end ? 'primary' : 'link') + '" data-act="home">Back to the map</button></div></div>'; }
-    if (o === 'lessonWon') { var lastL = S.lesson === LESSONS.length - 1; return '<div class="veil"><div class="sheet win"><h2>' + (lastL ? 'You’re ready!' : 'Lesson ' + (S.lesson + 1) + ' done!') + '</h2><p>' + esc(LESSONS[S.lesson].win) + '</p>' + (lastL ? '<div class="chest">' + SPARK + 'Welcome gift: +' + WELCOME + ' Sparks</div><button class="primary" data-act="boards">Choose your board</button>' : '<button class="primary" data-act="nextLesson">Next lesson</button>') + '</div></div>'; }
+    if (o === 'lessonWon') { var lastL = S.lesson === LESSONS.length - 1; return '<div class="veil"><div class="sheet win"><h2>' + (lastL ? 'You’re ready!' : 'Level ' + (S.lesson + 1) + ' done!') + '</h2><p>' + esc(LESSONS[S.lesson].win) + '</p>' + (lastL ? '<div class="chest">' + SPARK + 'Welcome gift: +' + WELCOME + ' Sparks</div><button class="primary" data-act="boards">Choose your board</button>' : '<button class="primary" data-act="nextLesson">Next level</button>') + '</div></div>'; }
     if (o === 'lessonLost') return '<div class="veil"><div class="sheet lose"><h2>Out of hearts</h2><p>That’s how a level is lost. No penalty here, so try again!</p><button class="primary" data-act="restart">Try again</button></div></div>';
     if (o === 'rules') return rulesSheet();
+    if (o === 'player') return playerSheet();
     return '';
   }
 
   function rulesSheet() {
     var rules = [['✓', '#6EE7A8', 'The Sudoku rule', 'Each row, column and box holds each number once.'], ['↓', '#4FC3F7', 'Numbers fall', 'Pick a number, tap a column: it drops to the lowest gap. So fill lower gaps first.'],
-      ['3', '#FF8AD8', 'Three boards', 'Quick 4×4, Classic 6×6 or Master 9×9. All open from the start.'], ['30s', '#FFB547', 'Beat the countdown', 'Every level has one: seconds on Quick, minutes on Master. Time’s up = start again.'], ['♥', '#FF6B7A', '3 hearts', 'A wrong drop cracks and costs a heart.'],
+      ['3', '#FF8AD8', 'Three boards', 'Quick 4×4, Classic 6×6 or Master 9×9. All open from the start.'], ['20s', '#FFB547', 'Beat the countdown', 'Every level has one: about 20 seconds on the first Quick levels, a few minutes on Master. Time’s up = start again.'], ['♥', '#FF6B7A', '3 hearts', 'A wrong drop cracks and costs a heart.'],
       ['★', '#FFB547', 'Up to 3 stars', 'No mistakes, with a quarter of the time still left.'], ['✦', '#9D8CFF', 'Sparks', 'Earned by playing. Spend them on hints, or 400 to skip a level after 2 tries.']];
-    var reset = S.confirmReset ? '<p style="color:var(--bad)">This deletes your stars and Sparks in this browser.</p><button class="secondary" style="color:var(--bad)" data-act="resetYes">Yes, reset everything</button><button class="link" data-act="resetNo">Keep my progress</button>' : '<button class="link" style="color:var(--faint)" data-act="reset">Reset progress…</button>';
     return '<div class="veil"><div class="sheet"><h2>How to play</h2><div class="rules">' + rules.map(function (r) { return '<div class="rule"><div class="ic" style="background:' + r[1] + '">' + r[0] + '</div><div><b>' + r[2] + '</b><span>' + r[3] + '</span></div></div>'; }).join('') +
-      '</div><button class="primary" data-act="closeRules">Got it</button><button class="secondary" data-act="tutorial">Replay the tutorial</button><button class="link" data-act="mute">' + (P.muted ? 'Sound: off (tap to turn on)' : 'Sound: on (tap to turn off)') + '</button>' + reset + '</div></div>';
+      '</div><button class="primary" data-act="closeRules">Got it</button><button class="secondary" data-act="tutorial">Replay the tutorial</button><button class="link" data-act="mute">' + (P.muted ? 'Sound: off (tap to turn on)' : 'Sound: on (tap to turn off)') + '</button></div></div>';
   }
 
   // A small picture of each board: n x n cells split into boxes, with grey stacks topped by a dropped tile.
@@ -454,6 +585,42 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
     var cleared = 0, stars = 0;
     b.levels.forEach(function (lv) { if (P.best[lv.id]) { cleared++; stars += P.best[lv.id]; } else if (P.skipped[lv.id]) cleared++; });
     return { cleared: cleared, stars: stars };
+  }
+
+  function profileForm(mode) {
+    var f = S.form;
+    return '<label class="fld"><span>Your name</span><input id="f-name" type="text" maxlength="20" autocomplete="given-name" autocapitalize="words" spellcheck="false" enterkeyhint="next" placeholder="e.g. Alex" value="' + esc(f.name) + '"></label>' +
+      '<label class="fld"><span>Your age</span><input id="f-age" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" enterkeyhint="done" placeholder="5 to 99" value="' + esc(f.age) + '"></label>' +
+      '<div id="f-msg" class="fmsg" role="status">' + esc(formMessage()) + '</div>' +
+      '<button id="f-go" class="primary" data-act="saveProfile"' + (formOk() ? '' : ' disabled') + '>' + (mode === 'edit' ? 'Save' : 'Let’s play') + '</button>';
+  }
+
+  function welcomeScreen() {
+    var tops = [1, 2, 3, 4], grid = S4.slice(1), t = '', c, r;
+    for (c = 0; c < 4; c++) {
+      var cells = '<span class="t" style="' + tileVars(tops[c]) + ';--dl:' + (c * 0.35).toFixed(2) + 's">' + tops[c] + '</span>';
+      for (r = 0; r < 3; r++) cells += '<span class="g">' + grid[r][c] + '</span>';
+      t += '<div class="wl-col">' + cells + '</div>';
+    }
+    return '<div class="screen welcome scroll"><div class="wl-board" aria-hidden="true">' + t + '</div>' +
+      '<h1>Welcome to Dropku</h1><p class="wl-p">Sudoku, but the numbers fall. Beat the clock on three boards. First, who’s playing?</p>' +
+      profileForm('new') +
+      '<p class="priv">Your name and age stay on this device (the iPhone app also keeps them in your own iCloud). They are never sent to us, and you can change or delete them any time.</p></div>';
+  }
+
+  function ago(t) { try { return new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
+  function outcomeText(r) { return r.out === 'won' ? '★★★'.slice(0, r.stars) + '☆☆☆'.slice(0, 3 - r.stars) + ' cleared' : r.out === 'timeUp' ? 'Time’s up' : r.out === 'outOfHearts' ? 'Out of hearts' : 'Left early'; }
+
+  function playerSheet() {
+    var p = P.profile || { name: '', age: '' };
+    if (S.form.edit) return '<div class="veil"><div class="sheet"><h2>Your details</h2>' + profileForm('edit') + '<button class="link" data-act="closePlayer">Cancel</button></div></div>';
+    var cleared = Object.keys(P.best).length, list = P.sessions.slice(-8).reverse().map(function (r) { var b = boardById(r.board); return '<div><span>' + esc(b.name) + ' ' + r.n + ' · ' + esc(outcomeText(r)) + '</span><small>' + r.secs + 's · ' + esc(ago(r.t)) + '</small></div>'; }).join('');
+    var reset = S.confirmReset ? '<p style="color:var(--bad)">This deletes your name, age, stars, Sparks and session history from this browser.</p><button class="secondary" style="color:var(--bad)" data-act="resetYes">Yes, delete everything</button><button class="link" data-act="resetNo">Keep my progress</button>' : '<button class="link" style="color:var(--faint)" data-act="reset">Delete my data…</button>';
+    return '<div class="veil"><div class="sheet"><div style="display:flex;align-items:center;gap:12px"><span class="av" style="width:48px;height:48px;border-radius:24px;font-size:22px">' + esc(Array.from(p.name)[0] || '?').toUpperCase() + '</span><div style="min-width:0"><h2 style="font-size:24px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(p.name) + '</h2><div style="color:var(--muted);font-size:14px">Age ' + esc(p.age) + '</div></div></div>' +
+      '<div class="stats"><div class="stat"><b>' + P.sessions.length + '</b><span>sessions</span></div><div class="stat"><b>' + cleared + '</b><span>levels cleared</span></div><div class="stat"><b>' + P.wallet + '</b><span>Sparks</span></div></div>' +
+      (list ? '<div class="hist" aria-label="Recent sessions">' + list + '</div>' : '<p style="font-size:14px">No sessions yet. Play a level and it shows up here.</p>') +
+      '<p style="font-size:12.5px;color:var(--muted);text-align:center">Sessions are saved in this browser. The iPhone app also saves them to your own iCloud, never to our servers.</p>' +
+      '<button class="secondary" data-act="editProfile">Change name or age</button><button class="primary" data-act="closePlayer">Done</button>' + reset + '</div></div>';
   }
 
   function homeScreen() {
@@ -483,19 +650,26 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
     }
     var nl = LEVELS[next];
     var logo = '<div class="logo" aria-hidden="true"><i></i><i style="background:linear-gradient(180deg,#FFCF85 0%,#FFB547 58%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 #C9862A"></i><i style="background:linear-gradient(180deg,#8ADAFB 0%,#4FC3F7 58%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 #2E8DB8"></i><i style="background:linear-gradient(180deg,#363D57 0%,#2A3045 60%);box-shadow:0 3px 0 #1C2030"></i></div>';
-    return '<div class="screen home scroll"><div class="topbar"><button class="pill" data-act="rules">How to play</button><span class="pill spark" aria-label="' + P.wallet + ' Sparks">' + SPARK + P.wallet + '</span></div>' +
+    var nm = P.profile ? P.profile.name : '', hi = '<button class="pill who" data-act="player" aria-label="Player: ' + esc(nm) + '. Open profile and sessions"><span class="av">' + esc((Array.from(nm)[0] || '?').toUpperCase()) + '</span><span class="nm">Hi, ' + esc(nm) + '</span></button>';
+    return '<div class="screen home scroll"><div class="topbar">' + hi + '<span style="display:flex;gap:8px;align-items:center"><span class="pill spark" aria-label="' + P.wallet + ' Sparks">' + SPARK + P.wallet + '</span><button class="iconbtn" data-act="rules" aria-label="How to play">?</button></span></div>' +
       '<div class="hero">' + logo + '<div><h1>Dropku</h1><p>Sudoku. But the numbers fall.</p></div></div>' +
       '<div class="boards" role="group" aria-label="Choose a board">' + picker + '</div>' +
       '<div class="bd-info">' + esc(BOARD_TEXT[board.id] || '') + ' ' + board.levels.length + ' levels, ' + minutes(board.levels[0].timeLimit) + ' to ' + minutes(board.levels[board.levels.length - 1].timeLimit) + ' each.</div>' +
-      '<button class="primary" data-act="play" data-i="' + next + '" style="height:66px;flex-shrink:0">' + (P.best[nl.id] ? 'Replay' : 'Play') + ' ' + board.name + ' Level ' + nl.number + ' · ' + minutes(nl.timeLimit) + '</button>' +
-      chaptersHtml + '<div class="note">' + BOARDS.reduce(function (a, b) { return a + b.levels.length; }, 0) + ' levels on 3 boards. No ads, nothing to buy. Progress is saved in this browser only.</div>' + (S.overlay === 'rules' ? rulesSheet() : '') + '</div>';
+      '<button class="primary pulse" data-act="play" data-i="' + next + '" style="height:66px;flex-shrink:0">' + (P.best[nl.id] ? 'Replay' : 'Play') + ' ' + board.name + ' Level ' + nl.number + ' · ' + minutes(nl.timeLimit) + '</button>' +
+      chaptersHtml + '<div class="note">' + BOARDS.reduce(function (a, b) { return a + b.levels.length; }, 0) + ' levels on 3 boards. No ads, nothing to buy. Progress is saved in this browser only.</div>' + (S.overlay === 'rules' ? rulesSheet() : S.overlay === 'player' ? playerSheet() : '') + '</div>';
   }
 
+  var lastScreen = '', lastSheet = '';
   function render() {
     var app = document.getElementById('app');
     document.body.classList.toggle('wide', isWide());
     app.classList.toggle('wide', isWide());
-    if (S.screen === 'home') app.innerHTML = homeScreen();
+    var sk = [S.screen, S.lesson, S.levelIndex, S.game && S.game.level.id].join('|'), hk = [S.screen, S.overlay, S.paused, S.form.edit].join('|');
+    if (sk !== lastScreen) app.setAttribute('data-anim-screen', ''); else app.removeAttribute('data-anim-screen');
+    if (hk !== lastSheet && (S.overlay || S.paused)) app.setAttribute('data-anim-sheet', ''); else app.removeAttribute('data-anim-sheet');
+    lastScreen = sk; lastSheet = hk;
+    if (S.screen === 'welcome') app.innerHTML = welcomeScreen();
+    else if (S.screen === 'home') app.innerHTML = homeScreen();
     else { app.innerHTML = gameScreen(); fitBoard(); }
   }
 
@@ -544,13 +718,39 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
       case 'mute': P.muted = !P.muted; save(); break;
       case 'reset': S.confirmReset = true; break;
       case 'resetNo': S.confirmReset = false; break;
-      case 'resetYes': P = fresh(); save(); S.confirmReset = false; S.overlay = null; startLesson(0); break;
+      case 'resetYes': P = fresh(); save(); setBoard(P.board); S.confirmReset = false; S.overlay = null; S.game = null; S.form = { name: '', age: '', edit: false }; S.screen = 'welcome'; break;
+      case 'player': S.overlay = 'player'; S.form = { name: '', age: '', edit: false }; break;
+      case 'closePlayer': S.overlay = null; S.confirmReset = false; S.form.edit = false; break;
+      case 'editProfile': S.form = { name: P.profile ? P.profile.name : '', age: P.profile ? String(P.profile.age) : '', edit: true }; break;
+      case 'saveProfile':
+        var nm = cleanName(S.form.name), ag = parseAge(S.form.age); if (!nm || !validAge(ag)) break;
+        var now = Date.now(); P.profile = { name: nm, age: ag, created: P.profile ? P.profile.created : now, updated: now }; save();
+        S.form = { name: '', age: '', edit: false }; S.overlay = null;
+        if (S.screen === 'welcome') { if (!P.tutorialDone) { startLesson(0); } else { S.screen = 'home'; } }
+        break;
       case 'share':
         var text = b.getAttribute('data-text');
         try { navigator.clipboard.writeText(text).then(function () { S.copied = 'ok'; render(); }, function () { S.copied = 'fail'; render(); }); } catch (err) { S.copied = 'fail'; }
         break;
     }
     render();
+  });
+
+  // Typing in the name and age boxes updates the form without redrawing the page (a redraw would drop the keyboard).
+  document.getElementById('app').addEventListener('input', function (e) {
+    var t = e.target;
+    if (t.id === 'f-name') S.form.name = t.value;
+    else if (t.id === 'f-age') { var d = t.value.replace(/\D/g, '').slice(0, 2); if (d !== t.value) t.value = d; S.form.age = d; }
+    else return;
+    var go = document.getElementById('f-go'), msg = document.getElementById('f-msg');
+    if (go) go.disabled = !formOk();
+    if (msg) msg.textContent = formMessage();
+  });
+  document.getElementById('app').addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || !e.target || (e.target.id !== 'f-name' && e.target.id !== 'f-age')) return;
+    e.preventDefault();
+    if (e.target.id === 'f-name') { var a = document.getElementById('f-age'); if (a) a.focus(); }
+    else if (formOk()) { var go = document.getElementById('f-go'); if (go) go.click(); }
   });
 
   // Keyboard (iPad keyboards and Mac): 1-9 pick, arrows choose a column, Return/Space drops, P pauses, Z undo, H hint.

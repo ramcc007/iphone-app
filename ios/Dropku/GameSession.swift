@@ -25,6 +25,13 @@ final class GameSession: ObservableObject {
         let tone: Tone
     }
 
+    /// The "+N" that floats up from the tile that just completed a row, column or box.
+    struct FloatingGain: Equatable {
+        let id = UUID()
+        let position: Game.Position
+        let amount: Int
+    }
+
     struct Crack: Equatable {
         let position: Game.Position
         let value: Int
@@ -38,6 +45,7 @@ final class GameSession: ObservableObject {
     @Published var crack: Crack?
     @Published var glow: Set<Game.Position> = []
     @Published var justPlaced: Game.Position?
+    @Published private(set) var floatingGain: FloatingGain?
     @Published var paused = false
     @Published var overlay: Overlay?
     @Published var lessonStep = 0
@@ -45,6 +53,13 @@ final class GameSession: ObservableObject {
     let mode: Mode
     private let app: AppModel
     private var timerTask: Task<Void, Never>?
+
+    // One attempt = from the first board (or Restart) until it ends. It is written to the session history once.
+    private var attemptStartedAt = Date().timeIntervalSince1970
+    private var attemptDrops = 0
+    private var attemptRecorded = false
+    /// Out of hearts is only final once the player does not buy the +1 heart, so it is written later.
+    private var pendingOutcome: SessionRecord.Outcome?
 
     init(mode: Mode, app: AppModel) {
         self.mode = mode
@@ -109,6 +124,7 @@ final class GameSession: ObservableObject {
     func stop() {
         timerTask?.cancel()
         timerTask = nil
+        finishAttempt()   // leaving the screen ends the attempt (home button, back to the map, new level)
     }
 
     func pause() {
@@ -148,7 +164,12 @@ final class GameSession: ObservableObject {
             show("Pick a number first", .info)
             return
         }
-        switch game.drop(value: value, column: column) {
+        let outcome = game.drop(value: value, column: column)
+        switch outcome {
+        case .placed, .wrong: attemptDrops += 1
+        default: break
+        }
+        switch outcome {
         case .columnFull:
             show("That column is full", .info)
 
@@ -180,6 +201,14 @@ final class GameSession: ObservableObject {
             hintText = nil
             if lesson != nil, !(lesson?.steps.isEmpty ?? true) { lessonStep += 1 }
             glow = Set(placement.completedUnits.flatMap { $0 })
+            if placement.sparksGained > 0, !placement.completedUnits.isEmpty {
+                let gain = FloatingGain(position: placement.position, amount: placement.sparksGained)
+                floatingGain = gain
+                Task { [weak self] in
+                    try? await Task.sleep(for: .milliseconds(1300))
+                    if self?.floatingGain?.id == gain.id { self?.floatingGain = nil }
+                }
+            }
             switch placement.combo {
             case .triple?:
                 show("TRIPLE!! +\(placement.sparksGained) Sparks", .pink)
@@ -243,6 +272,12 @@ final class GameSession: ObservableObject {
     }
 
     func restart() {
+        finishAttempt()   // restarting in the middle of a board counts as leaving that attempt
+        attemptStartedAt = Date().timeIntervalSince1970
+        attemptDrops = 0
+        attemptRecorded = false
+        pendingOutcome = nil
+        floatingGain = nil
         game = Game(level: game.level, timed: game.isTimed)
         selected = nil
         hintColumn = nil
@@ -263,6 +298,7 @@ final class GameSession: ObservableObject {
     func continueWithHeart() {
         guard canBuyHeart, game.continueWithHeart() else { return }
         app.update { $0.spend(Economy.extraHeart, device: app.deviceID) }
+        pendingOutcome = nil   // the attempt goes on, so only its final outcome is recorded
         overlay = nil
         show("+1 heart. Keep going!", .gold)
     }
@@ -270,9 +306,12 @@ final class GameSession: ObservableObject {
     /// Skip is shown after 2 failed attempts; it needs 400 earned Sparks.
     var skipOffered: Bool { lesson == nil && app.progress.canOfferSkip(level) }
     var canAffordSkip: Bool { app.progress.sparks >= Economy.skip }
+    /// Failed attempts still needed before Skip unlocks (0 once it is offered).
+    var skipTriesLeft: Int { max(0, Economy.skipAfterFailedAttempts - (app.progress.failedAttempts[level.id] ?? 0)) }
 
     func skip() {
         guard skipOffered, canAffordSkip else { return }
+        finishAttempt()
         var skipped = false
         app.update { skipped = $0.skip(level, device: app.deviceID) }
         if skipped { overlay = .skipped }
@@ -290,7 +329,10 @@ final class GameSession: ObservableObject {
         guard let result = game.result() else { return }
         var reward: PlayerProgress.WinReward?
         app.update { reward = $0.recordWin(level, result: result, device: app.deviceID) }
-        if let reward { overlay = .won(result, reward) }
+        if let reward {
+            recordAttempt(.won, stars: result.stars, sparks: reward.sparks + reward.chest)
+            overlay = .won(result, reward)
+        }
     }
 
     private func onLost() {
@@ -299,13 +341,36 @@ final class GameSession: ObservableObject {
             return
         }
         app.update { $0.recordFailure(level) }
+        pendingOutcome = .outOfHearts
         overlay = .lost
     }
 
     private func onTimeUp() {
         selected = nil
         app.update { $0.recordFailure(level) }
+        recordAttempt(.timeUp, stars: 0, sparks: 0)
         overlay = .timeUp
+    }
+
+    // MARK: - Session history (real levels only, at most one record per attempt)
+
+    private func recordAttempt(_ outcome: SessionRecord.Outcome, stars: Int, sparks: Int) {
+        guard lesson == nil, !attemptRecorded else { return }
+        attemptRecorded = true
+        pendingOutcome = nil
+        app.recordSession(levelID: level.id, startedAt: attemptStartedAt,
+                          seconds: min(level.timeLimit, max(0, level.timeLimit - game.timeLeft)),
+                          outcome: outcome, stars: stars, sparks: sparks)
+    }
+
+    /// Called when the attempt is abandoned (leaving the screen, Restart, Skip): writes whatever has not been written yet.
+    private func finishAttempt() {
+        guard lesson == nil, !attemptRecorded else { return }
+        if let pending = pendingOutcome {
+            recordAttempt(pending, stars: 0, sparks: 0)
+        } else if overlay == nil, game.status == .playing, attemptDrops > 0 {
+            recordAttempt(.left, stars: 0, sparks: 0)
+        }
     }
 
     private func show(_ text: String, _ tone: Flash.Tone) {

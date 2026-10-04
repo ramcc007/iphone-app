@@ -27,7 +27,7 @@ t('Time table: same for each block of 5 levels, then +5s, on every board', () =>
   const bad = [];
   for (const id of D.BOARD_ORDER) { const b = D.BOARDS[id]; for (let lv = 2; lv <= b.levels; lv++) { const d = D.timeLimit(id, lv) - D.timeLimit(id, lv - 1); const want = (lv - 1) % 5 === 0 ? b.step : 0; if (d !== want || b.step !== 5) bad.push(id + lv); } }
   const firsts = D.BOARD_ORDER.map((id) => D.timeLimit(id, 1)).join(',');
-  return bad.length ? bad.join(' ') : firsts === '30,75,240' ? true : firsts;
+  return bad.length ? bad.join(' ') : firsts === '20,55,180' ? true : firsts;
 });
 t('Each board gets harder: more gaps and less time per gap from its first chapter to its last', () => {
   const bad = [];
@@ -84,8 +84,8 @@ t('Stars: 3 = no mistakes and >= 25% time left; 2 = no mistakes but slow; 1 = mi
   const c = D.newGame(L); const k = firstOpen(c); D.drop(c, k, wrongFor(c, k)); solveByHints(c);
   return D.result(a).stars === 3 && D.result(b).stars === 2 && D.result(c).stars === 1 ? true : [D.result(a).stars, D.result(b).stars, D.result(c).stars].join();
 });
-t('Economy: a strong player (no mistakes, 3/5/7s per gap on 4x4/6x6/9x9) earns 25-50 Sparks on 4x4, 40-70 on 6x6, 50-90 on 9x9, so a 400 skip = 5-16 levels', () => {
-  const bad = [], pace = { 4: 3, 6: 5, 9: 7 }, range = { 4: [25, 50], 6: [40, 70], 9: [50, 90] };
+t('Economy: a strong player (no mistakes, 2/3/4s per gap on 4x4/6x6/9x9) earns 30-50 Sparks on 4x4, 40-70 on 6x6, 50-85 on 9x9, so a 400 skip = 5-13 levels', () => {
+  const bad = [], pace = { 4: 2, 6: 3, 9: 4 }, range = { 4: [30, 50], 6: [40, 70], 9: [50, 85] };
   for (const L of LEVELS) { const g = D.newGame(L); D.tick(g, L.gaps * pace[L.size]); solveByHints(g); const e = D.result(g).earned; const [lo, hi] = range[L.size]; if (g.status !== 'won' || e < lo || e > hi) bad.push(L.id + '=' + e); }
   return bad.length ? bad.join(' ') : true;
 });

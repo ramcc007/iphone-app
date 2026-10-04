@@ -125,9 +125,9 @@ def validate(name, sol, giv, time_limit=None, min_secs_per_gap=6):
 # Time limit per level (seconds): the same for each block of 5 levels, then +step.
 # Must match prototype/web/engine.js (BOARDS) and ios/DropkuCore Level.swift (Board, TimeTable).
 BOARDS = {
-    'quick':   {'name': 'Quick',   'size': 4, 'boxRows': 2, 'boxCols': 2, 'levels': 30,  'start': 30,  'step': 5,  'minSecsPerGap': 4},
-    'classic': {'name': 'Classic', 'size': 6, 'boxRows': 2, 'boxCols': 3, 'levels': 100, 'start': 75,  'step': 5,  'minSecsPerGap': 5},
-    'master':  {'name': 'Master',  'size': 9, 'boxRows': 3, 'boxCols': 3, 'levels': 100, 'start': 240, 'step': 5,  'minSecsPerGap': 6},
+    'quick':   {'name': 'Quick',   'size': 4, 'boxRows': 2, 'boxCols': 2, 'levels': 30,  'start': 20,  'step': 5,  'minSecsPerGap': 3},
+    'classic': {'name': 'Classic', 'size': 6, 'boxRows': 2, 'boxCols': 3, 'levels': 100, 'start': 55,  'step': 5,  'minSecsPerGap': 4},
+    'master':  {'name': 'Master',  'size': 9, 'boxRows': 3, 'boxCols': 3, 'levels': 100, 'start': 180, 'step': 5,  'minSecsPerGap': 6},
 }
 BOARD_ORDER = ['quick', 'classic', 'master']
 

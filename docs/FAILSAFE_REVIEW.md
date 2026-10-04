@@ -29,8 +29,8 @@ Severity:
 | Gameplay (Classic Level 12, iPad landscape) | — | **26 / 26** (same engine, same tests) |
 | Tutorial (3 lessons) | 7 / 7 | 7 / 7 |
 | Game engine on all 230 levels of the 3 boards (`engine.test.js`) | — | **16 / 16**: every level solvable by following logical hints only, time tables, harder from first chapter to last, timer, hearts, undo, continue, stars, economy |
-| Swift rules on Linux (`tools/swift/linux-swift.sh`, Swift 6.0) | — | **25 / 25**: the same rules and all 230 levels, plus saving and iCloud merge |
-| Real browser, iPhone SE to iPad 13" (`web.e2e.js`) | 43 / 49: on small screens the number tray wrapped and buttons went off-screen | **85 / 85**, now including the board picker and 9×9 layouts on every device |
+| Swift rules on Linux (`tools/swift/linux-swift.sh`, Swift 6.0) | — | **37 / 37**: the same rules and all 230 levels, plus saving, iCloud merge, player profile and session history |
+| Real browser, iPhone SE to iPad 13" (`web.e2e.js`) | 43 / 49: on small screens the number tray wrapped and buttons went off-screen | **99 / 99**, including the intro (name and age), session history, time-up options, the board picker and 9×9 layouts on every device |
 | Level validator (all 230 levels + 6 design boards) | 6 / 6 | **236 / 236** |
 | Validator self-check (4 broken levels) | all 4 correctly rejected | all 4 correctly rejected |
 
@@ -67,6 +67,11 @@ Updated 3 October 2026 for the three boards (Quick 4×4, Classic 6×6, Master 9�
 | B4 | Tilt and Locks rules are not fully defined yet. | Medium | Write exact rules and validator checks before generating Chapters 3 and 6. | 📐 |
 | B5 | A 9×9 board on iPhone SE or mini: 9 columns at about 31–38pt is under Apple's 44pt touch target, and 9 tray tiles don't fit. | High | Full-height column hit areas. The board is sized from its measured space. The tray uses 2 rows on tall phones and 1 row of 9 on short ones. The browser test checks iPhone SE: 9×9 board fits, columns ≥ 30px, number tiles ≥ 32px. Still to do: try it on a real iPhone SE. | ✅ web · 📐 device |
 | B6 | Gap ceiling: with bottom-stacked givens, logic alone stops being able to finish a board above about 9 gaps (4×4), 21 (6×6) and 41 (9×9). Random gap placement almost never gave a valid 9×9 board. (Found while generating levels.) | High | The dig-holes generator (`tools/levelgen/dig.py`) removes one cell at a time and keeps only boards logic can finish, so every board is valid by construction. Difficulty also comes from a measured score (fewer moves per step, hidden singles) and the timer. | ✅ |
+| B7 | Early levels felt untimed: 6 to 20 seconds per gap. | High | Per-board tables start much lower (Quick 20s, Classic 55s, Master 180s). The validator enforces a minimum of seconds per gap. Tune from "time's up" rates in TestFlight. | ✅ table · 📐 tuning |
+| B8 | The name and age field: invalid, empty, very long, emoji, or a paste with line breaks. | Medium | One cleaning rule in Swift and JS: trim, collapse spaces, drop control characters, 20 characters, name required, age a whole number 5 to 99. The button stays disabled until both are valid. Tested in `web.e2e.js` and `DropkuCoreTests`. | ✅ |
+| B9 | An old or newer save file fails to load and the player loses everything. | High | Every field of the saved progress decodes with a default, a broken session record is dropped instead of failing the file, and `{}` loads. Tested. | ✅ |
+| B10 | "Delete my data" leaves the profile alive in iCloud, so another device brings it back. | Medium | Known: a reset on one device writes an empty save, but another device that still holds the profile merges it back (the same as stars). A reset marker is needed before launch. | 📐 |
+| B11 | Session history grows without limit. | Low | Only the newest 300 sessions are kept, on the device and in iCloud (the iCloud key-value store is limited to 1 MB per app). | ✅ |
 
 ## C. Economy (Sparks)
 

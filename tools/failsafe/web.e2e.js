@@ -28,6 +28,8 @@ async function open(browser, viewport, progress) {
 }
 const allOnScreen = (page) => page.evaluate(() => { const bad = [...document.querySelectorAll('button')].filter((b) => { const r = b.getBoundingClientRect(); return r.width && (r.left < -0.5 || r.right > window.innerWidth + 0.5); }).map((b) => b.textContent.trim()); return bad.length ? bad.join(', ') : true; });
 const trayOneRow = (page) => page.evaluate(() => { const t = [...document.querySelectorAll('.tray .num')].map((b) => Math.round(b.getBoundingClientRect().top)); return new Set(t).size === 1; });
+// Entrance animations (slide-up) run in real time; wait for the finite ones before measuring positions.
+const settle = (page) => page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect && a.effect.getComputedTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {}))));
 const noHScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth && document.body.scrollWidth <= window.innerWidth);
 const boardFits = (page) => page.evaluate(() => { const b = document.querySelector('.board'); if (!b) return 'no board'; const r = b.getBoundingClientRect(); return r.left >= 0 && r.right <= window.innerWidth + 0.5 && r.top >= 0 && r.bottom <= window.innerHeight + 0.5 ? true : JSON.stringify(r); });
 // Picking the number that is already selected would un-select it, so only tap the tray when needed.
@@ -47,13 +49,30 @@ async function solveLevel(page, board, idx) {
   const browser = await chromium.launch();
   // 1. iPhone: tutorial -> level 1 -> win
   { const { ctx, page, errors } = await open(browser, { width: 390, height: 844 });
-    ok('iPhone: first launch opens the tutorial', await page.isVisible('text=Lesson 1 of 3'));
+    // First run: the intro asks who's playing before anything else.
+    ok('iPhone: first launch opens the intro screen', await page.isVisible('text=Welcome to Dropku'));
+    await page.screenshot({ path: path.join(SHOTS, 'iphone-welcome.png') });
+    ok('Intro: "Let\u2019s play" is disabled until name and age are filled', await page.isDisabled('#f-go'));
+    await page.fill('#f-name', '   Alex   Quinn  ');
+    await page.fill('#f-age', '4');
+    ok('Intro: age 4 is refused with a message', (await page.isDisabled('#f-go')) && /5 to 99/.test(await page.textContent('#f-msg')));
+    await page.fill('#f-age', 'a7x');
+    ok('Intro: age box only keeps digits', (await page.inputValue('#f-age')) === '7');
+    await page.fill('#f-age', '24');
+    ok('Intro: valid name and age enable the button', !(await page.isDisabled('#f-go')));
+    await page.focus('#f-name'); await page.keyboard.type('!');
+    ok('Intro: typing keeps focus (the page does not redraw)', await page.evaluate(() => document.activeElement && document.activeElement.id === 'f-name'));
+    await page.fill('#f-name', '   Alex   Quinn  ');
+    await page.click('#f-go');
+    const prof = await page.evaluate(() => JSON.parse(localStorage.getItem('dropku.web.v2')).profile);
+    ok('Intro: name is cleaned and saved on the device', prof && prof.name === 'Alex Quinn' && prof.age === 24, JSON.stringify(prof));
+    ok('Intro leads into the tutorial, whose steps are called levels', await page.isVisible('text=Tutorial · Level 1 of 3'));
     await page.screenshot({ path: path.join(SHOTS, 'iphone-tutorial.png') });
     await drop(page, 2, 1); await drop(page, 4, 3);
-    ok('Tutorial lesson 1 completes', await page.isVisible('text=Lesson 1 done!'));
+    ok('Tutorial level 1 completes', await page.isVisible('text=Level 1 done!'));
     await page.click('[data-act="nextLesson"]');
     await drop(page, 4, 3);
-    ok('Lesson 2 explains the lower-gap trap', await page.isVisible('text=LOWER gap'));
+    ok('Tutorial level 2 explains the lower-gap trap', await page.isVisible('text=LOWER gap'));
     await page.clock.runFor(1000);
     await drop(page, 2, 3); await drop(page, 4, 3); await drop(page, 3, 2);
     await page.click('[data-act="nextLesson"]');
@@ -61,6 +80,7 @@ async function solveLevel(page, board, idx) {
     for (const [v, c] of [[3, 0], [1, 0], [3, 2], [2, 3], [4, 3]]) await drop(page, v, c);
     ok('Tutorial finishes with the welcome gift', await page.isVisible('text=Welcome gift'));
     await page.click('[data-act="boards"]');
+    ok('Home greets the player by name', await page.isVisible('text=Hi, Alex Quinn'));
     ok('Home shows the three boards', (await page.locator('[data-act="board"]').count()) === 3);
     ok('Classic is the starting board', await page.isVisible('[data-act="board"][data-b="classic"][aria-pressed="true"]'));
     ok('Play button names the board and level', await page.isVisible('text=Play Classic Level 1'));
@@ -68,10 +88,13 @@ async function solveLevel(page, board, idx) {
     await page.click('[data-act="board"][data-b="quick"]');
     ok('Switching board updates the Play button', await page.isVisible('text=Play Quick Level 1'));
     await page.click('.home [data-act="play"]');
-    ok('Quick Level 1 shows the 30-second countdown', await page.isVisible('#timer >> text=30s'));
+    ok('Quick Level 1 shows the 20-second countdown', await page.isVisible('#timer >> text=20s'));
+    ok('Game header shows the player name', await page.isVisible('text=Alex Quinn · 20-second limit'));
     ok('Header names the board', await page.isVisible('text=Quick · Level 1'));
     await page.clock.runFor(5000);
-    ok('Countdown ticks down', await page.isVisible('#timer >> text=25s'));
+    ok('Countdown ticks down', await page.isVisible('#timer >> text=15s'));
+    const w0 = await page.evaluate(() => parseFloat(document.getElementById('tfill').style.width));
+    ok('Timer bar drains with the clock (75% left)', Math.abs(w0 - 75) < 1, w0);
     ok('iPhone: no sideways scrolling', await noHScroll(page));
     ok('iPhone: board fits on screen (4x4)', (await boardFits(page)) === true, await boardFits(page));
     await solveLevel(page, 'quick', 0);
@@ -79,23 +102,29 @@ async function solveLevel(page, board, idx) {
     await page.screenshot({ path: path.join(SHOTS, 'iphone-win.png') });
     const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('dropku.web.v2')));
     ok('Win is saved (stars + Sparks + board)', saved.best['quick-001'] >= 1 && saved.wallet > 50 && saved.board === 'quick', JSON.stringify(saved));
+    ok('Win is recorded as a session (level, outcome, time used)', saved.sessions.length === 1 && saved.sessions[0].level === 'quick-001' && saved.sessions[0].out === 'won' && saved.sessions[0].secs >= 5 && saved.sessions[0].stars >= 1, JSON.stringify(saved.sessions));
+    ok('Confetti plays on a win', (await page.locator('#fx .conf').count()) > 20);
     await page.click('.veil [data-act="home"]');
     ok('Back home, Quick shows 1 of 30 done', await page.isVisible('[data-b="quick"] >> text=1/30'));
     ok('No script errors (iPhone run)', errors.length === 0, errors.join(' | '));
     await ctx.close(); }
 
   // 2. iPhone: time's up on Quick level 2, then restart; skip offered after 2 fails
-  { const progress = { wallet: 500, best: { 'quick-001': 3 }, skipped: {}, fails: {}, chests: {}, tutorialDone: true, muted: true, board: 'quick' };
+  const profile = { name: 'Sam', age: 19, created: 1, updated: 1 };
+  { const progress = { wallet: 500, best: { 'quick-001': 3 }, skipped: {}, fails: {}, chests: {}, tutorialDone: true, muted: true, board: 'quick', profile, sessions: [] };
     const { ctx, page, errors } = await open(browser, { width: 390, height: 844 }, progress);
     await page.click('[data-act="play"][data-i="1"]');
-    await page.clock.runFor(31000);
+    await page.clock.runFor(21000);
     ok("Time's up pop-up appears at 0s", await page.isVisible("text=Time’s up!"));
     await page.screenshot({ path: path.join(SHOTS, 'iphone-timeup.png') });
-    ok('No skip after only 1 fail', !(await page.isVisible('.veil [data-act="skip"]')));
+    ok('Time\u2019s up still shows Skip, locked until the 2nd try', (await page.isVisible('.veil [data-act="skip"]')) && (await page.isDisabled('.veil [data-act="skip"]')) && (await page.isVisible('text=Unlocks after 2 tries (1 more)')));
+    ok('Time\u2019s up offers a tip and a way to switch board', (await page.isVisible('.veil .tip')) && (await page.isVisible('.veil >> text=Switch board or level')));
+    const s1 = await page.evaluate(() => JSON.parse(localStorage.getItem('dropku.web.v2')).sessions);
+    ok('Time\u2019s up is recorded as a session', s1.length === 1 && s1[0].out === 'timeUp' && s1[0].secs === 20, JSON.stringify(s1));
     await page.click('.veil [data-act="restart"]');
-    ok('Start again gives the full 30s', await page.isVisible('#timer >> text=30s'));
-    await page.clock.runFor(31000);
-    ok('Skip offered after 2 fails', await page.isVisible('.veil [data-act="skip"]'));
+    ok('Start again gives the full 20s', await page.isVisible('#timer >> text=20s'));
+    await page.clock.runFor(21000);
+    ok('Skip is unlocked after 2 fails', (await page.isVisible('.veil [data-act="skip"]')) && !(await page.isDisabled('.veil [data-act="skip"]')));
     await page.click('.veil [data-act="skip"]');
     ok('Skip spends 400 Sparks and unlocks the next level', await page.isVisible('text=Level skipped'));
     const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('dropku.web.v2')));
@@ -111,12 +140,12 @@ async function solveLevel(page, board, idx) {
     await ctx.close(); }
 
   // 3. Layout checks on 6x6 (Classic level 12) and 9x9 (Master level 1) across devices
-  const unlockAll = { wallet: 320, best: Object.fromEntries(Array.from({ length: 11 }, (_, i) => ['classic-' + String(i + 1).padStart(3, '0'), 3])), skipped: {}, fails: {}, chests: {}, tutorialDone: true, muted: true, board: 'classic' };
+  const unlockAll = { wallet: 320, best: Object.fromEntries(Array.from({ length: 11 }, (_, i) => ['classic-' + String(i + 1).padStart(3, '0'), 3])), skipped: {}, fails: {}, chests: {}, tutorialDone: true, muted: true, board: 'classic', profile: { name: 'Sam', age: 19, created: 1, updated: 1 }, sessions: [] };
   for (const [name, vp] of [['iPhone SE', { width: 375, height: 667 }], ['iPhone 16 Pro Max', { width: 440, height: 956 }], ['iPad mini portrait', { width: 744, height: 1133 }], ['iPad 13 landscape', { width: 1376, height: 1032 }], ['iPad split view narrow', { width: 375, height: 1032 }]]) {
     const { ctx, page, errors } = await open(browser, vp, unlockAll);
     await page.screenshot({ path: path.join(SHOTS, name.replace(/ /g, '-') + '-home.png') });
     const homeOffs = await allOnScreen(page); ok(`${name}: home and board picker fully on screen`, homeOffs === true, homeOffs);
-    await page.click('[data-act="play"][data-i="11"]');
+    await page.click('[data-act="play"][data-i="11"]'); await settle(page);
     const fits = await boardFits(page);
     const tile = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--tile'));
     const trayVisible = await page.evaluate(() => { const t = document.querySelector('.tray'); const r = t.getBoundingClientRect(); return r.bottom <= window.innerHeight + 0.5 && r.right <= window.innerWidth + 0.5; });
@@ -130,7 +159,7 @@ async function solveLevel(page, board, idx) {
     // 9x9: Master level 1
     await page.click('[data-act="pause"]'); await page.click('.veil [data-act="home"]');
     await page.click('[data-act="board"][data-b="master"]');
-    await page.click('.home [data-act="play"]');
+    await page.click('.home [data-act="play"]'); await settle(page);
     const fits9 = await boardFits(page);
     const col9 = await page.evaluate(() => Math.round(document.querySelector('.col').getBoundingClientRect().width));
     const tray9 = await page.evaluate(() => { const t = document.querySelector('.tray'); const r = t.getBoundingClientRect(); return r.bottom <= window.innerHeight + 0.5 && r.right <= window.innerWidth + 0.5; });
@@ -140,7 +169,7 @@ async function solveLevel(page, board, idx) {
     const offs9 = await allOnScreen(page); ok(`${name}: 9x9 every button fully on screen`, offs9 === true, offs9);
     const num9 = await page.evaluate(() => Math.round(Math.min(...[...document.querySelectorAll('.tray .num')].map((b) => b.getBoundingClientRect().width))));
     ok(`${name}: 9x9 number tiles at least 32px wide (${num9}px)`, num9 >= 32, num9);
-    ok(`${name}: 9x9 shows the 240-second countdown`, await page.isVisible('#timer >> text=240s'));
+    ok(`${name}: 9x9 shows the 180-second countdown`, /(180|179|178)s/.test(await page.textContent('#timer')));
     await page.screenshot({ path: path.join(SHOTS, name.replace(/ /g, '-') + '-master1.png') });
     ok(`${name}: no script errors`, errors.length === 0, errors.join(' | '));
     await ctx.close();

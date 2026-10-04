@@ -21,6 +21,8 @@ struct RootView: View {
     var body: some View {
         Group {
             switch app.route {
+            case .welcome:
+                WelcomeView()
             case .tutorial(let lesson):
                 GameView(mode: .lesson(index: lesson), app: app)
             case .home:
