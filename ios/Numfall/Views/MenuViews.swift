@@ -1,4 +1,5 @@
 import SwiftUI
+import GameKit
 import NumfallCore
 
 /// Public web pages the app links to. These must exist before App Store submission
@@ -71,6 +72,8 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var app: AppModel
     @State private var confirmReset = false
+    @State private var reminderOn = Reminders.enabled
+    @ObservedObject private var gameCenter = GameCenterService.shared
 
     var body: some View {
         NavigationStack {
@@ -86,10 +89,36 @@ struct SettingsView: View {
                     Text("Saved on this device and in your iCloud")
                 }
                 Section("Game") {
+                    Toggle("Sound", isOn: Binding(
+                        get: { app.progress.soundOn },
+                        set: { value in app.update { $0.soundOn = value }; Sound.enabled = value }
+                    ))
                     Toggle("Haptics", isOn: Binding(
                         get: { app.progress.hapticsOn },
                         set: { value in app.update { $0.hapticsOn = value }; Haptics.enabled = value }
                     ))
+                    Toggle("Daily Drop reminder (7 pm)", isOn: Binding(
+                        get: { reminderOn },
+                        set: { value in
+                            Task { @MainActor in
+                                reminderOn = await Reminders.setEnabled(value)
+                                Reminders.reschedule(doneToday: app.progress.dailyDone(on: DayKey(date: Date())))
+                            }
+                        }
+                    ))
+                }
+                Section {
+                    NavigationLink("Achievements") { AchievementsView() }
+                    Button("Game Center achievements") { gameCenter.show(.achievements) }
+                        .disabled(!gameCenter.signedIn)
+                    Button("Game Center leaderboards") { gameCenter.show(.leaderboards) }
+                        .disabled(!gameCenter.signedIn)
+                } header: {
+                    Text("Achievements")
+                } footer: {
+                    Text(gameCenter.signedIn
+                         ? "Your stars and Daily Drop streak can appear on Apple\u{2019}s Game Center leaderboards."
+                         : "Sign in to Game Center in iOS Settings to see leaderboards. The game works the same without it.")
                 }
                 Section("Progress") {
                     LabeledContent("Sparks", value: "\(app.progress.sparks)")

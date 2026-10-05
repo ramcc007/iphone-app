@@ -5,5 +5,8 @@
 	<!-- iCloud key-value storage: syncs progress and the Sparks ledger across the player's own devices. -->
 	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
 	<string>$(TeamIdentifierPrefix)$(CFBundleIdentifier)</string>
+	<!-- Game Center: achievements and leaderboards (optional for the player). -->
+	<key>com.apple.developer.game-center</key>
+	<true/>
 </dict>
 </plist>

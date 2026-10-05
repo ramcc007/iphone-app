@@ -50,6 +50,8 @@ struct HomeView: View {
                     }
                     .padding(.vertical, 8)
 
+                    DailyCard()
+
                     BoardPicker(wide: wide)
 
                     if let first = levels.first, let last = levels.last {

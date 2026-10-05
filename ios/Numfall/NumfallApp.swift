@@ -18,6 +18,12 @@ struct NumfallApp: App {
 
 struct RootView: View {
     @EnvironmentObject private var app: AppModel
+    @Environment(\.scenePhase) private var scenePhase
+
+    /// Game Center sign-in waits until the player is past the Welcome screen.
+    private func startServicesIfReady() {
+        if app.route != .welcome { GameCenterService.shared.start() }
+    }
 
     var body: some View {
         Group {
@@ -30,10 +36,21 @@ struct RootView: View {
                 HomeView()
             case .level(let board, let index):
                 GameView(mode: .level(board: board, index: index), app: app)
+            case .daily(let day, let levelIndex):
+                GameView(mode: .daily(day: day, levelIndex: levelIndex), app: app)
             }
         }
         // A new route gets a fresh screen (and a fresh game session).
         .id(app.route)
-        .onAppear { Haptics.enabled = app.progress.hapticsOn }
+        .onAppear {
+            Haptics.enabled = app.progress.hapticsOn
+            Sound.enabled = app.progress.soundOn
+            startServicesIfReady()
+            Reminders.reschedule(doneToday: app.progress.dailyDone(on: DayKey(date: Date())))
+        }
+        .onChange(of: app.route) { _, _ in startServicesIfReady() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Reminders.reschedule(doneToday: app.progress.dailyDone(on: DayKey(date: Date()))) }
+        }
     }
 }

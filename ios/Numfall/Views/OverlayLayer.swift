@@ -30,7 +30,7 @@ struct OverlayLayer: View {
 
     private var borderColor: Color {
         switch session.overlay {
-        case .won?, .lessonWon?: return Theme.good.opacity(0.5)
+        case .won?, .lessonWon?, .dailyWon?: return Theme.good.opacity(0.5)
         case .lost?, .timeUp?, .lessonLost?: return Theme.bad.opacity(0.5)
         default: return Color.white.opacity(0.08)
         }
@@ -59,20 +59,54 @@ struct OverlayLayer: View {
             Text("Wallet: \(app.progress.sparks) Sparks").scaledFont(14, .medium).foregroundStyle(Theme.soft)
             if let board = session.board, let next = session.nextIndex {
                 PrimaryButton("Next: Level \(level.number + 1)") { app.play(board, next) }
-                ShareLink(item: shareText(result)) {
-                    Text("Share result").scaledFont(16, .semibold).frame(maxWidth: .infinity).frame(minHeight: 50)
-                        .background(Capsule().fill(Color.white.opacity(0.08)))
-                }
+                ShareResultButton(
+                    data: ShareCardData(headline: "\(session.board?.name ?? "") \u{00B7} Level \(level.number)", stars: result.stars,
+                                        seconds: min(level.timeLimit, max(0, level.timeLimit - session.game.timeLeft))),
+                    text: ShareText.level(boardName: session.board?.name ?? "", number: level.number, stars: result.stars,
+                                          seconds: min(level.timeLimit, max(0, level.timeLimit - session.game.timeLeft))))
                 LinkButton("Back to the map") { app.goHome() }
             } else {
                 Text("That\u{2019}s every \(session.board?.name ?? "") level! Try another board for a new challenge.").font(Theme.rounded(.body, .medium)).foregroundStyle(Theme.soft)
                 PrimaryButton("Choose a board") { app.goHome() }
             }
 
+        case let .dailyWon(result, reward)?:
+            SheetTitle(result.stars == 3 ? "Perfect Daily Drop!" : "Daily Drop cleared!", color: Theme.good)
+            StarRow(count: result.stars, celebrate: true).frame(maxWidth: .infinity)
+            if reward.firstClearToday {
+                VStack(spacing: 4) {
+                    ForEach(result.breakdown, id: \.label) { line in RewardRow(label: line.label, sparks: line.sparks) }
+                    RewardRow(label: "Daily bonus", sparks: DailyDrop.rewardBase)
+                    if DailyDrop.streakBonus(reward.streak) > 0 {
+                        RewardRow(label: "Streak bonus", sparks: DailyDrop.streakBonus(reward.streak))
+                    }
+                }
+            } else {
+                BodyText("Played again. Only your best result for today is kept.")
+            }
+            if reward.streak > 0 {
+                Label("\(reward.streak)-day streak", systemImage: "flame.fill")
+                    .scaledFont(16, .semibold).foregroundStyle(Color(hex: 0xFF8A3D))
+                    .padding(12).frame(maxWidth: .infinity, alignment: .leading)
+                    .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color(hex: 0xFF8A3D).opacity(0.12)))
+            }
+            Text("Wallet: \(app.progress.sparks) Sparks").scaledFont(14, .medium).foregroundStyle(Theme.soft)
+            if let day = session.dailyDay {
+                let saved = app.progress.dailyResult(on: day)
+                ShareResultButton(
+                    data: ShareCardData(headline: "Daily Drop \u{00B7} \(day.string)", stars: saved?.stars ?? result.stars,
+                                        seconds: saved?.seconds ?? 0, streak: reward.streak),
+                    text: ShareText.daily(day: day, stars: saved?.stars ?? result.stars, seconds: saved?.seconds ?? 0, streak: reward.streak))
+            }
+            if !Reminders.offered && !Reminders.enabled {
+                ReminderOffer()
+            }
+            PrimaryButton("Back home") { app.goHome() }
+
         case .timeUp?:
             SheetTitle("Time\u{2019}s up!", color: Theme.bad)
-            BodyText("You filled \(session.game.history.count) of \(level.gaps) gaps. Level \(level.number) starts again with a fresh board and the full \(level.timeLimit) seconds.")
-            PrimaryButton("Start Level \(level.number) again") { session.restart() }
+            BodyText("You filled \(session.game.history.count) of \(level.gaps) gaps. \(restartName(level)) starts again with a fresh board and the full \(level.timeLimit) seconds.")
+            PrimaryButton(session.isDaily ? "Start again" : "Start Level \(level.number) again") { session.restart() }
             skipRow
             SecondaryButton("Try another board") { app.goHome() }
             LinkButton("Back to the map") { app.goHome() }
@@ -82,7 +116,7 @@ struct OverlayLayer: View {
 
         case .lost?:
             SheetTitle("Out of hearts", color: Theme.bad)
-            BodyText("Level \(level.number) starts again with a fresh board and the full \(level.timeLimit) seconds.")
+            BodyText("\(restartName(level)) starts again with a fresh board and the full \(level.timeLimit) seconds.")
             PrimaryButton("Start again") { session.restart() }
             if !session.game.heartContinueUsed {
                 SecondaryButton("+1 heart, keep this board \u{00B7} \(Economy.extraHeart) \u{2726}") { session.continueWithHeart() }
@@ -147,7 +181,7 @@ struct OverlayLayer: View {
             .buttonStyle(.plain)
             .disabled(!session.canAffordSkip)
             .opacity(session.canAffordSkip ? 1 : 0.5)
-        } else if session.lesson == nil {
+        } else if session.lesson == nil && !session.isDaily {
             let left = session.skipTriesLeft
             VStack(spacing: 4) {
                 Button {} label: {
@@ -170,9 +204,41 @@ struct OverlayLayer: View {
         }
     }
 
-    private func shareText(_ result: LevelResult) -> String {
-        let stars = String(repeating: "\u{2605}", count: result.stars) + String(repeating: "\u{2606}", count: 3 - result.stars)
-        return "Numfall \(session.board?.name ?? "") \u{00B7} Level \(session.level.number) \(stars) \u{00B7} \(session.game.timeLeft)s to spare"
+    private func restartName(_ level: Level) -> String { session.isDaily ? "The Daily Drop" : "Level \(level.number)" }
+}
+
+/// One-time offer after the first Daily Drop: a quiet 7 pm reminder, off unless the player says yes.
+private struct ReminderOffer: View {
+    @State private var answered = false
+
+    var body: some View {
+        if !answered {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Remind me about the Daily Drop?").scaledFont(16, .semibold)
+                Text("One quiet message at 7 pm on days you have not played. You can turn it off any time in Settings.")
+                    .scaledFont(13, .medium).foregroundStyle(Theme.soft)
+                HStack(spacing: 10) {
+                    Button("Yes, remind me") {
+                        Reminders.markOffered()
+                        Task {
+                            _ = await Reminders.setEnabled(true)
+                            Reminders.reschedule(doneToday: true)
+                            answered = true
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Button("No thanks") {
+                        Reminders.markOffered()
+                        answered = true
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .scaledFont(15, .semibold)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.white.opacity(0.06)))
+        }
     }
 }
 
@@ -238,6 +304,7 @@ struct StarRow: View {
                 try? await Task.sleep(for: .milliseconds(index == 0 ? 250 : 320))
                 if Task.isCancelled { return }
                 shown = index + 1
+                Sound.play(.star(index))
             }
         }
         .accessibilityElement(children: .ignore)

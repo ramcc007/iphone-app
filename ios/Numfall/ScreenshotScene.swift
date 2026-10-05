@@ -27,6 +27,10 @@ enum ScreenshotScene {
             _ = p.setProfile(name: "Alex", now: 0)
             if scene != "tutorial" { p.finishTutorial(device: "screenshots") }
             p.earn(420, device: "screenshots")
+            if parts.first == "daily" || parts.first == "home" {
+                let today = DayKey(date: Date())
+                for back in 1...3 { p.dailyResults[today.adding(days: -back).string] = DailyResult(stars: 3 - back % 2, seconds: 38 + back * 4) }
+            }
             for kind in BoardKind.allCases {
                 let cleared = (kind == .classic) ? 23 : 8
                 for (i, level) in app.levels(kind).enumerated() where i < cleared {
@@ -38,6 +42,7 @@ enum ScreenshotScene {
         switch parts.first {
         case "welcome": app.route = .welcome
         case "tutorial": app.route = .tutorial(lesson: 0)
+        case "daily": app.playDaily()
         case "home":
             if let board { app.selectedBoard = board }
             app.route = .home

@@ -168,11 +168,13 @@ private struct TopBar: View {
 
     private var title: String {
         if case .lesson(let index) = session.mode { return "Tutorial \u{00B7} Level \(index + 1) of \(Lesson.all.count)" }
+        if session.isDaily { return "Daily Drop" }
         return "\(session.board?.name ?? "") \u{00B7} Level \(session.level.number)"
     }
 
     private var subtitle: String {
         if session.lesson != nil { return "No timer while you learn" }
+        if let day = session.dailyDay { return "\(day.string) \u{00B7} \(session.level.timeLimit)-second limit" }
         return "Chapter \(session.level.chapter) \u{00B7} \(session.level.timeLimit)-second limit"
     }
 }

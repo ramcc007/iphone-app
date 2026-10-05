@@ -8,6 +8,8 @@ enum Route: Hashable {
     case tutorial(lesson: Int)
     case home
     case level(board: BoardKind, index: Int)
+    /// Today's Daily Drop: a Classic level picked from the date (see DailyDrop in NumfallCore).
+    case daily(day: DayKey, levelIndex: Int)
 }
 
 /// Owns the boards and levels, the player's saved progress and navigation.
@@ -50,6 +52,7 @@ final class AppModel: ObservableObject {
         progress = loaded
         selectedBoard = defaults.string(forKey: "numfall.board").flatMap(BoardKind.init(rawValue:)) ?? .classic
         route = Self.startRoute(for: loaded)
+        Sound.enabled = loaded.soundOn
 
         NotificationCenter.default.addObserver(forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
                                                object: store, queue: .main) { [weak self] _ in
@@ -77,6 +80,7 @@ final class AppModel: ObservableObject {
         guard let data = try? JSONEncoder().encode(progress) else { return }
         try? data.write(to: fileURL, options: [.atomic])   // atomic: a crash mid-write never corrupts the save
         cloud.set(data, forKey: cloudKey)
+        GameCenterService.shared.sync(progress)   // only talks to Game Center when an achievement or score is new
     }
 
     private func pullFromCloud() {
@@ -106,6 +110,14 @@ final class AppModel: ObservableObject {
 
     func goHome() {
         route = .home
+    }
+
+    /// Opens today's Daily Drop (the date is the player's own calendar day).
+    func playDaily(now: Date = Date()) {
+        let classic = levels(.classic)
+        guard !classic.isEmpty else { return }
+        let day = DayKey(date: now)
+        route = .daily(day: day, levelIndex: DailyDrop.levelIndex(for: day, classicCount: classic.count))
     }
 
     func startTutorial() {

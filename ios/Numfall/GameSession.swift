@@ -8,6 +8,7 @@ final class GameSession: ObservableObject {
     enum Mode: Equatable {
         case level(board: BoardKind, index: Int)
         case lesson(index: Int)
+        case daily(day: DayKey, levelIndex: Int)
     }
 
     enum Overlay: Equatable {
@@ -17,6 +18,7 @@ final class GameSession: ObservableObject {
         case skipped
         case lessonWon
         case lessonLost
+        case dailyWon(LevelResult, DailyReward)
     }
 
     struct Flash: Equatable {
@@ -69,7 +71,19 @@ final class GameSession: ObservableObject {
             game = Game(level: app.levels(board)[index])
         case .lesson(let index):
             game = Game(level: Lesson.all[index].level, timed: false)
+        case .daily(_, let levelIndex):
+            game = Game(level: app.levels(.classic)[levelIndex])
         }
+    }
+
+    var isDaily: Bool {
+        if case .daily = mode { return true }
+        return false
+    }
+
+    var dailyDay: DayKey? {
+        if case .daily(let day, _) = mode { return day }
+        return nil
     }
 
     var level: Level { game.level }
@@ -145,7 +159,9 @@ final class GameSession: ObservableObject {
         switch game.timeLeft {
         case 30: show("30 seconds left", .gold)
         case 10: show("10 seconds left!", .bad)
-        case ..<10: Haptics.tick()
+        case ..<10:
+            Haptics.tick()
+            Sound.play(.tick)
         default: break
         }
     }
@@ -156,6 +172,7 @@ final class GameSession: ObservableObject {
         guard game.status == .playing, !paused, game.remaining(value) > 0 else { return }
         selected = selected == value ? nil : value
         flash = nil
+        Sound.play(.pick)
     }
 
     func drop(column: Int) {
@@ -189,6 +206,7 @@ final class GameSession: ObservableObject {
             hintColumn = nil
             show("Crack! " + text, .bad)
             Haptics.crack()
+            Sound.play(.crack)
             Task { [weak self] in
                 try? await Task.sleep(for: .milliseconds(650))
                 self?.crack = nil
@@ -213,15 +231,19 @@ final class GameSession: ObservableObject {
             case .triple?:
                 show("TRIPLE!! +\(placement.sparksGained) Sparks", .pink)
                 Haptics.line()
+                Sound.play(.triple)
             case .double?:
                 show("DOUBLE! +\(placement.sparksGained) Sparks", .gold)
                 Haptics.line()
+                Sound.play(.double)
             case .line?:
                 show(placement.sparksGained > 0 ? "Line complete! +1 Spark" : "Line complete!", .good)
                 Haptics.line()
+                Sound.play(.line)
             case nil:
                 flash = nil
                 Haptics.land()
+                Sound.play(.land)
             }
             if game.remaining(value) == 0 || !(lesson?.steps.isEmpty ?? true) { selected = nil }
             Task { [weak self] in
@@ -304,7 +326,7 @@ final class GameSession: ObservableObject {
     }
 
     /// Skip is shown after 2 failed attempts; it needs 400 earned Sparks.
-    var skipOffered: Bool { lesson == nil && app.progress.canOfferSkip(level) }
+    var skipOffered: Bool { lesson == nil && !isDaily && app.progress.canOfferSkip(level) }
     var canAffordSkip: Bool { app.progress.sparks >= Economy.skip }
     /// Failed attempts still needed before Skip unlocks (0 once it is offered).
     var skipTriesLeft: Int { max(0, Economy.skipAfterFailedAttempts - (app.progress.failedAttempts[level.id] ?? 0)) }
@@ -321,17 +343,31 @@ final class GameSession: ObservableObject {
 
     private func onWon() {
         Haptics.win()
+        Sound.play(.win)
         if case .lesson(let index) = mode {
             if index == Lesson.all.count - 1 { app.finishTutorial() }
             overlay = .lessonWon
             return
         }
         guard let result = game.result() else { return }
+        if case .daily(let day, _) = mode {
+            // The Daily Drop keeps its own result and never changes the level's stars or the map.
+            let seconds = min(level.timeLimit, max(0, level.timeLimit - game.timeLeft))
+            var reward: DailyReward?
+            app.update { reward = $0.recordDaily(day: day, result: result, seconds: seconds, device: app.deviceID) }
+            if let reward {
+                recordAttempt(.won, stars: result.stars, sparks: reward.sparks)
+                overlay = .dailyWon(result, reward)
+                Reminders.reschedule(doneToday: true)
+            }
+            return
+        }
         var reward: PlayerProgress.WinReward?
         app.update { reward = $0.recordWin(level, result: result, device: app.deviceID) }
         if let reward {
             recordAttempt(.won, stars: result.stars, sparks: reward.sparks + reward.chest)
             overlay = .won(result, reward)
+            if reward.chest > 0 { Sound.play(.chest) }
         }
     }
 
@@ -340,14 +376,16 @@ final class GameSession: ObservableObject {
             overlay = .lessonLost
             return
         }
-        app.update { $0.recordFailure(level) }
+        if !isDaily { app.update { $0.recordFailure(level) } }
+        Sound.play(.lose)
         pendingOutcome = .outOfHearts
         overlay = .lost
     }
 
     private func onTimeUp() {
         selected = nil
-        app.update { $0.recordFailure(level) }
+        if !isDaily { app.update { $0.recordFailure(level) } }
+        Sound.play(.lose)
         recordAttempt(.timeUp, stars: 0, sparks: 0)
         overlay = .timeUp
     }
