@@ -1,4 +1,4 @@
-/* Numfall game engine (web prototype). Pure game rules, no UI.
+/* NumFall game engine (web prototype). Pure game rules, no UI.
  * The same rules will be ported to Swift for the iPhone/iPad app.
  * Works in the browser (window.Numfall) and in Node (module.exports) so tests can run it. */
 (function (root) {

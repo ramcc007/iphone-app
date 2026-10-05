@@ -4,21 +4,37 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#13161F">
-<title>{{title}} | {{appName}}</title>
+<title>{{fullTitle}}</title>
 <meta name="description" content="{{description}}">
-<meta property="og:title" content="{{appName}}: {{tagline}}">
+<meta name="robots" content="{{robots}}">
+<link rel="canonical" href="{{canonical}}">
+<meta property="og:site_name" content="{{appName}}">
+<meta property="og:title" content="{{fullTitle}}">
 <meta property="og:description" content="{{description}}">
 <meta property="og:type" content="website">
-<meta property="og:url" content="{{siteUrl}}/{{path}}">
-<link rel="canonical" href="{{siteUrl}}/{{path}}">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css">
+<meta property="og:url" content="{{canonical}}">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="{{siteUrl}}/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{appName}} app icon: a number tile falling onto a stack. {{tagline}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{fullTitle}}">
+<meta name="twitter:description" content="{{description}}">
+<meta name="twitter:image" content="{{siteUrl}}/og-image.png">
+<meta name="apple-mobile-web-app-title" content="{{appName}}">
+<meta name="application-name" content="{{appName}}">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+{{jsonLd}}<link rel="stylesheet" href="/style.css">
 </head>
 <body>
-<header class="top"><div class="wrap"><a class="brand" href="index.html"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span>{{appName}}</a><nav aria-label="Main"><a href="index.html#how">How it works</a><a href="index.html#boards">Boards</a><a href="support.html">Support</a><a href="privacy.html">Privacy</a></nav></div></header>
+<header class="top"><div class="wrap"><a class="brand" href="/"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span>{{appName}}</a><nav aria-label="Main"><a href="/#how">How it works</a><a href="/#boards">Boards</a><a href="/support">Support</a><a href="/privacy">Privacy</a></nav></div></header>
 {{content}}
 <footer class="foot"><div class="wrap"><div><div class="brand" style="font-size:19px"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span>{{appName}}</div><p>{{tagline}}</p><p>&copy; {{year}} {{legalName}}. {{appName}} is an original puzzle game. iPhone, iPad, Mac and Apple Vision Pro are trademarks of Apple Inc.</p></div>
-<div><h4>Game</h4><a href="index.html#how">How it works</a><a href="index.html#boards">Boards</a><a href="index.html#faq">FAQ</a></div>
-<div><h4>Help &amp; legal</h4><a href="support.html">Support</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Use</a></div></div></footer>
+<div><h4>Game</h4><a href="/#how">How it works</a><a href="/#boards">Boards</a><a href="/#faq">FAQ</a></div>
+<div><h4>Help &amp; legal</h4><a href="/support">Support</a><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Use</a></div></div></footer>
 </body>
 </html>

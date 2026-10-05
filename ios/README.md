@@ -1,4 +1,4 @@
-# Numfall: iPhone and iPad app (SwiftUI)
+# NumFall: iPhone and iPad app (SwiftUI)
 
 **Status:** the game rules package (`NumfallCore`) compiles and passes all its tests with Swift 6.0 on Linux (`tools/swift/linux-swift.sh`). The SwiftUI screens (`Numfall/`) need Apple's SDK, so their first build happens in Xcode on a Mac. They pass a syntax check, but that first build may still surface small type errors to fix. The game rules are a line-by-line port of the web engine, which passes 13 engine tests and 49 real-browser checks, and they come with their own unit tests (below).
 
@@ -14,7 +14,7 @@ xcodegen                 # creates Numfall.xcodeproj from project.yml
 open Numfall.xcodeproj
 ```
 Then in Xcode:
-1. Select the **Numfall** target → **Signing & Capabilities** → choose your Team.
+1. Select the **NumFall** target → **Signing & Capabilities** → choose your Team.
 2. Change the bundle identifier from `com.example.numfall` to your own (it must match App Store Connect).
 3. Pick an iPhone or iPad simulator and press **Run** (⌘R).
 

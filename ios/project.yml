@@ -1,4 +1,4 @@
-# XcodeGen spec for the Numfall iPhone + iPad app.
+# XcodeGen spec for the NumFall iPhone + iPad app.
 # On a Mac: `brew install xcodegen`, then `cd ios && xcodegen`, then open Numfall.xcodeproj.
 name: Numfall
 options:
@@ -22,7 +22,7 @@ targets:
     info:
       path: Numfall/Info.plist
       properties:
-        CFBundleDisplayName: Numfall
+        CFBundleDisplayName: NumFall
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.puzzle-games

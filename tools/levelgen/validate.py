@@ -1,4 +1,4 @@
-"""Fail-safe validator for Numfall levels.
+"""Fail-safe validator for NumFall levels.
 
 Every level must pass ALL checks before it can ship:
   1. givens match the stored solution and the solution is a valid Sudoku

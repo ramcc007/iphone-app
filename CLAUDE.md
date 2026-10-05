@@ -1,4 +1,4 @@
-# Numfall (working title): project rules for Claude
+# NumFall (working title): project rules for Claude
 
 An original iPhone numbers puzzle game: a one-of-each number grid with gravity (see `docs/GAME_PLAN.md`). The earlier "Spill" concept was scrapped (`docs/archive/`).
 It **will be published on the Apple App Store**, and a marketing/support website will follow.

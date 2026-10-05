@@ -50,7 +50,7 @@ async function solveLevel(page, board, idx) {
   // 1. iPhone: tutorial -> level 1 -> win
   { const { ctx, page, errors } = await open(browser, { width: 390, height: 844 });
     // First run: the intro asks who's playing before anything else.
-    ok('iPhone: first launch opens the intro screen', await page.isVisible('text=Welcome to Numfall'));
+    ok('iPhone: first launch opens the intro screen', await page.isVisible('text=Welcome to NumFall'));
     await page.screenshot({ path: path.join(SHOTS, 'iphone-welcome.png') });
     ok('Intro: "Let\u2019s play" is disabled until a name is filled', await page.isDisabled('#f-go'));
     ok('Intro: there is no age question', (await page.locator('#f-age').count()) === 0 && !(await page.isVisible('text=Your age')));

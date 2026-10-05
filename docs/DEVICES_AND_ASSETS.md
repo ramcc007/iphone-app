@@ -1,6 +1,6 @@
 # Devices, resolution and assets
 
-Numfall is a **universal app**: designed iPhone-first, fully supported on iPad, and available automatically on Apple silicon Macs and Apple Vision Pro as an iPad app. Canvas screens 15–18 show the iPad layouts, the app icon and this spec visually.
+NumFall is a **universal app**: designed iPhone-first, fully supported on iPad, and available automatically on Apple silicon Macs and Apple Vision Pro as an iPad app. Canvas screens 15–18 show the iPad layouts, the app icon and this spec visually.
 
 ## Supported devices
 | Device | Orientation | Layout |

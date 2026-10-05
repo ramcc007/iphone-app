@@ -1,4 +1,4 @@
-# Numfall: App Store listing (v1 draft, 5 October 2026)
+# NumFall: App Store listing (v1 draft, 5 October 2026)
 
 Rules this text follows: no other game, brand or trademark names anywhere (Guidelines 2.3.7 and 5.2), nothing the app does not do (2.3.1), no prices or "free" claims in the name or subtitle (2.3.7), no mention of other platforms. Character limits are Apple's; counts below are checked.
 Fill in or confirm the items marked **[Owner]** in App Store Connect.
@@ -6,7 +6,7 @@ Fill in or confirm the items marked **[Owner]** in App Store Connect.
 ## App information
 | Field | Text | Limit |
 |---|---|---|
-| Name | Numfall | 30 (7 used) |
+| Name | NumFall | 30 (7 used) |
 | Subtitle | Drop numbers. Beat the clock. | 30 (29 used) |
 | Primary category | Games | |
 | Game subcategory | Puzzle (first), Strategy (second, optional) | |
@@ -24,7 +24,7 @@ Pick a number, drop it in a column and watch it fall. Fill the grid before the c
 ## Description (4000 max)
 Drop the numbers. Beat the clock.
 
-Numfall is a fast, colourful number puzzle. Pick a number from the tray, tap a column, and it falls to the lowest empty cell. Fill the whole grid so that every row, every column and every box holds each number exactly once.
+NumFall is a fast, colourful number puzzle. Pick a number from the tray, tap a column, and it falls to the lowest empty cell. Fill the whole grid so that every row, every column and every box holds each number exactly once.
 
 There is a twist: numbers fall. The order you drop them in is part of the puzzle, so you plan which gap to fill first and which must wait. Every level has exactly one solution you can work out by logic, with no guessing.
 
@@ -61,7 +61,7 @@ MADE TO FEEL GOOD
 • Large Text, VoiceOver and Reduce Motion supported
 
 PRIVATE BY DESIGN
-No ads. No tracking. No account. Numfall asks for a first name to greet you and keeps it, your progress and your session history on your device and in your own iCloud. We never receive it.
+No ads. No tracking. No account. NumFall asks for a first name to greet you and keeps it, your progress and your session history on your device and in your own iCloud. We never receive it.
 
 Questions or ideas? Write to support@numfall.store.
 
@@ -69,7 +69,7 @@ Questions or ideas? Write to support@numfall.store.
 puzzle,number,logic,brain,grid,timer,gravity,drop,columns,rows,fill,offline,casual,mind,train,quick
 
 ## What's New (version 1.0)
-Welcome to Numfall! Three boards, 230 levels and a countdown on every one. Drop the numbers and beat the clock.
+Welcome to NumFall! Three boards, 230 levels and a countdown on every one. Drop the numbers and beat the clock.
 
 ## Screenshots (6.9-inch iPhone and 13-inch iPad, required; capture from the real app)
 Order and caption (short, no other brand names):
@@ -89,7 +89,7 @@ Unrestricted web access: **No**. User-generated content: **No**. Loot boxes or s
 "Data Not Collected." (Game Center scores and achievements go only to Apple's Game Center. Confirm in App Store Connect's privacy questionnaire that using GameKit does not require declaring data as collected by the developer; it normally does not.) The app has no analytics, advertising or third-party code, and the developer receives nothing. The name, progress and sessions stay on the device and in the player's own iCloud (Apple's key-value storage), which is not "collected" by the developer. Tracking: **No**. Re-check this answer if anything below changes.
 
 ## Notes for App Review
-Numfall is a free single-player number puzzle. No account, sign-in or demo login is needed.
+NumFall is a free single-player number puzzle. No account, sign-in or demo login is needed.
 
 How to try it: on first launch, type any name (for example "Alex") and tap "Let's play". A three-step tutorial follows, then the home screen shows three boards (Quick, Classic, Master) that are all open. Tap a number in the tray, then tap a column; the number falls to the lowest empty cell. Every level has a countdown by design; when it reaches zero the level restarts. After two failed tries, a "Skip this level" option appears and costs Sparks, an in-game score earned by playing.
 

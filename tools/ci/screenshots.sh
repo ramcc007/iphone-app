@@ -26,7 +26,7 @@ if [ -z "$SMALL" ] && [ "$WHICH" = small ]; then
     [ -z "$RUNTIME" ] && break
     SE_TYPE=$(xcrun simctl list devicetypes | grep -F "$NAME (com.apple" | head -1 | sed -E 's/.*\((com\.apple\.CoreSimulator\.SimDeviceType\.[^)]*)\).*/\1/')
     [ -z "$SE_TYPE" ] && continue
-    NEWDEV=$(xcrun simctl create "Numfall small" "$SE_TYPE" "$RUNTIME" 2>&1 | tail -1)   # not OUT: that is the screenshot folder
+    NEWDEV=$(xcrun simctl create "NumFall small" "$SE_TYPE" "$RUNTIME" 2>&1 | tail -1)   # not OUT: that is the screenshot folder
     case "$NEWDEV" in
       [0-9A-F]*-*-*-*-*) SMALL="$NEWDEV"; echo "created a $NAME simulator: $SMALL"; case "$NAME" in *mini) SMALL_LABEL=iphone-mini ;; esac; break ;;
       *) echo "could not create $NAME: $NEWDEV" ;;

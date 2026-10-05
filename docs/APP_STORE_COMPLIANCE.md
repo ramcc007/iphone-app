@@ -1,4 +1,4 @@
-# App Store compliance checklist: Numfall (working title)
+# App Store compliance checklist: NumFall (working title)
 
 This is a living checklist. Re-check Apple's current rules before each submission, because they change every year.
 - App Review Guidelines: https://developer.apple.com/app-store/review/guidelines/
@@ -31,8 +31,8 @@ This is not legal advice. Items marked **[Check]** need confirming with Apple's 
 
 ## 3. Payments (Guideline 3.1): (later), not in v1
 v1 has nothing to buy. Sparks are earned only and can't be bought, sold or exchanged for anything outside the game, so no payment rules apply. When purchases arrive:
-- [ ] All hints, skips, extra moves and the "Numfall Complete" unlock are sold through **In-App Purchase (StoreKit 2)**. No external payment links.
-- [ ] **Restore Purchases** button, required for non-consumables such as "Numfall Complete".
+- [ ] All hints, skips, extra moves and the "NumFall Complete" unlock are sold through **In-App Purchase (StoreKit 2)**. No external payment links.
+- [ ] **Restore Purchases** button, required for non-consumables such as "NumFall Complete".
 - [ ] Prices come from StoreKit and are shown in the local currency. Never hard-code prices.
 - [ ] Each IAP has a clear name, description and review screenshot in App Store Connect.
 - [ ] No loot boxes. If any are ever added, the odds must be disclosed before purchase (3.1.1).

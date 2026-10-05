@@ -1,6 +1,6 @@
-# Game Plan v2: "Numfall" (working title), Sudoku where numbers fall
+# Game Plan v2: "NumFall" (working title), Sudoku where numbers fall
 
-Status: **approved 3 October 2026.** Screens designed (canvas "Numfall – Game Screens", 18 screens incl. iPad). v1 decisions recorded in section 11.
+Status: **approved 3 October 2026.** Screens designed (canvas "NumFall – Game Screens", 18 screens incl. iPad). v1 decisions recorded in section 11.
 **Update 3 October 2026:** after playtesting the web version ("levels feel too easy"), the game now has **three boards to choose from** (Quick 4×4, Classic 6×6, Master 9×9), 230 levels in all, harder levels and tighter clocks. See sections 2 and 7.
 Previous concept ("Spill") was scrapped and moved to `docs/archive/`.
 Last updated: 3 October 2026.
@@ -9,12 +9,12 @@ Last updated: 3 October 2026.
 
 ## 1. The brief
 
-**Numfall is Sudoku with gravity.**
+**NumFall is Sudoku with gravity.**
 - The rule everyone already knows stays the same: every row, column and box must contain each number exactly once.
 - The twist: **you never tap a cell.** You choose a number and **drop it into a column**, and it falls to the lowest empty space.
 - To get a number high up in a column, you must first fill the cells beneath it, in an order that never breaks the rules.
 
-Sudoku asks *what* goes where. Numfall also asks **in what order**. That ordering is the new layer of challenge, and it makes every level feel like a small strategy puzzle rather than a fill-in exercise.
+Sudoku asks *what* goes where. NumFall also asks **in what order**. That ordering is the new layer of challenge, and it makes every level feel like a small strategy puzzle rather than a fill-in exercise.
 
 - **Audience:** 16–30. Also accessible to anyone who has seen a Sudoku.
 - **Session length:** under a minute (Quick) to about 5 minutes (Master) per level. The player picks the board.
@@ -110,7 +110,7 @@ I checked before choosing:
 | Falling Sudoku blocks, arcade style | **Partly:** an obscure web game, "Falling Sudoku" (Tetris-style, real-time) |
 | **Turn-based level puzzles where you plan the drop order, plus a number queue, board rotation and the dead-end rule** | **Not found on the App Store** |
 
-Game mechanics can't be owned (copyright protects code, art, text and names, not rules). Our protection is an original combination, our own art and code, and a cleared name. "Numfall" still needs a trademark and App Store name search [Check].
+Game mechanics can't be owned (copyright protects code, art, text and names, not rules). Our protection is an original combination, our own art and code, and a cleared name. "NumFall" still needs a trademark and App Store name search [Check].
 
 ---
 
@@ -189,7 +189,7 @@ Version 1 has **no ads and no In-App Purchases**. Every Spark is earned by playi
 **Possible later versions** (not in v1, to be decided after launch):
 - **Skip now:** a single skip bought with real money.
 - **Sparks packs:** for example 500 / 1,500 / 4,000 Sparks.
-- **Numfall Complete:** a one-time purchase that unlocks all themes and gives bonus Sparks.
+- **NumFall Complete:** a one-time purchase that unlocks all themes and gives bonus Sparks.
 - **Rewarded ads:** watch an ad for Sparks.
 
 Because v1 players will have earned everything by playing, any later purchases must only be optional shortcuts. Levels must never be made harder to push people towards paying.
@@ -252,7 +252,7 @@ The whole set is generated deterministically (`python3 tools/levelgen/build_leve
 ---
 
 ## 11. Decisions confirmed at approval
-- Working name: **Numfall** (trademark and App Store search still pending).
+- Working name: **NumFall** (trademark and App Store search still pending).
 - 3 hearts per level. A wrong drop costs 1 heart. Retry is always free.
 - **Timer always on** (decided after the fail-safe review): every level has a hard countdown in seconds. At 0s, "Time's up!" and the same level starts again. No relaxed mode, no paid or earned extra time.
 - **v1: no ads and no In-App Purchases.** Sparks are earned only. Purchases may come in a later version.
@@ -276,7 +276,7 @@ The owner found the first levels too tight (Quick 3.3 to 4 s per gap, Classic 4.
 The owner asked for more time on 6×6 and 9×9. Start clocks are now **Classic 90s (was 70s) and Master 240s (was 180s)**, still +5s every 5 levels: Classic 90 to 185s, Master 240 to 335s. That is about 7.5 to 8.8 seconds per gap on Classic and 8.2 to 8.6 on Master (before: 5.4 to 7.9 and 6.2 to 6.7). Quick is unchanged at 28 to 53s. The level puzzles themselves are untouched, only the clock. The full list is in `docs/TIME_LIMITS.md`. If it still feels tight or too loose, the start value is one number per board (`BOARDS` in `validate.py`, `engine.js` and `Level.swift`).
 
 ## Share result, after launch (decision of 5 October 2026)
-The first Share result (a text line plus a picture, "Numfall Classic · Level 1 ★★☆ · 8s to spare") was removed from v1: the owner found it too plain, and a share is most useful when it carries the App Store link, which only exists once the app is live. Nothing about sharing ships in v1: no button, no share card, no share text, and the privacy policy and listing no longer mention it.
+The first Share result (a text line plus a picture, "NumFall Classic · Level 1 ★★☆ · 8s to spare") was removed from v1: the owner found it too plain, and a share is most useful when it carries the App Store link, which only exists once the app is live. Nothing about sharing ships in v1: no button, no share card, no share text, and the privacy policy and listing no longer mention it.
 **Plan for the next version:** a "Share result" button on the win screen that takes a **screenshot of the results screen itself** (stars, Sparks, praise headline) and opens the iOS share sheet, so the player can send it by social media, messages, email or any other share option on the device, together with the **App Store link** of the app. Notes for when it is built: use the app's real App Store URL (known only after the listing is created), show no player name by default, keep the board out of the picture so it spoils nothing, check Guideline 4.5.x and the privacy policy wording again, and mention it in the listing only when it ships.
 
 ## Back button on the game screen (5 October 2026)
@@ -298,3 +298,6 @@ The first chapter of a board is always 1 flame and the last is 5. Classic and Ma
 
 ### Text size, corners and colour check (5 October 2026)
 Checked against Apple's Human Interface Guidelines. Fonts are the system rounded font and follow Dynamic Type; corners use Apple's continuous curve; every text colour meets 4.5:1 contrast on every background; the app icon is a square, opaque 1024 px image. One fix: the small labels on level tiles were 9–10 pt, under Apple's 11 pt minimum. They are now 11 pt with no fading. "SKIPPED" did not fit a tile on the smallest phone at 11 pt, so a skipped level shows a skip icon instead, and a locked chest level shows only the lock (its gold border already marks the chest). VoiceOver still says "skipped" and "chest". The web e2e test now fails if any home-screen text is under 11 px or a tile label overflows its tile.
+
+### Name spelling: NumFall (5 October 2026)
+The name is written **NumFall** everywhere players and App Review see it: the Home Screen name under the icon (`CFBundleDisplayName`), the title and welcome screens, the web preview, the website, the App Store listing and the design canvas. Code names stay as they are (the `Numfall` Xcode target and folder, the `NumfallCore` package, saved-data keys, the numfall.store domain and email) so nothing breaks and no saved progress is lost. Use the same spelling when creating the App Store Connect record.

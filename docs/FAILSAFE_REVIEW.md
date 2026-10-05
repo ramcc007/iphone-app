@@ -1,4 +1,4 @@
-# Fail-safe review: Numfall (before building the app)
+# Fail-safe review: NumFall (before building the app)
 
 Date: 3 October 2026. Scope: the approved game plan, the 14 screens on the design canvas, the playable prototype logic, the level data, the economy, App Store rules and the technical build.
 

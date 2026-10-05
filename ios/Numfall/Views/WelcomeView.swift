@@ -20,7 +20,7 @@ struct WelcomeView: View {
                         .padding(.top, 8)
 
                     VStack(spacing: 8) {
-                        Text("Welcome to Numfall")
+                        Text("Welcome to NumFall")
                             .font(Theme.rounded(.largeTitle))
                             .multilineTextAlignment(.center)
                             .accessibilityAddTraits(.isHeader)

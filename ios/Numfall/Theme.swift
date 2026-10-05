@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-/// Colours and shapes from the design canvas ("Numfall – Game Screens").
+/// Colours and shapes from the design canvas ("NumFall – Game Screens").
 /// Everything is drawn in code, so it is sharp on every iPhone, iPad and Mac screen.
 enum Theme {
     static let background = Color(hex: 0x13161F)

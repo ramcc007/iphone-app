@@ -1,4 +1,4 @@
-# Numfall (working title)
+# NumFall (working title)
 
 A number puzzle with gravity: pick a number, drop it into a column, and it falls to the lowest gap. An original puzzle game for iPhone and iPad.
 

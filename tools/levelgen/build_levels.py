@@ -1,4 +1,4 @@
-"""Build the Numfall level set: three boards, each its own path of levels, as levels/levels.json.
+"""Build the NumFall level set: three boards, each its own path of levels, as levels/levels.json.
 
   Quick    4x4   30 levels
   Classic  6x6  100 levels

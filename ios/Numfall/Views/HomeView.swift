@@ -22,7 +22,7 @@ struct HomeView: View {
                     HStack(spacing: 18) {
                         LogoMark(size: wide ? 44 : 30)
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Numfall").scaledFont(wide ? 64 : 44)
+                            Text("NumFall").scaledFont(wide ? 64 : 44)
                             Text("Drop the numbers. Beat the clock.").font(Theme.rounded(.subheadline, .medium)).foregroundStyle(Theme.muted)
                         }
                         Spacer(minLength: 0)
