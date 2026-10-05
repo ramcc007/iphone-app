@@ -244,14 +244,14 @@ final class ProgressTests: XCTestCase {
 
     func testSkipNeedsTwoFailuresAndEnoughSparks() {
         var progress = PlayerProgress()
-        let level = levels[3]
+        let level = levels[7]
         progress.earn(1000, device: "A")
         progress.recordFailure(level)
         XCTAssertFalse(progress.skip(level, device: "A"))
         progress.recordFailure(level)
         XCTAssertTrue(progress.skip(level, device: "A"))
         XCTAssertEqual(progress.sparks, 600)
-        XCTAssertTrue(progress.isUnlocked(4, in: levels))
+        XCTAssertTrue(progress.isUnlocked(8, in: levels))
 
         var poor = PlayerProgress()
         poor.recordFailure(level); poor.recordFailure(level)
@@ -269,12 +269,18 @@ final class ProgressTests: XCTestCase {
 
     func testUnlockingAndNextLevel() {
         var progress = PlayerProgress()
-        XCTAssertTrue(progress.isUnlocked(0, in: levels))
-        XCTAssertFalse(progress.isUnlocked(1, in: levels))
+        // The first five levels are open from the start, in any order.
+        for index in 0..<PlayerProgress.freeLevels { XCTAssertTrue(progress.isUnlocked(index, in: levels), "level \(index + 1)") }
+        XCTAssertFalse(progress.isUnlocked(5, in: levels))
         XCTAssertEqual(progress.nextLevelIndex(in: levels), 0)
-        _ = progress.recordWin(levels[0], result: perfectResult(levels[0]), device: "A")
-        XCTAssertTrue(progress.isUnlocked(1, in: levels))
-        XCTAssertEqual(progress.nextLevelIndex(in: levels), 1)
+        _ = progress.recordWin(levels[2], result: perfectResult(levels[2]), device: "A")   // playing level 3 first is fine
+        XCTAssertEqual(progress.nextLevelIndex(in: levels), 0, "the Play button still starts at the first level not yet cleared")
+        XCTAssertFalse(progress.isUnlocked(5, in: levels), "level 6 waits for level 5")
+        _ = progress.recordWin(levels[4], result: perfectResult(levels[4]), device: "A")
+        XCTAssertTrue(progress.isUnlocked(5, in: levels))
+        XCTAssertFalse(progress.isUnlocked(6, in: levels))
+        _ = progress.recordWin(levels[5], result: perfectResult(levels[5]), device: "A")
+        XCTAssertTrue(progress.isUnlocked(6, in: levels))
     }
 
     func testEachBoardIsItsOwnPath() {
@@ -285,7 +291,7 @@ final class ProgressTests: XCTestCase {
         XCTAssertTrue(progress.isUnlocked(0, in: master))
         _ = progress.recordWin(quick[0], result: perfectResult(quick[0]), device: "A")
         XCTAssertTrue(progress.isUnlocked(1, in: quick))
-        XCTAssertFalse(progress.isUnlocked(1, in: classic), "clearing Quick 1 must not unlock Classic 2")
+        XCTAssertFalse(progress.isUnlocked(5, in: classic), "clearing Quick 1 must not unlock Classic 6")
         XCTAssertEqual(progress.nextLevelIndex(in: quick), 1)
         XCTAssertEqual(progress.nextLevelIndex(in: classic), 0)
         XCTAssertEqual(progress.nextLevelIndex(in: master), 0)

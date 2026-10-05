@@ -41,7 +41,12 @@ struct OverlayLayer: View {
         let level = session.level
         switch session.overlay {
         case let .won(result, reward)?:
-            SheetTitle(result.stars == 3 ? "Perfect!" : "Level \(level.number) complete!", color: Theme.good)
+            let cleared = app.progress.bestStars.count
+            SheetTitle(reward.wasReplay ? Praise.replayHeadline(improved: reward.sparks > 0) : Praise.headline(cleared: cleared), color: Theme.good)
+            Text("Level \(level.number) cleared"
+                 + (result.stars == 3 ? " \u{00B7} Perfect, no mistakes" : "")
+                 + (!reward.wasReplay && Praise.isNewTitle(cleared: cleared) ? " \u{00B7} New title!" : ""))
+                .scaledFont(15, .semibold).foregroundStyle(Theme.soft)
             StarRow(count: result.stars, celebrate: true).frame(maxWidth: .infinity)
             VStack(spacing: 4) {
                 if reward.wasReplay {

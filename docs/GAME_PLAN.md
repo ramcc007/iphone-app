@@ -271,3 +271,7 @@ The first time a level (or the Daily Drop) is opened it is the original board. E
 
 ## Clock change (5 October 2026)
 The owner found the first levels too tight (Quick 3.3 to 4 s per gap, Classic 4.6 to 5). Start clocks are now **Quick 28s, Classic 70s, Master 180s (unchanged)**, still +5s every 5 levels: Quick 28 to 53s, Classic 70 to 165s. The full list is in `docs/TIME_LIMITS.md`. Side effect: stars and the time bonus use the time left, so a few more players reach three stars.
+
+## Praise and open first levels (5 October 2026)
+- **Praise:** on a first clear the win pop-up headline is a compliment that grows with the number of levels cleared over all boards (24 titles: 'Nice start!' at 1, 'You're a Pro!' at 25, 'You're an achiever!' at 45, 'You're a genius!' at 80, 'Centurion!' at 100, 'You cleared everything!' at 230). A line under it says 'Level N cleared', adds 'Perfect, no mistakes' for three stars and 'New title!' when a threshold is crossed. Replays say 'Better than before!' or 'Nice replay!'. Source: `Praise.swift` and `engine.js` (`praise`).
+- **Open first levels:** the first 5 levels of every board can be played in any order; Level 6 needs Level 5 cleared or skipped, and so on (`PlayerProgress.freeLevels`). The Play button still points at the first level not yet cleared.

@@ -28,7 +28,7 @@ Numfall is a fast, colourful number puzzle. Pick a number from the tray, tap a c
 
 There is a twist: numbers fall. The order you drop them in is part of the puzzle, so you plan which gap to fill first and which must wait. Every level has exactly one solution you can work out by logic, with no guessing.
 
-THREE BOARDS, ALL OPEN FROM THE START
+THREE BOARDS, ALL OPEN FROM THE START (and the first five levels of each are open to play in any order)
 • Quick, 4×4: 30 short levels for a spare minute
 • Classic, 6×6: 100 levels with a steady climb in difficulty
 • Master, 9×9: 100 big boards with tight clocks
@@ -44,6 +44,9 @@ A new puzzle every day, the same for everyone. Clear it to earn bonus Sparks, bu
 
 FRESH EVERY TIME
 Restart a level and the numbers change while the difficulty stays exactly the same, so you can never beat it from memory. Every board is solvable by logic alone.
+
+CHEERS THAT GROW WITH YOU
+Every cleared level earns a compliment, and the praise grows as you do: from "Nice start!" to "You're a Pro!" and "You're a genius!" all the way to "Hall of fame!".
 
 EARN, NEVER BUY
 Collect Sparks by clearing levels, finishing without mistakes, finishing fast and opening chests every ten levels. Spend them on hints, undos, an extra heart, or to skip a level that has you stuck. Sparks cannot be bought, because there are no purchases at all.

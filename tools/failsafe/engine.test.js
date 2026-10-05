@@ -154,5 +154,22 @@ t('The number of different variants per board is large enough (Quick 4x4 at leas
   const counts = {}; for (const id of ['quick', 'classic', 'master']) { const L = board(id)[5], seen = new Set(); for (let s = 0; s < 4000; s++) seen.add(JSON.stringify(D.variant(L, s * 2654435761 % 4294967296).givens)); counts[id] = seen.size; }
   return counts.quick >= 150 && counts.classic >= 3000 && counts.master >= 3900 ? true : JSON.stringify(counts);
 });
+t('Praise: 24 titles in strict progression, the three requested phrases in the right order, never empty', () => {
+  const P = D.PRAISE; const text = P.map((x) => x[1]); const at = (s) => text.indexOf(s);
+  const strict = P.every((p, i) => i === 0 || p[0] > P[i - 1][0]);
+  const order = at('You’re a Pro!') >= 0 && at('You’re a Pro!') < at('You’re an achiever!') && at('You’re an achiever!') < at('You’re a genius!');
+  const sane = D.praise(0) === 'Nice start!' && D.praise(1) === 'Nice start!' && D.praise(25) === 'You’re a Pro!' && D.praise(80) === 'You’re a genius!' && D.praise(230) === 'You cleared everything!' && D.praise(9999) === 'You cleared everything!';
+  const news = D.praiseIsNew(25) && !D.praiseIsNew(26);
+  return P.length === 24 && new Set(text).size === 24 && P[P.length - 1][0] === LEVELS.length && strict && order && sane && news ? true : JSON.stringify({ n: P.length, strict, order, sane, news });
+});
+t('First five levels of each board are open in any order; level 6 needs level 5', () => {
+  // mirrors the rule in index.html (FREE_LEVELS = 5) and PlayerProgress.freeLevels in Swift
+  const FREE = 5, best = {}, un = (L, i) => i < FREE || !!best[L[i - 1].id];
+  const L = board('classic');
+  const open = [0, 1, 2, 3, 4].every((i) => un(L, i)) && !un(L, 5);
+  best[L[2].id] = 3; const stillShut = !un(L, 5);
+  best[L[4].id] = 1; const opens = un(L, 5) && !un(L, 6);
+  return open && stillShut && opens ? true : JSON.stringify({ open, stillShut, opens });
+});
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exitCode = fail ? 1 : 0;

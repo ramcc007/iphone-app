@@ -137,6 +137,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
 .lv.skipped { background: transparent; border: 1.5px solid rgba(255,181,71,0.5); color: var(--spark); }
 .lv.locked { background: transparent; border: 1.5px dashed rgba(255,255,255,0.15); color: var(--faint); cursor: pointer; }
 .lv.locked small { display: flex; align-items: center; gap: 3px; opacity: 0.8; } .lv .lk { display: block; }
+.praise-sub { margin: -6px 0 0; text-align: center; color: var(--soft); font-size: 15px; font-weight: 600; }
 .toast { position: fixed; left: 16px; right: 16px; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); max-width: 440px; margin: 0 auto; padding: 12px 16px; border-radius: 16px; background: var(--raised, #272C3D); color: var(--fg, #F5F6FA); font-size: 15px; font-weight: 600; text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,0.5); z-index: 50; }
 .lv.mile { border: 2px solid var(--spark); }
 .boards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -325,7 +326,8 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]; }); }
   function tileVars(v) { var t = TILE[v]; return '--t-base:' + t[0] + ';--t-light:' + t[1] + ';--t-edge:' + t[2]; }
   function isWide() { return window.innerWidth >= 900 && window.innerWidth > window.innerHeight * 1.1; }
-  function unlocked(i) { if (i === 0) return true; var prev = LEVELS[i - 1]; return !!(P.best[prev.id] || P.skipped[prev.id]); }
+  var FREE_LEVELS = 5;   // the first five levels of every board are open to play in any order; level 6 onward unlock one by one
+  function unlocked(i) { if (i < FREE_LEVELS) return true; var prev = LEVELS[i - 1]; return !!(P.best[prev.id] || P.skipped[prev.id]); }
   function nextIndex() { for (var i = 0; i < LEVELS.length; i++) if (unlocked(i) && !P.best[LEVELS[i].id] && !P.skipped[LEVELS[i].id]) return i; return LEVELS.length - 1; }
   function say(text) { var l = document.getElementById('live'); if (l) l.textContent = text; }
   function setFlash(text, kind) { S.flash = text; S.flashKind = kind || 'info'; say(text); }
@@ -558,7 +560,10 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
       var r = S.result, last = S.levelIndex === LEVELS.length - 1;
       var rows = S.replay ? '<div><span>Replay: ' + (S.award ? 'new stars' : 'no new stars') + '</span><b>+' + S.award + ' ✦</b></div>' : r.breakdown.map(function (b) { return '<div><span>' + esc(b.label) + '</span><b>+' + b.n + ' ✦</b></div>'; }).join('');
       var share = 'Numfall ' + boardById(lv.board).name + ' · Level ' + lv.number + ' ' + '★★★'.slice(0, r.stars) + '☆☆☆'.slice(0, 3 - r.stars) + ' · ' + g.timeLeft + 's to spare';
-      return '<div class="veil"><div class="sheet win"><h2>' + (r.stars === 3 ? 'Perfect!' : 'Level ' + lv.number + ' complete!') + '</h2>' + starsSvg(r.stars, 46) +
+      var cleared = Object.keys(P.best).length;
+      var headline = S.replay ? (S.award ? 'Better than before!' : 'Nice replay!') : D.praise(cleared);
+      var subline = 'Level ' + lv.number + ' cleared' + (r.stars === 3 ? ' · Perfect, no mistakes' : '') + (!S.replay && D.praiseIsNew(cleared) ? ' · New title!' : '');
+      return '<div class="veil"><div class="sheet win"><h2>' + esc(headline) + '</h2><p class="praise-sub">' + esc(subline) + '</p>' + starsSvg(r.stars, 46) +
         '<div class="breakdown">' + rows + '</div>' + (S.chest ? '<div class="chest">' + SPARK + 'Chapter ' + lv.chapter + ' milestone chest: +' + S.chest + ' Sparks</div>' : '') +
         '<p style="font-size:14px">Wallet: ' + P.wallet + ' Sparks</p>' +
         (last ? '<p>That’s every ' + boardById(lv.board).name + ' level! Try another board for a new challenge.</p><button class="primary" data-act="home">Choose a board</button>' : '<button class="primary" data-act="next">Next: Level ' + (lv.number + 1) + '</button>') +

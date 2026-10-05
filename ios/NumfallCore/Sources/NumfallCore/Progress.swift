@@ -195,8 +195,12 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
 
     // MARK: - Level flow
 
+    /// The first levels of every board are open from the start, to play in any order. From the next one on, a level opens
+    /// when the one before it is cleared or skipped.
+    public static let freeLevels = 5
+
     public func isUnlocked(_ index: Int, in levels: [Level]) -> Bool {
-        guard index > 0 else { return true }
+        guard index >= Self.freeLevels else { return true }
         let previous = levels[index - 1].id
         return bestStars[previous] != nil || skipped.contains(previous)
     }

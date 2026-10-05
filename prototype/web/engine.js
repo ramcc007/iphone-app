@@ -217,7 +217,16 @@
     return variant(level, Math.floor(rand() * 4294967296));
   }
 
-  var api = { variant: variant, freshVariant: freshVariant, BOARDS: BOARDS, BOARD_ORDER: BOARD_ORDER, timeLimit: timeLimit, newGame: newGame, landing: landing, left: left, drop: drop, tick: tick, undo: undo,
+  // ---- Praise for clearing a level, in progression (mirrors ios/NumfallCore Praise.swift) ----
+  var PRAISE = [[1, 'Nice start!'], [2, 'You’re getting it!'], [3, 'Smooth drop!'], [5, 'You’re on a roll!'], [8, 'Sharp thinking!'], [10, 'Double digits!'],
+    [13, 'You’re a natural!'], [16, 'Smooth moves!'], [20, 'Brilliant!'], [25, 'You’re a Pro!'], [30, 'Puzzle power!'], [35, 'Razor sharp!'],
+    [40, 'Unstoppable!'], [45, 'You’re an achiever!'], [50, 'Half a hundred!'], [60, 'Mastermind at work!'], [70, 'Number ninja!'],
+    [80, 'You’re a genius!'], [90, 'Absolute legend!'], [100, 'Centurion!'], [125, 'Grandmaster!'], [150, 'Beyond brilliant!'],
+    [190, 'Hall of fame!'], [230, 'You cleared everything!']];
+  function praise(cleared) { var t = PRAISE[0][1]; PRAISE.forEach(function (p) { if (p[0] <= cleared) t = p[1]; }); return t; }
+  function praiseIsNew(cleared) { return PRAISE.some(function (p) { return p[0] === cleared; }); }
+
+  var api = { praise: praise, praiseIsNew: praiseIsNew, PRAISE: PRAISE, variant: variant, freshVariant: freshVariant, BOARDS: BOARDS, BOARD_ORDER: BOARD_ORDER, timeLimit: timeLimit, newGame: newGame, landing: landing, left: left, drop: drop, tick: tick, undo: undo,
     continueWithHeart: continueWithHeart, hint: hint, result: result, conflict: conflict, HEARTS: HEARTS, UNDOS_FREE: UNDOS_FREE };
   root.Numfall = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
