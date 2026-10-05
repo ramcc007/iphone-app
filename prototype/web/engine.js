@@ -233,7 +233,7 @@
     master: ['Base Camp', 'Rising Ground', 'The Long Climb', 'Thin Air', 'Sharp Ridge', 'Above the Clouds', 'Storm Front', 'Sky High', 'Final Ascent', 'The Summit']
   };
   var MAX_FLAMES = 5;
-  function chapterName(board, chapter) { var l = CHAPTER_NAMES[board] || []; return l[chapter - 1] || 'Chapter ' + chapter; }
+  function chapterName(board, chapter) { var l = CHAPTER_NAMES[board] || []; return l[chapter - 1] || 'More levels'; }
   // First chapter of a board = 1 flame, last = 5, steady steps between (10 chapters: 1,1,2,2,3,3,4,4,5,5).
   function chapterFlames(chapter, count) {
     if (count <= 1) return 1;

@@ -217,21 +217,44 @@ struct BoardIcon: View {
     }
 }
 
-/// Difficulty meter: `lit` of 5 flames glow, the rest are dim. Read out as "Difficulty 3 of 5".
+/// Difficulty meter: `lit` of 5 flames glow, the rest are dim, followed by the word "Difficulty". Read out as "Difficulty 3 of 5".
 private struct FlameMeter: View {
     let lit: Int
     var quiet = false
 
     var body: some View {
-        HStack(spacing: 1) {
-            ForEach(1...Chapters.maxFlames, id: \.self) { index in
-                Image(systemName: "flame.fill")
-                    .font(.system(size: 13))
-                    .foregroundStyle(index <= lit ? (quiet ? Theme.faint : Theme.flame) : Theme.faint.opacity(0.28))
+        HStack(spacing: 6) {
+            HStack(spacing: 1) {
+                ForEach(1...Chapters.maxFlames, id: \.self) { index in
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(index <= lit ? (quiet ? Theme.faint : Theme.flame) : Theme.faint.opacity(0.28))
+                }
             }
+            Text("Difficulty").scaledFont(12, .medium).lineLimit(1)
+                .foregroundStyle(quiet ? Theme.faint : Theme.muted)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Difficulty \(lit) of \(Chapters.maxFlames)")
+    }
+}
+
+/// "Levels 11-20" next to the flame meter. If that does not fit on one line (a narrow phone or large text), the meter drops below.
+private struct RangeAndFlames: View {
+    let range: String
+    let lit: Int
+    var quiet = false
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 8) { rangeLabel; FlameMeter(lit: lit, quiet: quiet) }
+            VStack(alignment: .leading, spacing: 3) { rangeLabel; FlameMeter(lit: lit, quiet: quiet) }
+        }
+    }
+
+    private var rangeLabel: some View {
+        Text(range).scaledFont(quiet ? 12 : 13, .medium).lineLimit(1)
+            .foregroundStyle(quiet ? Theme.faint : Theme.muted)
     }
 }
 
@@ -252,11 +275,8 @@ private struct ChapterCard: View {
             // Locked chapters stay compact, so a 100-level board is still a short scroll.
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Chapter \(chapter) \u{00B7} \(name)").scaledFont(16)
-                    HStack(spacing: 8) {
-                        Text(range).scaledFont(12, .medium)
-                        FlameMeter(lit: flames, quiet: true)
-                    }
+                    Text(name).scaledFont(16)
+                    RangeAndFlames(range: range, lit: flames, quiet: true)
                 }
                 Spacer()
                 Label("Locked", systemImage: "lock.fill").scaledFont(14, .medium).fixedSize()
@@ -265,19 +285,14 @@ private struct ChapterCard: View {
             .padding(16)
             .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Theme.surface))
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Chapter \(chapter), \(name), \(range), difficulty \(flames) of \(Chapters.maxFlames), locked")
+            .accessibilityLabel("\(name), \(range), difficulty \(flames) of \(Chapters.maxFlames), locked")
         } else {
             let stars = indices.reduce(0) { total, index in total + (app.progress.bestStars[levels[index].id] ?? 0) }
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("\(board.name.uppercased()) \u{00B7} CHAPTER \(chapter) OF \(chapterCount)").scaledFont(12, .semibold).foregroundStyle(Theme.muted).tracking(1.5)
                         Text(name).scaledFont(20)
-                        HStack(spacing: 8) {
-                            Text(range).scaledFont(13, .medium).foregroundStyle(Theme.muted)
-                            FlameMeter(lit: flames)
-                        }
-                        .padding(.top, 1)
+                        RangeAndFlames(range: range, lit: flames).padding(.top, 1)
                     }
                     Spacer()
                     Label("\(stars)/\(indices.count * 3)", systemImage: "star.fill")

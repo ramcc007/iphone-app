@@ -126,6 +126,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
 .chapter-head .n { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
 .chapter-head .t { font-size: 20px; font-weight: 700; }
 .chapter-head .st { font-size: 14px; font-weight: 700; color: var(--spark); white-space: nowrap; }
+.fl-label { font-size: 12px; font-weight: 500; }
+.rg, .fm { white-space: nowrap; } .fm { display: inline-flex; align-items: center; gap: 6px; }
+.chapter-head .sub, .chapter.closed .sub { flex-wrap: wrap; row-gap: 2px; }
 .chapter-head .sub { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 3px; }
 .flames { display: inline-flex; gap: 1px; align-items: center; }
 .flames svg { width: 15px; height: 15px; display: block; }
@@ -571,7 +574,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
       var headline = S.replay ? (S.award ? 'Better than before!' : 'Nice replay!') : D.praise(cleared);
       var subline = 'Level ' + lv.number + ' cleared' + (r.stars === 3 ? ' · Perfect, no mistakes' : '') + (!S.replay && D.praiseIsNew(cleared) ? ' · New title!' : '');
       return '<div class="veil"><div class="sheet win"><h2>' + esc(headline) + '</h2><p class="praise-sub">' + esc(subline) + '</p>' + starsSvg(r.stars, 46) +
-        '<div class="breakdown">' + rows + '</div>' + (S.chest ? '<div class="chest">' + SPARK + 'Chapter ' + lv.chapter + ' · ' + esc(D.chapterName(lv.board, lv.chapter)) + ' complete: chest +' + S.chest + ' Sparks</div>' : '') +
+        '<div class="breakdown">' + rows + '</div>' + (S.chest ? '<div class="chest">' + SPARK + esc(D.chapterName(lv.board, lv.chapter)) + ' complete: chest +' + S.chest + ' Sparks</div>' : '') +
         '<p style="font-size:14px">Wallet: ' + P.wallet + ' Sparks</p>' +
         (last ? '<p>That’s every ' + boardById(lv.board).name + ' level! Try another board for a new challenge.</p><button class="primary" data-act="home">Choose a board</button>' : '<button class="primary" data-act="next">Next: Level ' + (lv.number + 1) + '</button>') +
         (last ? '' : '<button class="link" data-act="home">Back to the map</button>') + '</div></div>';
@@ -654,7 +657,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   function flameRow(n) {
     var h = '';
     for (var i = 1; i <= D.MAX_FLAMES; i++) h += FLAME.replace('<svg ', '<svg class="' + (i <= n ? 'on' : 'off') + '" ');
-    return '<span class="flames" role="img" aria-label="Difficulty ' + n + ' of ' + D.MAX_FLAMES + ' flames">' + h + '</span>';
+    return '<span class="fm"><span class="flames" role="img" aria-label="Difficulty ' + n + ' of ' + D.MAX_FLAMES + ' flames">' + h + '</span><span class="fl-label" aria-hidden="true">Difficulty</span></span>';
   }
 
   function homeScreen() {
@@ -668,7 +671,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
     for (var ch = 1; ch <= chapters; ch++) {
       var first = (ch - 1) * 10, last = Math.min(LEVELS.length, ch * 10) - 1, range = 'Levels ' + (first + 1) + '–' + (last + 1);
       var cname = D.chapterName(board.id, ch), fl = D.chapterFlames(ch, chapters);
-      if (!unlocked(first)) { chaptersHtml += '<section class="chapter closed" aria-label="Chapter ' + ch + ', ' + esc(cname) + ', ' + range + ', difficulty ' + fl + ' of ' + D.MAX_FLAMES + ', locked"><div><div class="t">Chapter ' + ch + ' · ' + esc(cname) + '</div><div class="sub" aria-hidden="true">' + range + flameRow(fl) + '</div></div><span>Locked</span></section>'; continue; }
+      if (!unlocked(first)) { chaptersHtml += '<section class="chapter closed" aria-label="' + esc(cname) + ', ' + range + ', difficulty ' + fl + ' of ' + D.MAX_FLAMES + ', locked"><div><div class="t">' + esc(cname) + '</div><div class="sub" aria-hidden="true"><span class="rg">' + range + '</span>' + flameRow(fl) + '</div></div><span>Locked</span></section>'; continue; }
       var tiles = '', stars = 0;
       for (var i = first; i <= last; i++) {
         var lv = LEVELS[i], best = P.best[lv.id] || 0; stars += best;
@@ -681,7 +684,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
         if (lv.role === 'milestone' && !best) { cls += ' mile'; if (!sub) sub = 'CHEST'; else if (sub === LOCK) sub = LOCK + ' CHEST'; }
         tiles += '<button class="' + cls + '" ' + act + ' aria-label="' + aria + '">' + lv.number + (sub ? '<small>' + sub + '</small>' : '') + '</button>';
       }
-      chaptersHtml += '<section class="chapter"><div class="chapter-head"><div><div class="n">' + board.name + ' · Chapter ' + ch + ' of ' + chapters + '</div><div class="t">' + esc(cname) + '</div><div class="sub">' + range + flameRow(fl) + '</div></div><div class="st">★ ' + stars + '/' + (last - first + 1) * 3 + '</div></div><div class="levels">' + tiles + '</div></section>';
+      chaptersHtml += '<section class="chapter"><div class="chapter-head"><div><div class="t">' + esc(cname) + '</div><div class="sub"><span class="rg">' + range + '</span>' + flameRow(fl) + '</div></div><div class="st">★ ' + stars + '/' + (last - first + 1) * 3 + '</div></div><div class="levels">' + tiles + '</div></section>';
     }
     var nl = LEVELS[next];
     var logo = '<div class="logo" aria-hidden="true"><i></i><i style="background:linear-gradient(180deg,#FFCF85 0%,#FFB547 58%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 #C9862A"></i><i style="background:linear-gradient(180deg,#8ADAFB 0%,#4FC3F7 58%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 #2E8DB8"></i><i style="background:linear-gradient(180deg,#363D57 0%,#2A3045 60%);box-shadow:0 3px 0 #1C2030"></i></div>';

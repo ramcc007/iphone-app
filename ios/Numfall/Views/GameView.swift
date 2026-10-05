@@ -175,7 +175,7 @@ private struct TopBar: View {
     private var subtitle: String {
         if session.lesson != nil { return "No timer while you learn" }
         if let day = session.dailyDay { return "\(day.string) \u{00B7} \(session.level.timeLimit)-second limit" }
-        return "Chapter \(session.level.chapter) \u{00B7} \(session.level.timeLimit)-second limit"
+        return "\(session.level.timeLimit)-second limit"
     }
 }
 

@@ -176,7 +176,7 @@ t('Every chapter of every board has its own short name', () => {
   const bad = [];
   for (const id of D.BOARD_ORDER) {
     const n = Math.ceil(board(id).length / 10), names = [];
-    for (let ch = 1; ch <= n; ch++) { const nm = D.chapterName(id, ch); names.push(nm); if (/^Chapter /.test(nm) || nm.length > 22) bad.push(id + ch + ':' + nm); }
+    for (let ch = 1; ch <= n; ch++) { const nm = D.chapterName(id, ch); names.push(nm); if (nm === 'More levels' || /chapter/i.test(nm) || nm.length > 22) bad.push(id + ch + ':' + nm); }
     if (new Set(names).size !== n || D.CHAPTER_NAMES[id].length !== n) bad.push(id + ' count/unique');
   }
   return bad.length ? bad.join(' ') : true;

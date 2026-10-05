@@ -33,7 +33,7 @@ THREE BOARDS, ALL OPEN FROM THE START (and the first five levels of each are ope
 • Classic, 6×6: 100 levels with a steady climb in difficulty
 • Master, 9×9: 100 big boards with a long clock
 
-Every board is split into named chapters of ten levels, from "First Drops" to "Grand Finale" and from "Base Camp" to "The Summit". A flame meter shows how hard each chapter is, and a chest waits at the end of every one.
+Every board is split into named groups of ten levels, from "First Drops" to "Grand Finale" and from "Base Camp" to "The Summit". A difficulty meter of one to five flames shows how hard each group is, and a chest waits at the end of every one.
 
 ALWAYS A CLOCK
 Every level is timed, and early levels are short on purpose, so you are racing from your first drop. Finish with seconds to spare for more stars and more Sparks.
@@ -76,7 +76,7 @@ Order and caption (short, no other brand names):
 1. Board mid-drop with the ghost tile: "Drop it. Watch it fall."
 2. Timer bar and stars: "Beat the clock."
 3. Board picker: "Three boards. All open."
-4. Level map with named chapters and the flame meter: "230 levels, rising steadily."
+4. Level map with named groups of levels and the difficulty flames: "230 levels, rising steadily."
 5. Level complete with Sparks and stars: "Earn Sparks, never buy them."
 6. Tutorial step: "Learn it in a minute."
 Notes: use the real game screens only, no device frames needed, show no personal name other than a placeholder such as "Alex", keep text inside the safe area.

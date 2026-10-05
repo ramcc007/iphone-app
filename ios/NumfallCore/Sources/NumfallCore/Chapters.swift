@@ -16,7 +16,7 @@ public enum Chapters {
 
     public static func name(board: BoardKind, chapter: Int) -> String {
         let list = names[board] ?? []
-        return list.indices.contains(chapter - 1) ? list[chapter - 1] : "Chapter \(chapter)"
+        return list.indices.contains(chapter - 1) ? list[chapter - 1] : "More levels"
     }
 
     /// 1 to 5 flames. The first chapter of a board is 1 and the last is 5, with steady steps in between

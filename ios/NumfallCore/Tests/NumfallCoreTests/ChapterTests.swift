@@ -12,7 +12,8 @@ final class ChapterTests: XCTestCase {
             let names = chapters.map { Chapters.name(board: kind, chapter: $0) }
             XCTAssertEqual(Set(names).count, names.count, "\(board.id): names are unique")
             for name in names {
-                XCTAssertFalse(name.hasPrefix("Chapter "), "\(board.id): \(name) is a real name, not the fallback")
+                XCTAssertNotEqual(name, "More levels", "\(board.id): a real name, not the fallback")
+                XCTAssertFalse(name.localizedCaseInsensitiveContains("chapter"), "the word chapter is never shown")
                 XCTAssertLessThanOrEqual(name.count, 22, "\(name) must fit on a small phone")
             }
         }
@@ -40,7 +41,7 @@ final class ChapterTests: XCTestCase {
     }
 
     func testNameFallsBackToTheChapterNumber() {
-        XCTAssertEqual(Chapters.name(board: .classic, chapter: 11), "Chapter 11")
+        XCTAssertEqual(Chapters.name(board: .classic, chapter: 11), "More levels")
         XCTAssertEqual(Chapters.name(board: .quick, chapter: 1), "Quick Start")
     }
 
