@@ -27,3 +27,5 @@ Project `numfall-site` in the owner's Vercel team. Build with `node tools/site/b
 Private values (legal name, support email) go in `site/site.config.local.json` (git-ignored, overrides `site.config.json`).
 
 Live: https://numfall-site.vercel.app (/privacy, /terms, /support). Deployed 5 Oct 2026 to the `numfall-site` Vercel project (team onlinemoneyrcc-gmailcoms-projects), Vercel Authentication off so the pages are public.
+
+Vercel note: when files are sent through the API they land in a `src/` folder, so the project's Output Directory is set to `src`. If the site ever shows 404, check that setting and redeploy.
