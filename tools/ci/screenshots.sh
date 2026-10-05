@@ -41,7 +41,7 @@ shoot_device() {   # <label> <udid> <scene list...>
   limit 60 xcrun simctl shutdown "$id" 2>/dev/null
 }
 
-SCENES=(welcome tutorial home-quick home-classic home-master level-quick level-classic level-classic+3 level-master)
+SCENES=(welcome home-classic daily daily+3 level-classic+3 level-master home-quick tutorial home-master level-quick)
 case "$WHICH" in
   phone) shoot_device iphone-pro-max "$PHONE" "${SCENES[@]}" ;;
   small) shoot_device iphone-se "$SMALL" level-master level-classic home-classic welcome ;;
