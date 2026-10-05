@@ -25,3 +25,5 @@ Use the final addresses for the three links in `ios/Numfall/Views/MenuViews.swif
 Project `numfall-site` in the owner's Vercel team. Build with `node tools/site/build.js`, then deploy the `site/dist` folder (it includes `vercel.json`: clean URLs such as `/privacy`, `/terms`, `/support`). Do not deploy to production until the placeholder list is empty.
 
 Private values (legal name, support email) go in `site/site.config.local.json` (git-ignored, overrides `site.config.json`).
+
+Live: https://numfall-site.vercel.app (/privacy, /terms, /support). Deployed 5 Oct 2026 to the `numfall-site` Vercel project (team onlinemoneyrcc-gmailcoms-projects), Vercel Authentication off so the pages are public.
