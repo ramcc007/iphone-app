@@ -39,12 +39,16 @@ Every level is timed, and early levels are short on purpose, so you are racing f
 LEARN IN A MINUTE
 A three-level tutorial teaches the whole game: the basic move, why order matters, and how mistakes work. Each real level shows a ghost tile where your number will land.
 
+DAILY DROP
+A new puzzle every day, the same for everyone. Clear it to earn bonus Sparks, build a streak and share your result as a picture with no spoilers. An optional reminder is off until you turn it on.
+
 EARN, NEVER BUY
 Collect Sparks by clearing levels, finishing without mistakes, finishing fast and opening chests every ten levels. Spend them on hints, undos, an extra heart, or to skip a level that has you stuck. Sparks cannot be bought, because there are no purchases at all.
 
 MADE TO FEEL GOOD
 • Crisp vector graphics at any size, with a rich dark look
-• Smooth animation, haptics and sound you can switch off
+• Smooth animation, haptics and crisp sound effects, each of which you can switch off
+• Achievements and leaderboards through Game Center (optional)
 • Works on iPhone and iPad, in any orientation
 • Large Text, VoiceOver and Reduce Motion supported
 
@@ -74,14 +78,17 @@ Cartoon or fantasy violence, realistic violence, sexual content or nudity, profa
 Unrestricted web access: **No**. User-generated content: **No**. Loot boxes or simulated gambling: **No**.
 
 ## App Privacy (App Store Connect)
-"Data Not Collected." The app has no analytics, advertising or third-party code, and the developer receives nothing. The name, progress and sessions stay on the device and in the player's own iCloud (Apple's key-value storage), which is not "collected" by the developer. Tracking: **No**. Re-check this answer if anything below changes.
+"Data Not Collected." (Game Center scores and achievements go only to Apple's Game Center. Confirm in App Store Connect's privacy questionnaire that using GameKit does not require declaring data as collected by the developer; it normally does not.) The app has no analytics, advertising or third-party code, and the developer receives nothing. The name, progress and sessions stay on the device and in the player's own iCloud (Apple's key-value storage), which is not "collected" by the developer. Tracking: **No**. Re-check this answer if anything below changes.
 
 ## Notes for App Review
 Numfall is a free single-player number puzzle. No account, sign-in or demo login is needed.
 
 How to try it: on first launch, type any name (for example "Alex") and tap "Let's play". A three-step tutorial follows, then the home screen shows three boards (Quick, Classic, Master) that are all open. Tap a number in the tray, then tap a column; the number falls to the lowest empty cell. Every level has a countdown by design; when it reaches zero the level restarts. After two failed tries, a "Skip this level" option appears and costs Sparks, an in-game score earned by playing.
 
-Data and privacy: the first name, progress and session history are stored only on the device and in the user's own iCloud (key-value storage). The app makes no network connections and contains no third-party SDKs, ads or analytics. Settings has "Reset all progress" which deletes this data, and links to the Privacy Policy, Terms and Support pages.
+Data and privacy: Game Center and iCloud are Apple's own services; the app has no server and no third-party SDKs. The first name, progress and session history are stored only on the device and in the user's own iCloud (key-value storage). The app makes no network connections and contains no third-party SDKs, ads or analytics. Settings has "Reset all progress" which deletes this data, and links to the Privacy Policy, Terms and Support pages.
+
+New in this build: a Daily Drop (a Classic level chosen from the date, with a streak), sound effects (synthesised in code, no audio files), Game Center achievements and leaderboards (optional; the app works without signing in), a share image (shows only the result, never the puzzle) and an optional daily reminder (a local notification, off until the player turns it on and iOS permission is given).
+Game Center needs the identifiers numfall.stars, numfall.streak and numfall.ach.* (see docs/GAME_CENTER_SETUP.md) to exist in App Store Connect.
 
 Purchases: there are no In-App Purchases and no ads in this version. Sparks cannot be bought.
 
