@@ -20,3 +20,6 @@ Use the final addresses for the three links in `ios/Numfall/Views/MenuViews.swif
 - [ ] Fill in the placeholders and rebuild.
 - [ ] Have a lawyer or a reputable template service review the Terms and Privacy Policy for your country (this is a draft, not legal advice).
 - [ ] Update `AppLinks` in the app and the URLs in App Store Connect.
+
+## Vercel
+Project `numfall-site` in the owner's Vercel team. Build with `node tools/site/build.js`, then deploy the `site/dist` folder (it includes `vercel.json`: clean URLs such as `/privacy`, `/terms`, `/support`). Do not deploy to production until the placeholder list is empty.

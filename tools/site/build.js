@@ -32,5 +32,6 @@ if (process.argv.includes('--check')) { console.log('Site builds: ' + pages.leng
 fs.rmSync(DIST, { recursive: true, force: true }); fs.mkdirSync(DIST, { recursive: true });
 for (const f of pages) fs.writeFileSync(path.join(DIST, f), out[f]);
 fs.copyFileSync(path.join(SRC, 'style.css'), path.join(DIST, 'style.css'));
+fs.copyFileSync(path.join(SRC, 'vercel.json'), path.join(DIST, 'vercel.json'));
 console.log('Wrote ' + pages.length + ' pages to site/dist/.');
 if (placeholders.length) console.log('NOT READY TO PUBLISH. Fill these in site/site.config.json:\n  ' + [...new Set(placeholders)].join('\n  '));
