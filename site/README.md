@@ -22,6 +22,6 @@ Use the final addresses for the three links in `ios/Numfall/Views/MenuViews.swif
 - [ ] Update `AppLinks` in the app and the URLs in App Store Connect.
 
 ## Vercel
-The `numfall-site` project is linked to this repository: every push to `claude/happy-ride-mm490y` (and later `main`) builds the site with `node tools/site/build.js` (see the root `vercel.json`) and publishes `site/dist` to https://numfall-site.vercel.app.
+The `numfall-site` project is linked to this repository: every push to `claude/happy-ride-mm490y` (and later `main`) builds the site with `node tools/site/build.js` (see the root `vercel.json`) and publishes `site/dist` to https://www.numfall.store.
 The private values come from Vercel project environment variables `SITE_LEGAL_NAME`, `SITE_SUPPORT_EMAIL`, `SITE_GOVERNING_LAW` (locally: `site/site.config.local.json`, git-ignored). The Vercel build fails on purpose if any placeholder is left, so a broken site never replaces a good one.
 Do not upload files to this project by hand: the git build is the source of truth.

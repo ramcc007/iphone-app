@@ -4,9 +4,9 @@ import NumfallCore
 /// Public web pages the app links to. These must exist before App Store submission
 /// (docs/APP_STORE_COMPLIANCE.md section 9). Live on Vercel (project numfall-site); swap for a custom domain later.
 enum AppLinks {
-    static let privacy = URL(string: "https://numfall-site.vercel.app/privacy")!
-    static let terms = URL(string: "https://numfall-site.vercel.app/terms")!
-    static let support = URL(string: "https://numfall-site.vercel.app/support")!
+    static let privacy = URL(string: "https://www.numfall.store/privacy")!
+    static let terms = URL(string: "https://www.numfall.store/terms")!
+    static let support = URL(string: "https://www.numfall.store/support")!
 }
 
 struct HowToPlayView: View {

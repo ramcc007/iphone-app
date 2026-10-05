@@ -31,7 +31,7 @@ for (const f of pages) {
   const storeButton = cfg.appStoreUrl ? 'Download on the App Store' : 'Coming soon to the App Store';
   const content = fill(body, { storeLine, storeButton });
   const plain = (s) => fill(s).replace(/<[^>]+>/g, '');
-  out[f] = fill(layout, { title: esc(plain(meta[1])), description: esc(plain(meta[2])), content, year: String(new Date().getFullYear()) });
+  out[f] = fill(layout, { title: esc(plain(meta[1])), description: esc(plain(meta[2])), content, year: String(new Date().getFullYear()), path: f === 'index.html' ? '' : f.replace('.html', '') });
   const left = out[f].match(/\{\{\w+\}\}/g);
   if (left) throw new Error(f + ': unknown placeholder ' + left[0]);
 }

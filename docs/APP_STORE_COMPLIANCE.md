@@ -92,3 +92,9 @@ v1 has nothing to buy. Sparks are earned only and can't be bought, sold or excha
 
 ## Links shown in the app (added 5 Oct 2026)
 First screen footer: Privacy Policy, Terms of Use, Help & Contact (same links in Settings). Other common links we do not need yet: Restore Purchases (no IAP), Rate the app (use SKStoreReviewController, never gate on a rating), Licenses/Acknowledgements (only if third-party code is added), Delete my data (already in the player sheet).
+
+## Website addresses (5 Oct 2026)
+Marketing URL: https://www.numfall.store
+Privacy Policy URL: https://www.numfall.store/privacy
+Support URL: https://www.numfall.store/support
+Terms: https://www.numfall.store/terms
