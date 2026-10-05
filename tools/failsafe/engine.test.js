@@ -27,7 +27,7 @@ t('Time table: same for each block of 5 levels, then +5s, on every board', () =>
   const bad = [];
   for (const id of D.BOARD_ORDER) { const b = D.BOARDS[id]; for (let lv = 2; lv <= b.levels; lv++) { const d = D.timeLimit(id, lv) - D.timeLimit(id, lv - 1); const want = (lv - 1) % 5 === 0 ? b.step : 0; if (d !== want || b.step !== 5) bad.push(id + lv); } }
   const firsts = D.BOARD_ORDER.map((id) => D.timeLimit(id, 1)).join(',');
-  return bad.length ? bad.join(' ') : firsts === '28,70,180' ? true : firsts;
+  return bad.length ? bad.join(' ') : firsts === '28,90,240' ? true : firsts;
 });
 t('Each board gets harder: more gaps and less time per gap from its first chapter to its last', () => {
   const bad = [];

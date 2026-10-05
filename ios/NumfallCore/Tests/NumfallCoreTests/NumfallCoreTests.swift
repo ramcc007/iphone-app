@@ -60,12 +60,12 @@ final class GameRulesTests: XCTestCase {
         XCTAssertEqual(TimeTable.limit(board: .quick, level: 5), 28)
         XCTAssertEqual(TimeTable.limit(board: .quick, level: 6), 33)
         XCTAssertEqual(TimeTable.limit(board: .quick, level: 30), 53)
-        XCTAssertEqual(TimeTable.limit(board: .classic, level: 1), 70)
-        XCTAssertEqual(TimeTable.limit(board: .classic, level: 12), 80)
-        XCTAssertEqual(TimeTable.limit(board: .classic, level: 100), 165)
-        XCTAssertEqual(TimeTable.limit(board: .master, level: 1), 180)
-        XCTAssertEqual(TimeTable.limit(board: .master, level: 6), 185)
-        XCTAssertEqual(TimeTable.limit(board: .master, level: 100), 275)
+        XCTAssertEqual(TimeTable.limit(board: .classic, level: 1), 90)
+        XCTAssertEqual(TimeTable.limit(board: .classic, level: 12), 100)
+        XCTAssertEqual(TimeTable.limit(board: .classic, level: 100), 185)
+        XCTAssertEqual(TimeTable.limit(board: .master, level: 1), 240)
+        XCTAssertEqual(TimeTable.limit(board: .master, level: 6), 245)
+        XCTAssertEqual(TimeTable.limit(board: .master, level: 100), 335)
     }
 
     func testTimeUpLocksBoardAndClockNeverNegative() {

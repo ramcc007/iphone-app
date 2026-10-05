@@ -74,8 +74,8 @@ public enum BoardKind: String, Codable, CaseIterable, Identifiable, Sendable {
     var firstLimit: Int {
         switch self {
         case .quick: 28
-        case .classic: 70
-        case .master: 180
+        case .classic: 90
+        case .master: 240
         }
     }
 
@@ -85,7 +85,7 @@ public enum BoardKind: String, Codable, CaseIterable, Identifiable, Sendable {
         switch self {
         case .quick: "Short and snappy. Great for a coffee break."
         case .classic: "The full Numfall workout, and the best place to start."
-        case .master: "Big 9\u{00D7}9 boards, tight clocks. For number-puzzle fans."
+        case .master: "Big 9\u{00D7}9 boards and a long clock. For number-puzzle fans."
         }
     }
 }

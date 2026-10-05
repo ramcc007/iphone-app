@@ -250,7 +250,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   var HEART = '<path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.3 5 6.8 5c2 0 3.6 1.1 5.2 3 1.6-1.9 3.2-3 5.2-3 3.5 0 5.6 3.6 4.3 6.8C19.5 16.4 12 21 12 21z"/>';
   var STAR = '<polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21.5 12,17.3 5.5,21.5 7.5,14 2,9.3 9,9"/>';
   var SPARK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#FFB547" aria-hidden="true"><path d="M12 1l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"/></svg>';
-  var BOARD_TEXT = { quick: 'Short and snappy. Great for a coffee break.', classic: 'The full Numfall workout, and the best place to start.', master: 'Big 9×9 boards, tight clocks. For number-puzzle fans.' };
+  var BOARD_TEXT = { quick: 'Short and snappy. Great for a coffee break.', classic: 'The full Numfall workout, and the best place to start.', master: 'Big 9×9 boards and a long clock. For number-puzzle fans.' };
   function boardById(id) { for (var i = 0; i < BOARDS.length; i++) if (BOARDS[i].id === id) return BOARDS[i]; return BOARDS[0]; }
   function minutes(s) { return s < 120 ? s + 's' : Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
 

@@ -9,8 +9,8 @@
   // Must match tools/levelgen/validate.py (BOARDS) and ios/NumfallCore Level.swift (Board).
   const BOARDS = {
     quick:   { name: 'Quick',   size: 4, levels: 30,  start: 28,  step: 5 },
-    classic: { name: 'Classic', size: 6, levels: 100, start: 70,  step: 5 },
-    master:  { name: 'Master',  size: 9, levels: 100, start: 180, step: 5 }
+    classic: { name: 'Classic', size: 6, levels: 100, start: 90,  step: 5 },
+    master:  { name: 'Master',  size: 9, levels: 100, start: 240, step: 5 }
   };
   const BOARD_ORDER = ['quick', 'classic', 'master'];
 

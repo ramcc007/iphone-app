@@ -177,7 +177,7 @@ async function solveLevel(page, board, idx) {
     const offs9 = await allOnScreen(page); ok(`${name}: 9x9 every button fully on screen`, offs9 === true, offs9);
     const num9 = await page.evaluate(() => Math.round(Math.min(...[...document.querySelectorAll('.tray .num')].map((b) => b.getBoundingClientRect().width))));
     ok(`${name}: 9x9 number tiles at least 32px wide (${num9}px)`, num9 >= 32, num9);
-    ok(`${name}: 9x9 shows the 180-second countdown`, /(180|179|178)s/.test(await page.textContent('#timer')));
+    ok(`${name}: 9x9 shows the 240-second countdown`, /(240|239|238)s/.test(await page.textContent('#timer')));
     await page.screenshot({ path: path.join(SHOTS, name.replace(/ /g, '-') + '-master1.png') });
     ok(`${name}: no script errors`, errors.length === 0, errors.join(' | '));
     await ctx.close();

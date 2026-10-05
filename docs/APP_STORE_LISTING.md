@@ -31,7 +31,7 @@ There is a twist: numbers fall. The order you drop them in is part of the puzzle
 THREE BOARDS, ALL OPEN FROM THE START (and the first five levels of each are open to play in any order)
 • Quick, 4×4: 30 short levels for a spare minute
 • Classic, 6×6: 100 levels with a steady climb in difficulty
-• Master, 9×9: 100 big boards with tight clocks
+• Master, 9×9: 100 big boards with a long clock
 
 ALWAYS A CLOCK
 Every level is timed, and early levels are short on purpose, so you are racing from your first drop. Finish with seconds to spare for more stars and more Sparks.

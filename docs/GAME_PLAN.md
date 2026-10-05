@@ -30,8 +30,8 @@ The player chooses a board on the home screen. **All three are open from the sta
 | Board | Grid | Boxes | Levels | Gaps per level | Clock per level |
 |---|---|---|---|---|---|
 | **Quick** | 4×4 | 2×2 | 30 | 5 → 9 | 28s → 53s |
-| **Classic** (starting choice) | 6×6 | 2×3 | 100 | 12 → 21 | 70s → 165s |
-| **Master** | 9×9 | 3×3 | 100 | 28 → 41 | 180s → 275s |
+| **Classic** (starting choice) | 6×6 | 2×3 | 100 | 12 → 21 | 90s → 185s |
+| **Master** | 9×9 | 3×3 | 100 | 28 → 41 | 240s → 335s |
 
 - The tutorial is always on a 4×4 grid. When it ends, the player picks a board. Classic is selected by default.
 - Inside a board, levels unlock one after another (or by skipping). Clearing a Quick level never unlocks Classic levels.
@@ -78,8 +78,8 @@ Each board has its own table. The limit is the same for each block of 5 levels, 
 | Board | Levels 1–5 | Step every 5 levels | Last block | Seconds per gap (first → last level) |
 |---|---|---|---|---|
 | Quick 4×4 | 28s | +5s | 53s (levels 26–30) | about 4.7 → 5.9 |
-| Classic 6×6 | 70s | +5s | 165s (levels 96–100) | about 5.8 → 9 |
-| Master 9×9 | 180s | +5s | 275s (levels 96–100) | about 6.4 → 6.7 |
+| Classic 6×6 | 90s | +5s | 185s (levels 96–100) | about 7.5 → 8.8 |
+| Master 9×9 | 240s | +5s | 335s (levels 96–100) | about 8.6 → 8.2 |
 
 The early levels are the tightest on purpose (4 seconds per gap on Quick level 1): they are easy to solve, so the clock is what makes them a race. The validator rejects any level under 3 (Quick), 4 (Classic) or 6 (Master) seconds per gap. The tutorial is the only untimed play.
 
@@ -271,6 +271,9 @@ The first time a level (or the Daily Drop) is opened it is the original board. E
 
 ## Clock change (5 October 2026)
 The owner found the first levels too tight (Quick 3.3 to 4 s per gap, Classic 4.6 to 5). Start clocks are now **Quick 28s, Classic 70s, Master 180s (unchanged)**, still +5s every 5 levels: Quick 28 to 53s, Classic 70 to 165s. The full list is in `docs/TIME_LIMITS.md`. Side effect: stars and the time bonus use the time left, so a few more players reach three stars.
+
+## Second clock change: Classic and Master (5 October 2026)
+The owner asked for more time on 6×6 and 9×9. Start clocks are now **Classic 90s (was 70s) and Master 240s (was 180s)**, still +5s every 5 levels: Classic 90 to 185s, Master 240 to 335s. That is about 7.5 to 8.8 seconds per gap on Classic and 8.2 to 8.6 on Master (before: 5.4 to 7.9 and 6.2 to 6.7). Quick is unchanged at 28 to 53s. The level puzzles themselves are untouched, only the clock. The full list is in `docs/TIME_LIMITS.md`. If it still feels tight or too loose, the start value is one number per board (`BOARDS` in `validate.py`, `engine.js` and `Level.swift`).
 
 ## Praise and open first levels (5 October 2026)
 - **Praise:** on a first clear the win pop-up headline is a compliment that grows with the number of levels cleared over all boards (24 titles: 'Nice start!' at 1, 'You're a Pro!' at 25, 'You're an achiever!' at 45, 'You're a genius!' at 80, 'Centurion!' at 100, 'You cleared everything!' at 230). A line under it says 'Level N cleared', adds 'Perfect, no mistakes' for three stars and 'New title!' when a threshold is crossed. Replays say 'Better than before!' or 'Nice replay!'. Source: `Praise.swift` and `engine.js` (`praise`).

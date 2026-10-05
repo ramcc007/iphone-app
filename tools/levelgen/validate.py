@@ -126,8 +126,8 @@ def validate(name, sol, giv, time_limit=None, min_secs_per_gap=6):
 # Must match prototype/web/engine.js (BOARDS) and ios/NumfallCore Level.swift (Board, TimeTable).
 BOARDS = {
     'quick':   {'name': 'Quick',   'size': 4, 'boxRows': 2, 'boxCols': 2, 'levels': 30,  'start': 28,  'step': 5,  'minSecsPerGap': 3},
-    'classic': {'name': 'Classic', 'size': 6, 'boxRows': 2, 'boxCols': 3, 'levels': 100, 'start': 70,  'step': 5,  'minSecsPerGap': 4},
-    'master':  {'name': 'Master',  'size': 9, 'boxRows': 3, 'boxCols': 3, 'levels': 100, 'start': 180, 'step': 5,  'minSecsPerGap': 6},
+    'classic': {'name': 'Classic', 'size': 6, 'boxRows': 2, 'boxCols': 3, 'levels': 100, 'start': 90,  'step': 5,  'minSecsPerGap': 4},
+    'master':  {'name': 'Master',  'size': 9, 'boxRows': 3, 'boxCols': 3, 'levels': 100, 'start': 240, 'step': 5,  'minSecsPerGap': 6},
 }
 BOARD_ORDER = ['quick', 'classic', 'master']
 
