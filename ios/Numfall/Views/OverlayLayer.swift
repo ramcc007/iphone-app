@@ -64,11 +64,6 @@ struct OverlayLayer: View {
             Text("Wallet: \(app.progress.sparks) Sparks").scaledFont(14, .medium).foregroundStyle(Theme.soft)
             if let board = session.board, let next = session.nextIndex {
                 PrimaryButton("Next: Level \(level.number + 1)") { app.play(board, next) }
-                ShareResultButton(
-                    data: ShareCardData(headline: "\(session.board?.name ?? "") \u{00B7} Level \(level.number)", stars: result.stars,
-                                        seconds: min(level.timeLimit, max(0, level.timeLimit - session.game.timeLeft))),
-                    text: ShareText.level(boardName: session.board?.name ?? "", number: level.number, stars: result.stars,
-                                          seconds: min(level.timeLimit, max(0, level.timeLimit - session.game.timeLeft))))
                 LinkButton("Back to the map") { app.goHome() }
             } else {
                 Text("That\u{2019}s every \(session.board?.name ?? "") level! Try another board for a new challenge.").font(Theme.rounded(.body, .medium)).foregroundStyle(Theme.soft)
@@ -96,13 +91,6 @@ struct OverlayLayer: View {
                     .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color(hex: 0xFF8A3D).opacity(0.12)))
             }
             Text("Wallet: \(app.progress.sparks) Sparks").scaledFont(14, .medium).foregroundStyle(Theme.soft)
-            if let day = session.dailyDay {
-                let saved = app.progress.dailyResult(on: day)
-                ShareResultButton(
-                    data: ShareCardData(headline: "Daily Drop \u{00B7} \(day.string)", stars: saved?.stars ?? result.stars,
-                                        seconds: saved?.seconds ?? 0, streak: reward.streak),
-                    text: ShareText.daily(day: day, stars: saved?.stars ?? result.stars, seconds: saved?.seconds ?? 0, streak: reward.streak))
-            }
             if !Reminders.offered && !Reminders.enabled {
                 ReminderOffer()
             }

@@ -42,7 +42,7 @@ LEARN IN A MINUTE
 A three-level tutorial teaches the whole game: the basic move, why order matters, and how mistakes work. Each real level shows a ghost tile where your number will land.
 
 DAILY DROP
-A new puzzle every day, the same for everyone. Clear it to earn bonus Sparks, build a streak and share your result as a picture with no spoilers. An optional reminder is off until you turn it on.
+A new puzzle every day, the same for everyone. Clear it to earn bonus Sparks and build a streak. An optional reminder is off until you turn it on.
 
 FRESH EVERY TIME
 Restart a level and the numbers change while the difficulty stays exactly the same, so you can never beat it from memory. Every board is solvable by logic alone.
@@ -95,7 +95,7 @@ How to try it: on first launch, type any name (for example "Alex") and tap "Let'
 
 Data and privacy: Game Center and iCloud are Apple's own services; the app has no server and no third-party SDKs. The first name, progress and session history are stored only on the device and in the user's own iCloud (key-value storage). The app makes no network connections and contains no third-party SDKs, ads or analytics. Settings has "Reset all progress" which deletes this data, and links to the Privacy Policy, Terms and Support pages.
 
-New in this build: a Daily Drop (a Classic level chosen from the date, with a streak), sound effects (synthesised in code, no audio files), Game Center achievements and leaderboards (optional; the app works without signing in), a share image (shows only the result, never the puzzle) and an optional daily reminder (a local notification, off until the player turns it on and iOS permission is given).
+New in this build: a Daily Drop (a Classic level chosen from the date, with a streak), sound effects (synthesised in code, no audio files), Game Center achievements and leaderboards (optional; the app works without signing in) and an optional daily reminder (a local notification, off until the player turns it on and iOS permission is given).
 Game Center needs the identifiers numfall.stars, numfall.streak and numfall.ach.* (see docs/GAME_CENTER_SETUP.md) to exist in App Store Connect.
 
 Purchases: there are no In-App Purchases and no ads in this version. Sparks cannot be bought.

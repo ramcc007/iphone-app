@@ -140,7 +140,7 @@ private struct TopBar: View {
     var body: some View {
         HStack {
             if session.lesson == nil {
-                CircleButton(systemImage: "pause.fill", label: "Pause") { session.pause() }
+                CircleButton(systemImage: "chevron.backward", label: "Back to the map") { app.goHome() }
             } else {
                 CircleButton(systemImage: "questionmark", label: "How to play") { showRules = true }
             }
@@ -151,7 +151,7 @@ private struct TopBar: View {
             }
             Spacer()
             if session.lesson == nil {
-                CircleButton(systemImage: "questionmark", label: "How to play") { showRules = true }
+                CircleButton(systemImage: "pause.fill", label: "Pause") { session.pause() }
             } else {
                 Button("Skip") {
                     app.finishTutorial()

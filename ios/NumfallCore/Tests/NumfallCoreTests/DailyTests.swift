@@ -1,7 +1,7 @@
 import XCTest
 @testable import NumfallCore
 
-/// Daily Drop, streaks, achievements and share text. Run with `swift test` (Mac, GitHub Actions) or tools/swift/linux-swift.sh.
+/// Daily Drop, streaks, achievements and result formatting. Run with `swift test` (Mac, GitHub Actions) or tools/swift/linux-swift.sh.
 final class DailyTests: XCTestCase {
     let classic = LevelLibrary.bundled().first { $0.id == "classic" }!.levels
 
@@ -168,16 +168,13 @@ final class DailyTests: XCTestCase {
         XCTAssertEqual(Set(Achievement.allCases.map(\.id)).count, Achievement.allCases.count)
     }
 
-    func testShareTextHasNoPuzzleContent() {
-        XCTAssertEqual(ShareText.stars(3), "\u{2605}\u{2605}\u{2605}")
-        XCTAssertEqual(ShareText.stars(1), "\u{2605}\u{2606}\u{2606}")
-        XCTAssertEqual(ShareText.stars(9), "\u{2605}\u{2605}\u{2605}")
-        XCTAssertEqual(ShareText.clock(41), "0:41")
-        XCTAssertEqual(ShareText.clock(125), "2:05")
-        let level = ShareText.level(boardName: "Classic", number: 12, stars: 3, seconds: 41)
-        XCTAssertEqual(level, "Numfall \u{00B7} Classic 12\n\u{2605}\u{2605}\u{2605} in 0:41\nCan you beat it? https://www.numfall.store")
-        let daily = ShareText.daily(day: day(2026, 10, 5), stars: 2, seconds: 59, streak: 4)
-        XCTAssertTrue(daily.contains("2026-10-05") && daily.contains("4-day streak") && daily.contains("0:59"))
-        XCTAssertFalse(ShareText.daily(day: day(2026, 10, 5), stars: 1, seconds: 59, streak: 1).contains("streak"))
+    func testResultFormat() {
+        XCTAssertEqual(ResultFormat.stars(3), "\u{2605}\u{2605}\u{2605}")
+        XCTAssertEqual(ResultFormat.stars(1), "\u{2605}\u{2606}\u{2606}")
+        XCTAssertEqual(ResultFormat.stars(9), "\u{2605}\u{2605}\u{2605}")
+        XCTAssertEqual(ResultFormat.stars(-2), "\u{2606}\u{2606}\u{2606}")
+        XCTAssertEqual(ResultFormat.clock(41), "0:41")
+        XCTAssertEqual(ResultFormat.clock(125), "2:05")
+        XCTAssertEqual(ResultFormat.clock(-5), "0:00")
     }
 }

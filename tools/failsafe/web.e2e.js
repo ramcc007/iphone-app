@@ -148,6 +148,12 @@ async function solveLevel(page, board, idx) {
     const t1 = await page.textContent('#timer'); await page.clock.runFor(10000); const t2 = await page.textContent('#timer');
     ok('Pause stops the clock', t1 === t2, t1 + ' vs ' + t2);
     ok('Pause hides the board', await page.evaluate(() => document.querySelector('.board').classList.contains('hidden')));
+    await page.click('.veil [data-act="resume"]');
+    ok('Game screen: a visible Back button sits top-left and Pause top-right', (await page.getAttribute('.topbar [data-act="home"]', 'aria-label')) === 'Back to the map' && (await page.locator('.topbar > :first-child[data-act="home"]').count()) === 1 && (await page.locator('.topbar > :last-child[data-act="pause"]').count()) === 1);
+    ok('Game screen: the Back button is a 44px tap target', await page.evaluate(() => { const r = document.querySelector('.topbar [data-act="home"]').getBoundingClientRect(); return r.width >= 44 && r.height >= 44; }));
+    await page.click('.topbar [data-act="home"]');
+    ok('Back returns to the map in one tap', await page.isVisible('.home') && !(await page.isVisible('.board')));
+    ok('Leaving a level early is not a failure (no fail counted)', await page.evaluate(() => { const p = JSON.parse(localStorage.getItem('numfall.web.v2')); const last = p.sessions[p.sessions.length - 1]; return !!last && !('quick-003' in (p.fails || {})); }));
     ok('No script errors (time/skip run)', errors.length === 0, errors.join(' | '));
     await ctx.close(); }
 

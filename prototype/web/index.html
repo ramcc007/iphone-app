@@ -111,7 +111,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
 .breakdown { display: flex; flex-direction: column; gap: 4px; font-size: 15px; color: var(--soft); }
 .breakdown div { display: flex; justify-content: space-between; } .breakdown b { color: var(--spark); }
 .chest { display: flex; align-items: center; gap: 12px; background: rgba(255,181,71,0.12); border: 1.5px solid var(--spark); border-radius: 18px; padding: 12px 14px; color: var(--spark); font-weight: 600; }
-.sharebox { background: var(--bg); border-radius: 12px; padding: 10px 12px; font-size: 14px; color: var(--soft); -webkit-user-select: text; user-select: text; }
 
 /* Home */
 .home { gap: 16px; }
@@ -280,7 +279,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   ];
 
   // ---------- app state ----------
-  var S = { form: { name: '', edit: false }, attempt: null, screen: 'home', game: null, levelIndex: 0, lesson: -1, step: 0, sel: null, cursor: 0, hintCol: null, flash: '', flashKind: 'info', guideOverride: '', paused: false, overlay: null, anim: null, crack: null, glow: [], result: null, award: 0, chest: 0, copied: '', confirmReset: false };
+  var S = { form: { name: '', edit: false }, attempt: null, screen: 'home', game: null, levelIndex: 0, lesson: -1, step: 0, sel: null, cursor: 0, hintCol: null, flash: '', flashKind: 'info', guideOverride: '', paused: false, overlay: null, anim: null, crack: null, glow: [], result: null, award: 0, chest: 0, confirmReset: false };
   // First run: who's playing -> tutorial -> home. Anyone with saved progress but no profile is asked once.
   if (!P.profile) S.screen = 'welcome'; else if (!P.tutorialDone) startLesson(0);
 
@@ -375,7 +374,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
     S.lesson = k; S.step = 0; S.game = D.newGame(lessonLevel(LESSONS[k].empties), { timed: false }); S.screen = 'tutorial';
     resetTurn(); S.overlay = null;
   }
-  function resetTurn() { S.sel = null; S.cursor = 0; S.hintCol = null; S.flash = ''; S.guideOverride = ''; S.anim = null; S.crack = null; S.glow = []; S.result = null; S.copied = ''; }
+  function resetTurn() { S.sel = null; S.cursor = 0; S.hintCol = null; S.flash = ''; S.guideOverride = ''; S.anim = null; S.crack = null; S.glow = []; S.result = null; }
   function goHome() { leaveAttempt(); S.screen = 'home'; S.game = null; S.overlay = null; S.paused = false; render(); }
 
   function pick(v) {
@@ -533,9 +532,9 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
     var g = S.game, lv = g.level, lesson = inLesson() ? LESSONS[S.lesson] : null;
     sizeBoard(g.n);
     var top = '<div class="topbar">' +
-      (lesson ? '<button class="iconbtn" data-act="rules" aria-label="How to play">?</button>' : '<button class="iconbtn" data-act="pause" aria-label="Pause"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg></button>') +
+      (lesson ? '<button class="iconbtn" data-act="rules" aria-label="How to play">?</button>' : '<button class="iconbtn" data-act="home" aria-label="Back to the map"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 5 8 12 15 19"/></svg></button>') +
       '<div class="title-block"><div class="t">' + (lesson ? 'Tutorial · Level ' + (S.lesson + 1) + ' of 3' : boardById(lv.board).name + ' · Level ' + lv.number) + '</div><div class="s">' + (lesson ? 'No timer while you learn' : (P.profile ? esc(P.profile.name) + ' · ' : '') + lv.timeLimit + '-second limit') + '</div></div>' +
-      (lesson ? '<button class="pill" data-act="skipTutorial">Skip</button>' : '<button class="iconbtn" data-act="rules" aria-label="How to play">?</button>') + '</div>';
+      (lesson ? '<button class="pill" data-act="skipTutorial">Skip</button>' : '<button class="iconbtn" data-act="pause" aria-label="Pause"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg></button>') + '</div>';
     var status = lesson ? (lesson.hearts ? '<div class="status">' + hearts(g, 24) + '<span style="color:var(--muted);font-size:14px">3 hearts</span></div>' : '<div class="lesson"><span class="tag">' + esc(lesson.title.toUpperCase()) + '</span><p>' + esc(lesson.text) + '</p></div>') :
       '<div class="status"><div id="timer" class="' + timerClass(g) + '" aria-label="' + g.timeLeft + ' seconds left">' + timerInner(g) + '</div><div class="status-row2">' + hearts(g, isWide() ? 30 : 22) + '<span class="pill spark" style="background:transparent;padding:0" aria-label="' + P.wallet + ' Sparks">' + SPARK + P.wallet + '</span></div>' + timerBar(g) + '</div>';
     if (lesson && lesson.hearts) status = '<div class="lesson"><span class="tag">' + esc(lesson.title.toUpperCase()) + '</span><p>' + esc(lesson.text) + '</p></div>' + status;
@@ -565,7 +564,6 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
     if (o === 'won') {
       var r = S.result, last = S.levelIndex === LEVELS.length - 1;
       var rows = S.replay ? '<div><span>Replay: ' + (S.award ? 'new stars' : 'no new stars') + '</span><b>+' + S.award + ' ✦</b></div>' : r.breakdown.map(function (b) { return '<div><span>' + esc(b.label) + '</span><b>+' + b.n + ' ✦</b></div>'; }).join('');
-      var share = 'Numfall ' + boardById(lv.board).name + ' · Level ' + lv.number + ' ' + '★★★'.slice(0, r.stars) + '☆☆☆'.slice(0, 3 - r.stars) + ' · ' + g.timeLeft + 's to spare';
       var cleared = Object.keys(P.best).length;
       var headline = S.replay ? (S.award ? 'Better than before!' : 'Nice replay!') : D.praise(cleared);
       var subline = 'Level ' + lv.number + ' cleared' + (r.stars === 3 ? ' · Perfect, no mistakes' : '') + (!S.replay && D.praiseIsNew(cleared) ? ' · New title!' : '');
@@ -573,7 +571,6 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
         '<div class="breakdown">' + rows + '</div>' + (S.chest ? '<div class="chest">' + SPARK + 'Chapter ' + lv.chapter + ' · ' + esc(D.chapterName(lv.board, lv.chapter)) + ' complete: chest +' + S.chest + ' Sparks</div>' : '') +
         '<p style="font-size:14px">Wallet: ' + P.wallet + ' Sparks</p>' +
         (last ? '<p>That’s every ' + boardById(lv.board).name + ' level! Try another board for a new challenge.</p><button class="primary" data-act="home">Choose a board</button>' : '<button class="primary" data-act="next">Next: Level ' + (lv.number + 1) + '</button>') +
-        '<button class="secondary" data-act="share" data-text="' + esc(share) + '">' + (S.copied ? 'Copied!' : 'Share result') + '</button>' + (S.copied === 'fail' ? '<div class="sharebox">' + esc(share) + '</div>' : '') +
         (last ? '' : '<button class="link" data-act="home">Back to the map</button>') + '</div></div>';
     }
     if (o === 'timeup') return '<div class="veil"><div class="sheet lose"><h2>Time’s up!</h2><p>You filled ' + g.history.length + ' of ' + lv.gaps + ' gaps. Level ' + lv.number + ' starts again with a fresh board and the full ' + lv.timeLimit + ' seconds.</p><button class="primary" data-act="restart">Start Level ' + lv.number + ' again</button>' + skip + tip + '<button class="secondary" data-act="home">Switch board or level</button></div></div>';
@@ -763,10 +760,6 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
         var now = Date.now(); P.profile = { name: nm, created: P.profile ? P.profile.created : now, updated: now }; save();
         S.form = { name: '', edit: false }; S.overlay = null;
         if (S.screen === 'welcome') { if (!P.tutorialDone) { startLesson(0); } else { S.screen = 'home'; } }
-        break;
-      case 'share':
-        var text = b.getAttribute('data-text');
-        try { navigator.clipboard.writeText(text).then(function () { S.copied = 'ok'; render(); }, function () { S.copied = 'fail'; render(); }); } catch (err) { S.copied = 'fail'; }
         break;
     }
     render();

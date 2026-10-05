@@ -53,7 +53,7 @@ struct DailyCard: View {
 
     private func subtitle(done: Bool, streak: Int, result: DailyResult?) -> String {
         if done, let result {
-            return "Cleared \(ShareText.stars(result.stars)) in \(ShareText.clock(result.seconds)). A new puzzle tomorrow."
+            return "Cleared \(ResultFormat.stars(result.stars)) in \(ResultFormat.clock(result.seconds)). A new puzzle tomorrow."
         }
         let reward = DailyDrop.rewardBase + DailyDrop.streakBonus(streak + 1)
         if streak > 0 { return "Keep your \(streak)-day streak going. +\(reward) \u{2726}" }

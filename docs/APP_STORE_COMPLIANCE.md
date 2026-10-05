@@ -100,7 +100,8 @@ Support URL: https://www.numfall.store/support
 Terms: https://www.numfall.store/terms
 Support email: support@numfall.store (forwards to the owner's inbox through ImprovMX (MX and SPF records in Vercel DNS); replies are sent from Gmail "Send mail as").
 
-## Features added 5 October 2026 (Daily Drop, sound, Game Center, share, reminders)
+## Features added 5 October 2026 (Daily Drop, sound, Game Center, reminders)
+The Share result button was added and then removed again the same day (owner's decision). There is no sharing feature in v1, so the privacy policy and the listing no longer mention one. When it comes back after launch (see `docs/GAME_PLAN.md`, section "Share result, after launch"), update the privacy policy, the listing and this list in the same change.
 - **Privacy policy** updated: Daily Drop results are stored on the device and in iCloud; Game Center is Apple's service and optional; the reminder is a local notification. App Privacy answer stays "Data Not Collected", and `PrivacyInfo.xcprivacy` is unchanged (no new required-reason APIs are used beyond UserDefaults).
 - **Reminders (Guideline 4.5.4 and 5.1.1):** opt-in only, asked after the first Daily Drop or from Settings, never required to use the app, neutral wording with no streak-loss pressure, stops by itself after 14 days without opening the app.
 - **No fake urgency or guilt:** the streak is shown as a score, never as something to lose; there is no purchase to save a streak.

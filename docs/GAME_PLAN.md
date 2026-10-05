@@ -124,7 +124,7 @@ Game mechanics can't be owned (copyright protects code, art, text and names, not
 **Why players come back:**
 - **Visible progress:** each board's map is split into chapters of 10 levels, with a milestone chest at the end of each. Quick has 3 chapters, Classic and Master have 10 each.
 - **"One more level":** levels are short, and the next one starts with one tap.
-- **Daily Drop:** one puzzle a day, the same for everyone, with a streak, a leaderboard and a spoiler-free share card.
+- **Daily Drop:** one puzzle a day, the same for everyone, with a streak and a leaderboard.
 - **Collections:** number skins and board themes unlocked with stars.
 
 **Ethical guardrails:** these are required for Apple and under-18 players, and they protect reviews.
@@ -264,7 +264,7 @@ The whole set is generated deterministically (`python3 tools/levelgen/build_leve
 - **Shorter clocks, intro and player profile** (owner's feedback, 4 October 2026): the first levels of each board get much less time (Quick 20s, Classic 55s, Master 180s, +5s every 5 levels) so the player races the clock from the start. First run asks for a name (the age question was removed on 5 October 2026), saved on the device and in the player's own iCloud, with the name shown on the home screen and every attempt kept as a session record. Time's up always shows Skip (locked until the 2nd try), a tip and a way to switch board. The tutorial's steps are called levels.
 
 ## Update 5 October 2026
-Built and compiling in CI: Daily Drop (Classic levels 31 to 90 chosen from the date, streak, bonus Sparks), procedural sound effects, Game Center achievements and two leaderboards, a share image, and an opt-in 7 pm reminder. Still open: a Home Screen widget (needs a separate app extension and an App Group), background music, and a dedicated pool of Daily Drop puzzles.
+Built and compiling in CI: Daily Drop (Classic levels 31 to 90 chosen from the date, streak, bonus Sparks), procedural sound effects, Game Center achievements and two leaderboards, and an opt-in 7 pm reminder. Still open: a Home Screen widget (needs a separate app extension and an App Group), background music, and a dedicated pool of Daily Drop puzzles.
 
 ## Fresh boards on restart (5 October 2026)
 The first time a level (or the Daily Drop) is opened it is the original board. Every later start, whether a restart, a retry after time-up or a replay, uses a disguised copy: the digits are relabelled and whole columns are shuffled inside their box-wide groups. Rows are never moved because the givens are stacked at the bottom of each column. The puzzle keeps its gaps per column, its single solution, its logic path and its time limit, so difficulty is identical. Tests: `tools/failsafe/engine.test.js` (valid, one solution, same logic rounds, solved by logic alone, for all 230 levels over several seeds) and `ios/NumfallCore/Tests/NumfallCoreTests/VariantTests.swift`. Variants available per level: Quick 192, Classic 51,840, Master over 470 million.
@@ -274,6 +274,13 @@ The owner found the first levels too tight (Quick 3.3 to 4 s per gap, Classic 4.
 
 ## Second clock change: Classic and Master (5 October 2026)
 The owner asked for more time on 6×6 and 9×9. Start clocks are now **Classic 90s (was 70s) and Master 240s (was 180s)**, still +5s every 5 levels: Classic 90 to 185s, Master 240 to 335s. That is about 7.5 to 8.8 seconds per gap on Classic and 8.2 to 8.6 on Master (before: 5.4 to 7.9 and 6.2 to 6.7). Quick is unchanged at 28 to 53s. The level puzzles themselves are untouched, only the clock. The full list is in `docs/TIME_LIMITS.md`. If it still feels tight or too loose, the start value is one number per board (`BOARDS` in `validate.py`, `engine.js` and `Level.swift`).
+
+## Share result, after launch (decision of 5 October 2026)
+The first Share result (a text line plus a picture, "Numfall Classic · Level 1 ★★☆ · 8s to spare") was removed from v1: the owner found it too plain, and a share is most useful when it carries the App Store link, which only exists once the app is live. Nothing about sharing ships in v1: no button, no share card, no share text, and the privacy policy and listing no longer mention it.
+**Plan for the next version:** a "Share result" button on the win screen that takes a **screenshot of the results screen itself** (stars, Sparks, praise headline) and opens the iOS share sheet, so the player can send it by social media, messages, email or any other share option on the device, together with the **App Store link** of the app. Notes for when it is built: use the app's real App Store URL (known only after the listing is created), show no player name by default, keep the board out of the picture so it spoils nothing, check Guideline 4.5.x and the privacy policy wording again, and mention it in the listing only when it ships.
+
+## Back button on the game screen (5 October 2026)
+Playtest feedback: the game screen had no visible way back (the only exit was inside the pause sheet). The top bar now has a **Back chevron on the left** that returns to the level map in one tap, and **Pause on the right**. "How to play" is no longer in the top bar during a level; it stays in the pause sheet, which keeps the title readable on the smallest phones. Leaving counts as "Left early" in the session history and is never a failed attempt, so there is no penalty. The tutorial keeps its own "?" and "Skip". Both buttons are 44 pt.
 
 ## Chapter names and the flame meter (5 October 2026)
 Every chapter (block of 10 levels) now has a name and a difficulty meter of 1 to 5 flames on the home screen, open and locked chapters alike. Quick (3 chapters): Quick Start, Picking Up Pace, Lightning Round. Classic: First Drops, Finding Your Feet, Picking Up Speed, Steady Hands, Sharp Eyes, Clever Moves, Cool Under Pressure, Pattern Hunters, Razor Focus, Grand Finale. Master: Base Camp, Rising Ground, The Long Climb, Thin Air, Sharp Ridge, Above the Clouds, Storm Front, Sky High, Final Ascent, The Summit. The chest line on the win pop-up now names the chapter ("Chapter 2 · Finding Your Feet complete: chest +N Sparks").
