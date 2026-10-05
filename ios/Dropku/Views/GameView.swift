@@ -92,6 +92,7 @@ struct GameView: View {
                 OverlayLayer(session: session, wide: wide, showRules: $showRules)
             }
         }
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)   // the board and tray stay playable; menus and pop-ups scale further
         .onAppear { session.start() }
         .onDisappear { session.stop() }
         .onChange(of: scenePhase) { _, phase in
@@ -138,8 +139,8 @@ private struct TopBar: View {
             }
             Spacer()
             VStack(spacing: 2) {
-                Text(title).font(Theme.rounded(20))
-                Text(subtitle).font(Theme.rounded(12, .medium)).foregroundStyle(Theme.muted)
+                Text(title).scaledFont(20)
+                Text(subtitle).scaledFont(12, .medium).foregroundStyle(Theme.muted)
             }
             Spacer()
             if session.lesson == nil {
@@ -149,9 +150,9 @@ private struct TopBar: View {
                     app.finishTutorial()
                     app.goHome()
                 }
-                .font(Theme.rounded(15, .semibold))
+                .scaledFont(15, .semibold)
                 .padding(.horizontal, 14)
-                .frame(height: 40)
+                .frame(minHeight: 40)
                 .background(Capsule().fill(Theme.surface))
             }
         }
@@ -193,7 +194,7 @@ private struct StatusPanel: View {
     var body: some View {
         if let lesson = session.lesson {
             VStack(alignment: .leading, spacing: 6) {
-                Text(lesson.title.uppercased()).font(Theme.rounded(12, .semibold)).foregroundStyle(Theme.muted).tracking(1.5)
+                Text(lesson.title.uppercased()).scaledFont(12, .semibold).foregroundStyle(Theme.muted).tracking(1.5)
                 Text(lesson.instructions).font(Theme.rounded(.subheadline, .medium)).foregroundStyle(Theme.soft)
                 if lesson.costsHearts { Hearts(count: session.game.hearts, size: 22) }
             }
@@ -204,9 +205,9 @@ private struct StatusPanel: View {
             VStack(spacing: 12) {
                 VStack(spacing: 6) {
                     HStack {
-                        Text("Time left").font(Theme.rounded(18, .semibold))
+                        Text("Time left").scaledFont(18, .semibold)
                         Spacer()
-                        Text("\(session.game.timeLeft)s").font(Theme.rounded(48)).monospacedDigit()
+                        Text("\(session.game.timeLeft)s").scaledFont(48).monospacedDigit()
                     }
                     TimerBar(timeLeft: session.game.timeLeft, limit: session.level.timeLimit)
                 }
@@ -226,10 +227,10 @@ private struct StatusPanel: View {
         } else {
             HStack {
                 Label("\(session.game.timeLeft)s", systemImage: "timer")
-                    .font(Theme.rounded(18)).monospacedDigit()
+                    .scaledFont(18).monospacedDigit()
                     .foregroundStyle(timeColor)
                     .padding(.horizontal, 12).padding(.bottom, 5)
-                    .frame(height: 36)
+                    .frame(minHeight: 36)
                     .overlay(alignment: .bottom) {
                         TimerBar(timeLeft: session.game.timeLeft, limit: session.level.timeLimit)
                             .padding(.horizontal, 12).padding(.bottom, 4)
@@ -308,7 +309,7 @@ struct SparksLabel: View {
 
     var body: some View {
         Label("\(amount)", systemImage: "sparkle")
-            .font(Theme.rounded(size))
+            .scaledFont(size)
             .foregroundStyle(Theme.spark)
             .accessibilityLabel("\(amount) Sparks")
     }
@@ -320,7 +321,7 @@ private struct GuideLine: View {
 
     var body: some View {
         Text(session.guideText)
-            .font(Theme.rounded(wide ? 16 : 14, .medium))
+            .scaledFont(wide ? 16 : 14, .medium)
             .foregroundStyle(Theme.soft)
             .multilineTextAlignment(wide ? .leading : .center)
             .frame(maxWidth: .infinity, alignment: wide ? .leading : .center)
@@ -333,7 +334,7 @@ private struct FlashLine: View {
 
     var body: some View {
         Text(session.flash?.text ?? " ")
-            .font(Theme.rounded(18))
+            .scaledFont(18)
             .foregroundStyle(color)
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity, minHeight: 26)
@@ -616,12 +617,12 @@ private struct ControlsRow: View {
     private func control(_ title: String, color: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(Theme.rounded(15, .semibold))
+                .scaledFont(15, .semibold)
                 .lineLimit(1)
                 .foregroundStyle(color)
                 .padding(.horizontal, 14)
                 .frame(maxWidth: wide ? .infinity : nil)
-                .frame(height: wide ? 56 : 44)
+                .frame(minHeight: wide ? 56 : 44)
                 .background(Capsule().fill(Theme.surface))
         }
         .buttonStyle(.plain)

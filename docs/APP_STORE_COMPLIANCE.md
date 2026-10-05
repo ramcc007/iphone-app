@@ -13,7 +13,7 @@ This is not legal advice. Items marked **[Check]** need confirming with Apple's 
 - [ ] **(later)** **Paid Apps Agreement**, plus tax and banking forms. Not needed for a free v1 with no purchases (the Free Apps Agreement is accepted when you enrol).
 - [ ] **(later)** **App Store Small Business Program**: apply so Apple's commission is 15% instead of 30%.
 - [ ] **EU Digital Services Act trader status**: you must declare it to be distributed in the EU. Traders have their address, phone and email shown publicly on the App Store [Check].
-- [ ] **Name.** Search USPTO, the App Store and Google for the final name. The App Store name is limited to 30 characters and must be unique. Consider registering a trademark.
+- [ ] **Name.** First search done on 5 October 2026 (see `docs/NAME_SEARCH.md`): "Numpile" recommended, formal trademark search still to do. Search USPTO, the App Store and Google for the final name. The App Store name is limited to 30 characters and must be unique. Consider registering a trademark.
 
 ## 2. Design and functionality (Guidelines 2 and 4)
 - [ ] The app is complete, with no placeholder content, broken links or "coming soon" items (2.1).
@@ -83,7 +83,7 @@ v1 has nothing to buy. Sparks are earned only and can't be bought, sold or excha
 - [ ] Check the app with VoiceOver, the largest text size and Reduce Motion.
 
 ## 9. Website (needed before submission)
-- [ ] `/privacy`: privacy policy
+- [ ] `/privacy`: privacy policy (draft ready in `site/`, see `site/README.md`)
 - [ ] `/terms`: terms of use (or use Apple's standard EULA)
 - [ ] `/support`: FAQ and contact email
 - [ ] `/`: marketing page with the App Store badge (follow Apple's marketing guidelines for badge usage)

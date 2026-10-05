@@ -55,3 +55,9 @@ swift test               # 37 tests: rules on all 230 levels of the 3 boards, ti
 - Sound effects (the web version has them; native sound files or synthesis come next)
 - Game Center leaderboards, the Daily Drop and the milestone chest animation
 - The chapter twists from the original plan (Locks, Queue, Sums, Tilt) as extra boards or chapters
+
+## Dynamic Type (text size)
+- Text uses `.scaledFont(size, weight)` (see `Theme.swift`), which scales every design size with the player's text-size setting in proportion to the nearest system text style. Fonts inside the fixed-size game tiles and number tray keep their size so the board stays usable.
+- The whole app follows the system up to the largest Accessibility size (`accessibility3`). The game screen is capped at `xxxLarge` so the board, tray and controls always fit; pop-ups and menus scroll and keep scaling.
+- Buttons and capsules use minimum heights, so they grow with the text.
+- To test in Xcode: run in the simulator and change Settings > Accessibility > Display & Text Size > Larger Text, or use the Xcode environment overrides, and check every screen at the smallest and largest sizes on an iPhone SE and an iPad. [Check, not yet run on a device.]

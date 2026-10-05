@@ -46,6 +46,46 @@ enum Theme {
     static func rounded(_ style: Font.TextStyle, _ weight: Font.Weight = .bold) -> Font {
         .system(style, design: .rounded, weight: weight)
     }
+
+    /// The text style a design size scales with, so every size grows and shrinks with the player's
+    /// Dynamic Type setting in proportion to the system text it is closest to.
+    static func textStyle(forSize size: CGFloat) -> Font.TextStyle {
+        switch size {
+        case 34...: return .largeTitle
+        case 28..<34: return .title
+        case 22..<28: return .title2
+        case 20..<22: return .title3
+        case 17..<20: return .body
+        case 16..<17: return .callout
+        case 15..<16: return .subheadline
+        case 13..<15: return .footnote
+        case 12..<13: return .caption
+        default: return .caption2
+        }
+    }
+}
+
+/// Rounded system font at a design size that follows Dynamic Type (Settings > Display & Brightness > Text Size,
+/// and the Accessibility sizes). Use `.scaledFont(size, weight)` instead of `.font(Theme.rounded(size, weight))`
+/// for any text that is not inside a fixed-size game tile.
+struct ScaledRounded: ViewModifier {
+    @ScaledMetric private var size: CGFloat
+    private let weight: Font.Weight
+
+    init(size: CGFloat, weight: Font.Weight) {
+        _size = ScaledMetric(wrappedValue: size, relativeTo: Theme.textStyle(forSize: size))
+        self.weight = weight
+    }
+
+    func body(content: Content) -> some View {
+        content.font(.system(size: size, weight: weight, design: .rounded))
+    }
+}
+
+extension View {
+    func scaledFont(_ size: CGFloat, _ weight: Font.Weight = .bold) -> some View {
+        modifier(ScaledRounded(size: size, weight: weight))
+    }
 }
 
 extension Color {

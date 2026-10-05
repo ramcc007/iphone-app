@@ -52,15 +52,15 @@ struct OverlayLayer: View {
             }
             if reward.chest > 0 {
                 Label("Chapter \(level.chapter) milestone chest: +\(reward.chest) Sparks", systemImage: "gift.fill")
-                    .font(Theme.rounded(16, .semibold)).foregroundStyle(Theme.spark)
+                    .scaledFont(16, .semibold).foregroundStyle(Theme.spark)
                     .padding(12).frame(maxWidth: .infinity, alignment: .leading)
                     .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.spark.opacity(0.12)))
             }
-            Text("Wallet: \(app.progress.sparks) Sparks").font(Theme.rounded(14, .medium)).foregroundStyle(Theme.soft)
+            Text("Wallet: \(app.progress.sparks) Sparks").scaledFont(14, .medium).foregroundStyle(Theme.soft)
             if let board = session.board, let next = session.nextIndex {
                 PrimaryButton("Next: Level \(level.number + 1)") { app.play(board, next) }
                 ShareLink(item: shareText(result)) {
-                    Text("Share result").font(Theme.rounded(16, .semibold)).frame(maxWidth: .infinity).frame(height: 50)
+                    Text("Share result").scaledFont(16, .semibold).frame(maxWidth: .infinity).frame(minHeight: 50)
                         .background(Capsule().fill(Color.white.opacity(0.08)))
                 }
                 LinkButton("Back to the map") { app.goHome() }
@@ -77,7 +77,7 @@ struct OverlayLayer: View {
             SecondaryButton("Try another board") { app.goHome() }
             LinkButton("Back to the map") { app.goHome() }
             Text("There is no way to buy extra time: the clock is the challenge.")
-                .font(Theme.rounded(12, .medium)).foregroundStyle(Theme.faint)
+                .scaledFont(12, .medium).foregroundStyle(Theme.faint)
                 .frame(maxWidth: .infinity).multilineTextAlignment(.center)
 
         case .lost?:
@@ -108,7 +108,7 @@ struct OverlayLayer: View {
             BodyText(session.lesson?.winText ?? "")
             if isLast {
                 Label("Welcome gift: +\(Economy.welcomeGift) Sparks", systemImage: "gift.fill")
-                    .font(Theme.rounded(16, .semibold)).foregroundStyle(Theme.spark)
+                    .scaledFont(16, .semibold).foregroundStyle(Theme.spark)
                 PrimaryButton("Choose your board") { app.goHome() }
             } else if case .lesson(let index) = session.mode {
                 PrimaryButton("Next level") { app.route = .tutorial(lesson: index + 1) }
@@ -139,9 +139,9 @@ struct OverlayLayer: View {
                 Text(session.canAffordSkip
                      ? "Stuck? Skip this level \u{00B7} \(Economy.skip) \u{2726}"
                      : "Skip costs \(Economy.skip) \u{2726} (you have \(app.progress.sparks))")
-                    .font(Theme.rounded(16, .semibold))
+                    .scaledFont(16, .semibold)
                     .foregroundStyle(Theme.spark)
-                    .frame(maxWidth: .infinity).frame(height: 50)
+                    .frame(maxWidth: .infinity).frame(minHeight: 50)
                     .overlay(Capsule().strokeBorder(Theme.spark.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4])))
             }
             .buttonStyle(.plain)
@@ -152,16 +152,16 @@ struct OverlayLayer: View {
             VStack(spacing: 4) {
                 Button {} label: {
                     Text("Skip this level \u{00B7} \(Economy.skip) \u{2726}")
-                        .font(Theme.rounded(16, .semibold))
+                        .scaledFont(16, .semibold)
                         .foregroundStyle(Theme.muted)
-                        .frame(maxWidth: .infinity).frame(height: 50)
+                        .frame(maxWidth: .infinity).frame(minHeight: 50)
                         .overlay(Capsule().strokeBorder(Theme.muted.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4])))
                 }
                 .buttonStyle(.plain)
                 .disabled(true)
                 .opacity(0.55)
                 Text("Unlocks after \(Economy.skipAfterFailedAttempts) tries (\(left) more)")
-                    .font(Theme.rounded(12, .medium)).foregroundStyle(Theme.muted)
+                    .scaledFont(12, .medium).foregroundStyle(Theme.muted)
             }
             .frame(maxWidth: .infinity)
             .accessibilityElement(children: .ignore)
@@ -182,7 +182,7 @@ struct SheetTitle: View {
     let text: String
     let color: Color
     init(_ text: String, color: Color) { self.text = text; self.color = color }
-    var body: some View { Text(text).font(Theme.rounded(28)).foregroundStyle(color).accessibilityAddTraits(.isHeader) }
+    var body: some View { Text(text).scaledFont(28).foregroundStyle(color).accessibilityAddTraits(.isHeader) }
 }
 
 struct BodyText: View {
@@ -202,7 +202,7 @@ struct RewardRow: View {
             Spacer()
             Text("+\(sparks) \u{2726}").foregroundStyle(Theme.spark).fontWeight(.bold)
         }
-        .font(Theme.rounded(15, .medium))
+        .scaledFont(15, .medium)
     }
 }
 
@@ -312,8 +312,8 @@ struct PrimaryButton: View {
     init(_ title: String, action: @escaping () -> Void) { self.title = title; self.action = action }
     var body: some View {
         Button(action: action) {
-            Text(title).font(Theme.rounded(19)).foregroundStyle(.white)
-                .frame(maxWidth: .infinity).frame(height: 58)
+            Text(title).scaledFont(19).foregroundStyle(.white)
+                .frame(maxWidth: .infinity).frame(minHeight: 58)
                 .background(Capsule().fill(Theme.accent))
                 .background(Capsule().fill(Theme.accentEdge).offset(y: 5))
         }
@@ -327,8 +327,8 @@ struct SecondaryButton: View {
     init(_ title: String, action: @escaping () -> Void) { self.title = title; self.action = action }
     var body: some View {
         Button(action: action) {
-            Text(title).font(Theme.rounded(16, .semibold)).foregroundStyle(Theme.text)
-                .frame(maxWidth: .infinity).frame(height: 50)
+            Text(title).scaledFont(16, .semibold).foregroundStyle(Theme.text)
+                .frame(maxWidth: .infinity).frame(minHeight: 50)
                 .background(Capsule().fill(Color.white.opacity(0.08)))
         }
         .buttonStyle(.plain)
@@ -341,7 +341,7 @@ struct LinkButton: View {
     init(_ title: String, action: @escaping () -> Void) { self.title = title; self.action = action }
     var body: some View {
         Button(action: action) {
-            Text(title).font(Theme.rounded(15, .semibold)).foregroundStyle(Theme.accentSoft)
+            Text(title).scaledFont(15, .semibold).foregroundStyle(Theme.accentSoft)
                 .frame(maxWidth: .infinity).frame(minHeight: 44)
         }
         .buttonStyle(.plain)

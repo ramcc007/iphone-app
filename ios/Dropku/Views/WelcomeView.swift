@@ -36,11 +36,11 @@ struct WelcomeView: View {
                             Text("What\u{2019}s your name?").font(Theme.rounded(.headline))
                             NameField(name: $name, focused: $nameFocused)
                             if let problem = nameProblem(name, showEmpty: nameTouched) {
-                                Text(problem).font(Theme.rounded(13, .medium)).foregroundStyle(Theme.bad)
+                                Text(problem).scaledFont(13, .medium).foregroundStyle(Theme.bad)
                                     .fixedSize(horizontal: false, vertical: true)
                             } else if let clean = cleanName {
                                 Text("We\u{2019}ll call you \(clean).")
-                                    .font(Theme.rounded(13, .medium)).foregroundStyle(Theme.muted)
+                                    .scaledFont(13, .medium).foregroundStyle(Theme.muted)
                                     .lineLimit(2)
                             }
                         }
@@ -52,7 +52,7 @@ struct WelcomeView: View {
                     HStack(alignment: .top, spacing: 10) {
                         Image(systemName: "lock.fill").foregroundStyle(Theme.good)
                         Text("Your name stays on this device and in your own iCloud. We never receive it.")
-                            .font(Theme.rounded(13, .medium))
+                            .scaledFont(13, .medium)
                             .foregroundStyle(Theme.soft)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -116,7 +116,7 @@ struct NameField: View {
                 }
                 .accessibilityLabel("Your name")
             Text("\(min(name.count, PlayerProfile.maxNameLength))/\(PlayerProfile.maxNameLength)")
-                .font(Theme.rounded(12, .medium)).foregroundStyle(Theme.faint)
+                .scaledFont(12, .medium).foregroundStyle(Theme.faint)
                 .monospacedDigit()
                 .accessibilityHidden(true)
         }

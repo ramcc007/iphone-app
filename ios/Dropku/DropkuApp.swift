@@ -11,6 +11,7 @@ struct DropkuApp: App {
                 .environmentObject(app)
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility3)   // text follows the player's size, up to the largest accessibility sizes
         }
     }
 }

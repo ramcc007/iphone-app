@@ -15,25 +15,25 @@ struct HomeView: View {
                 VStack(spacing: 16) {
                     HStack(spacing: 8) {
                         Button("How to play") { showRules = true }
-                            .font(Theme.rounded(15, .semibold))
+                            .scaledFont(15, .semibold)
                             .lineLimit(1)
-                            .padding(.horizontal, 14).frame(height: 44)
+                            .padding(.horizontal, 14).frame(minHeight: 44)
                             .background(Capsule().fill(Theme.surface))
                             .layoutPriority(2)
                         if let name = app.progress.profile?.name {
                             Text("Hi, \(name)")
-                                .font(Theme.rounded(15, .semibold))
+                                .scaledFont(15, .semibold)
                                 .foregroundStyle(Theme.soft)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
-                                .padding(.horizontal, 14).frame(height: 40)
+                                .padding(.horizontal, 14).frame(minHeight: 40)
                                 .background(Capsule().fill(Theme.surface.opacity(0.85)))
                                 .layoutPriority(0)
                                 .accessibilityLabel("Hi, \(name)")
                         }
                         Spacer(minLength: 0)
                         SparksLabel(amount: app.progress.sparks, size: 16)
-                            .padding(.horizontal, 14).frame(height: 40)
+                            .padding(.horizontal, 14).frame(minHeight: 40)
                             .background(Capsule().fill(Theme.surface))
                             .layoutPriority(2)
                         CircleButton(systemImage: "slider.horizontal.3", label: "Settings") { showSettings = true }
@@ -43,7 +43,7 @@ struct HomeView: View {
                     HStack(spacing: 18) {
                         LogoMark(size: wide ? 44 : 30)
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Dropku").font(Theme.rounded(wide ? 64 : 44))
+                            Text("Dropku").scaledFont(wide ? 64 : 44)
                             Text("Sudoku. But the numbers fall.").font(Theme.rounded(.subheadline, .medium)).foregroundStyle(Theme.muted)
                         }
                         Spacer(minLength: 0)
@@ -54,7 +54,7 @@ struct HomeView: View {
 
                     if let first = levels.first, let last = levels.last {
                         Text("\(board.blurb) \(levels.count) levels, \(clockText(first.timeLimit)) to \(clockText(last.timeLimit)) each.")
-                            .font(Theme.rounded(14, .medium)).foregroundStyle(Theme.soft)
+                            .scaledFont(14, .medium).foregroundStyle(Theme.soft)
                             .multilineTextAlignment(.center)
                     }
 
@@ -73,7 +73,7 @@ struct HomeView: View {
                     }
 
                     Text("No ads, nothing to buy. Every Spark is earned by playing.")
-                        .font(Theme.rounded(13, .medium)).foregroundStyle(Theme.muted)
+                        .scaledFont(13, .medium).foregroundStyle(Theme.muted)
                         .multilineTextAlignment(.center)
                         .padding(.bottom, 12)
                 }
@@ -114,9 +114,9 @@ private struct BoardPicker: View {
                 } label: {
                     VStack(spacing: 3) {
                         BoardIcon(kind: kind).frame(width: 40, height: 40).padding(.bottom, 4)
-                        Text(kind.name).font(Theme.rounded(wide ? 20 : 17))
-                        Text("\(kind.size)\u{00D7}\(kind.size)").font(Theme.rounded(13, .semibold)).foregroundStyle(Theme.soft)
-                        Text("\(done)/\(levels.count)").font(Theme.rounded(12, .medium)).foregroundStyle(Theme.muted)
+                        Text(kind.name).scaledFont(wide ? 20 : 17)
+                        Text("\(kind.size)\u{00D7}\(kind.size)").scaledFont(13, .semibold).foregroundStyle(Theme.soft)
+                        Text("\(done)/\(levels.count)").scaledFont(12, .medium).foregroundStyle(Theme.muted)
                     }
                     .frame(maxWidth: .infinity, minHeight: wide ? 132 : 112)
                     .background(RoundedRectangle(cornerRadius: 20, style: .continuous)
@@ -174,9 +174,9 @@ private struct ChapterCard: View {
         if let first = indices.first, !app.progress.isUnlocked(first, in: levels) {
             // Locked chapters stay compact, so a 100-level board is still a short scroll.
             HStack {
-                Text("Chapter \(chapter) \u{00B7} \(range)").font(Theme.rounded(16))
+                Text("Chapter \(chapter) \u{00B7} \(range)").scaledFont(16)
                 Spacer()
-                Label("Locked", systemImage: "lock.fill").font(Theme.rounded(14, .medium))
+                Label("Locked", systemImage: "lock.fill").scaledFont(14, .medium)
             }
             .foregroundStyle(Theme.faint)
             .padding(16)
@@ -187,12 +187,12 @@ private struct ChapterCard: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("\(board.name.uppercased()) \u{00B7} CHAPTER \(chapter) OF \(chapterCount)").font(Theme.rounded(12, .semibold)).foregroundStyle(Theme.muted).tracking(1.5)
-                        Text(range).font(Theme.rounded(20))
+                        Text("\(board.name.uppercased()) \u{00B7} CHAPTER \(chapter) OF \(chapterCount)").scaledFont(12, .semibold).foregroundStyle(Theme.muted).tracking(1.5)
+                        Text(range).scaledFont(20)
                     }
                     Spacer()
                     Label("\(stars)/\(indices.count * 3)", systemImage: "star.fill")
-                        .font(Theme.rounded(14)).foregroundStyle(Theme.spark)
+                        .scaledFont(14).foregroundStyle(Theme.spark)
                         .accessibilityLabel("\(stars) of \(indices.count * 3) stars")
                 }
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: columns), spacing: 8) {
@@ -223,19 +223,19 @@ private struct LevelTile: View {
             app.play(board, index)
         } label: {
             VStack(spacing: 1) {
-                Text("\(level.number)").font(Theme.rounded(19))
+                Text("\(level.number)").scaledFont(19)
                 if best > 0 {
                     Text(String(repeating: "\u{2605}", count: best) + String(repeating: "\u{2606}", count: 3 - best))
-                        .font(Theme.rounded(10, .semibold)).foregroundStyle(Theme.spark)
+                        .scaledFont(10, .semibold).foregroundStyle(Theme.spark)
                 } else if skipped {
-                    Text("SKIPPED").font(Theme.rounded(9, .semibold))
+                    Text("SKIPPED").scaledFont(9, .semibold)
                 } else if isNext {
-                    Text("PLAY").font(Theme.rounded(10, .semibold))
+                    Text("PLAY").scaledFont(10, .semibold)
                 } else if level.role == .milestone {
-                    Text("CHEST").font(Theme.rounded(9, .semibold))
+                    Text("CHEST").scaledFont(9, .semibold)
                 }
             }
-            .frame(maxWidth: .infinity).frame(height: 60)
+            .frame(maxWidth: .infinity).frame(minHeight: 60)
             .foregroundStyle(isNext ? Color.white : (skipped ? Theme.spark : (unlocked ? Theme.text : Theme.faint)))
             .background(background(best: best, isNext: isNext, unlocked: unlocked, skipped: skipped))
             .overlay {
