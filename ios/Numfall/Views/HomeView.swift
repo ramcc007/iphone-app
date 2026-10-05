@@ -72,6 +72,8 @@ struct HomeView: View {
                         ChapterCard(board: board, levels: levels, chapter: chapter, chapterCount: chapters(levels).count, columns: wide ? 10 : 5)
                     }
 
+                    if wide { ProgressSummary() }
+
                     Text("No ads, nothing to buy. Every Spark is earned by playing.")
                         .scaledFont(13, .medium).foregroundStyle(Theme.muted)
                         .multilineTextAlignment(.center)
@@ -90,6 +92,31 @@ struct HomeView: View {
 
     private func chapters(_ levels: [Level]) -> [Int] {
         Array(Set(levels.map(\.chapter))).sorted()
+    }
+}
+
+/// Totals across all boards. Shown on wide screens (iPad), where the level list leaves room below it.
+private struct ProgressSummary: View {
+    @EnvironmentObject private var app: AppModel
+
+    var body: some View {
+        let progress = app.progress
+        HStack(spacing: 12) {
+            stat("\(progress.bestStars.count)", "levels cleared")
+            stat("\(progress.bestStars.values.reduce(0, +))", "stars")
+            stat("\(progress.sparks)", "Sparks")
+            stat("\(progress.sessions.count)", "sessions")
+        }
+    }
+
+    private func stat(_ value: String, _ label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value).scaledFont(28)
+            Text(label).scaledFont(13, .medium).foregroundStyle(Theme.muted)
+        }
+        .frame(maxWidth: .infinity, minHeight: 84)
+        .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Theme.surface))
+        .accessibilityElement(children: .combine)
     }
 }
 

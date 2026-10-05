@@ -230,12 +230,15 @@ struct AnimatedBackground: View {
                 var tileContext = context
                 tileContext.translateBy(x: CGFloat(centreX), y: CGFloat(centreY))
                 tileContext.rotate(by: .radians(drifter.tilt + sin(time * 0.2 + drifter.phase) * 0.12))
+                // Keep the top fifth clear so tiles never drift behind the title and the top buttons; they fade in below it.
+                let visible = min(1.0, max(0.0, (fall - 0.22) / 0.2))
+                guard visible > 0 else { continue }
                 let rect = CGRect(x: -side / 2, y: -side / 2, width: side, height: side)
                 let colours = Theme.tile(drifter.colour)
                 tileContext.fill(Path(roundedRect: rect, cornerRadius: side * 0.26, style: .continuous),
-                                 with: .color(colours.base.opacity(0.10)))
+                                 with: .color(colours.base.opacity(0.10 * visible)))
                 tileContext.stroke(Path(roundedRect: rect, cornerRadius: side * 0.26, style: .continuous),
-                                   with: .color(colours.light.opacity(0.12)), lineWidth: 1)
+                                   with: .color(colours.light.opacity(0.12 * visible)), lineWidth: 1)
             }
         }
     }
