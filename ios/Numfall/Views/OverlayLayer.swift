@@ -56,7 +56,7 @@ struct OverlayLayer: View {
                 }
             }
             if reward.chest > 0 {
-                Label("Chapter \(level.chapter) milestone chest: +\(reward.chest) Sparks", systemImage: "gift.fill")
+                Label("Chapter \(level.chapter)\(chapterSuffix(level)) complete: chest +\(reward.chest) Sparks", systemImage: "gift.fill")
                     .scaledFont(16, .semibold).foregroundStyle(Theme.spark)
                     .padding(12).frame(maxWidth: .infinity, alignment: .leading)
                     .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.spark.opacity(0.12)))
@@ -210,6 +210,12 @@ struct OverlayLayer: View {
     }
 
     private func restartName(_ level: Level) -> String { session.isDaily ? "The Daily Drop" : "Level \(level.number)" }
+
+    /// " \u{00B7} Finding Your Feet" for the chest line, or nothing when the board is unknown.
+    private func chapterSuffix(_ level: Level) -> String {
+        guard let board = BoardKind(rawValue: level.board) else { return "" }
+        return " \u{00B7} " + Chapters.name(board: board, chapter: level.chapter)
+    }
 }
 
 /// One-time offer after the first Daily Drop: a quiet 7 pm reminder, off unless the player says yes.

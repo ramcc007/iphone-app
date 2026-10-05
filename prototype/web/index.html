@@ -127,6 +127,12 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-soft); o
 .chapter-head .n { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
 .chapter-head .t { font-size: 20px; font-weight: 700; }
 .chapter-head .st { font-size: 14px; font-weight: 700; color: var(--spark); white-space: nowrap; }
+.chapter-head .sub { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 3px; }
+.flames { display: inline-flex; gap: 1px; align-items: center; }
+.flames svg { width: 15px; height: 15px; display: block; }
+.flames .on { fill: #FF8A4C; } .flames .off { fill: #3A4058; }
+.chapter.closed .sub { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; margin-top: 3px; }
+.chapter.closed .flames .on { fill: #8C92AB; }
 .levels { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .wide .levels { grid-template-columns: repeat(10, minmax(0, 1fr)); }
 .lv { height: 60px; border-radius: 16px; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font-size: 19px; font-weight: 700; }
@@ -564,7 +570,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
       var headline = S.replay ? (S.award ? 'Better than before!' : 'Nice replay!') : D.praise(cleared);
       var subline = 'Level ' + lv.number + ' cleared' + (r.stars === 3 ? ' · Perfect, no mistakes' : '') + (!S.replay && D.praiseIsNew(cleared) ? ' · New title!' : '');
       return '<div class="veil"><div class="sheet win"><h2>' + esc(headline) + '</h2><p class="praise-sub">' + esc(subline) + '</p>' + starsSvg(r.stars, 46) +
-        '<div class="breakdown">' + rows + '</div>' + (S.chest ? '<div class="chest">' + SPARK + 'Chapter ' + lv.chapter + ' milestone chest: +' + S.chest + ' Sparks</div>' : '') +
+        '<div class="breakdown">' + rows + '</div>' + (S.chest ? '<div class="chest">' + SPARK + 'Chapter ' + lv.chapter + ' · ' + esc(D.chapterName(lv.board, lv.chapter)) + ' complete: chest +' + S.chest + ' Sparks</div>' : '') +
         '<p style="font-size:14px">Wallet: ' + P.wallet + ' Sparks</p>' +
         (last ? '<p>That’s every ' + boardById(lv.board).name + ' level! Try another board for a new challenge.</p><button class="primary" data-act="home">Choose a board</button>' : '<button class="primary" data-act="next">Next: Level ' + (lv.number + 1) + '</button>') +
         '<button class="secondary" data-act="share" data-text="' + esc(share) + '">' + (S.copied ? 'Copied!' : 'Share result') + '</button>' + (S.copied === 'fail' ? '<div class="sharebox">' + esc(share) + '</div>' : '') +
@@ -643,6 +649,14 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
       '<button class="secondary" data-act="editProfile">Change name</button><button class="primary" data-act="closePlayer">Done</button>' + reset + '</div></div>';
   }
 
+  // Difficulty meter: n of 5 flames lit. Drawn as vector paths, one flame per chapter step.
+  var FLAME = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 1.5c.3 3 1.6 4.6 3.1 6.3 1.6 1.9 3 3.8 3 6.6A7.6 7.6 0 0 1 12 22a7.6 7.6 0 0 1-7.6-7.6c0-2.6 1.1-4.6 2.5-6 .2 1.6.9 2.6 1.9 3.2C8.4 8.8 10.4 4.4 13.5 1.5z"/></svg>';
+  function flameRow(n) {
+    var h = '';
+    for (var i = 1; i <= D.MAX_FLAMES; i++) h += FLAME.replace('<svg ', '<svg class="' + (i <= n ? 'on' : 'off') + '" ');
+    return '<span class="flames" role="img" aria-label="Difficulty ' + n + ' of ' + D.MAX_FLAMES + ' flames">' + h + '</span>';
+  }
+
   function homeScreen() {
     var board = boardById(P.board), next = nextIndex(), chaptersHtml = '';
     var picker = BOARDS.map(function (b) {
@@ -653,7 +667,8 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
     var chapters = Math.ceil(LEVELS.length / 10);
     for (var ch = 1; ch <= chapters; ch++) {
       var first = (ch - 1) * 10, last = Math.min(LEVELS.length, ch * 10) - 1, range = 'Levels ' + (first + 1) + '–' + (last + 1);
-      if (!unlocked(first)) { chaptersHtml += '<section class="chapter closed" aria-label="Chapter ' + ch + ', ' + range + ', locked"><div class="t">Chapter ' + ch + ' · ' + range + '</div><span>Locked</span></section>'; continue; }
+      var cname = D.chapterName(board.id, ch), fl = D.chapterFlames(ch, chapters);
+      if (!unlocked(first)) { chaptersHtml += '<section class="chapter closed" aria-label="Chapter ' + ch + ', ' + esc(cname) + ', ' + range + ', difficulty ' + fl + ' of ' + D.MAX_FLAMES + ', locked"><div><div class="t">Chapter ' + ch + ' · ' + esc(cname) + '</div><div class="sub" aria-hidden="true">' + range + flameRow(fl) + '</div></div><span>Locked</span></section>'; continue; }
       var tiles = '', stars = 0;
       for (var i = first; i <= last; i++) {
         var lv = LEVELS[i], best = P.best[lv.id] || 0; stars += best;
@@ -666,7 +681,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
         if (lv.role === 'milestone' && !best) { cls += ' mile'; if (!sub) sub = 'CHEST'; else if (sub === LOCK) sub = LOCK + ' CHEST'; }
         tiles += '<button class="' + cls + '" ' + act + ' aria-label="' + aria + '">' + lv.number + (sub ? '<small>' + sub + '</small>' : '') + '</button>';
       }
-      chaptersHtml += '<section class="chapter"><div class="chapter-head"><div><div class="n">' + board.name + ' · Chapter ' + ch + ' of ' + chapters + '</div><div class="t">' + range + '</div></div><div class="st">★ ' + stars + '/' + (last - first + 1) * 3 + '</div></div><div class="levels">' + tiles + '</div></section>';
+      chaptersHtml += '<section class="chapter"><div class="chapter-head"><div><div class="n">' + board.name + ' · Chapter ' + ch + ' of ' + chapters + '</div><div class="t">' + esc(cname) + '</div><div class="sub">' + range + flameRow(fl) + '</div></div><div class="st">★ ' + stars + '/' + (last - first + 1) * 3 + '</div></div><div class="levels">' + tiles + '</div></section>';
     }
     var nl = LEVELS[next];
     var logo = '<div class="logo" aria-hidden="true"><i></i><i style="background:linear-gradient(180deg,#FFCF85 0%,#FFB547 58%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 #C9862A"></i><i style="background:linear-gradient(180deg,#8ADAFB 0%,#4FC3F7 58%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 #2E8DB8"></i><i style="background:linear-gradient(180deg,#363D57 0%,#2A3045 60%);box-shadow:0 3px 0 #1C2030"></i></div>';

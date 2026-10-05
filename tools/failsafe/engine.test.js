@@ -171,5 +171,30 @@ t('First five levels of each board are open in any order; level 6 needs level 5'
   best[L[4].id] = 1; const opens = un(L, 5) && !un(L, 6);
   return open && stillShut && opens ? true : JSON.stringify({ open, stillShut, opens });
 });
+// ---- Chapter names and the flame meter ----
+t('Every chapter of every board has its own short name', () => {
+  const bad = [];
+  for (const id of D.BOARD_ORDER) {
+    const n = Math.ceil(board(id).length / 10), names = [];
+    for (let ch = 1; ch <= n; ch++) { const nm = D.chapterName(id, ch); names.push(nm); if (/^Chapter /.test(nm) || nm.length > 22) bad.push(id + ch + ':' + nm); }
+    if (new Set(names).size !== n || D.CHAPTER_NAMES[id].length !== n) bad.push(id + ' count/unique');
+  }
+  return bad.length ? bad.join(' ') : true;
+});
+t('Flames: 1 on the first chapter, 5 on the last, never go down (one step at a time on 10 chapters)', () => {
+  const bad = [];
+  for (const n of [3, 10]) { const f = []; for (let ch = 1; ch <= n; ch++) f.push(D.chapterFlames(ch, n)); const step = n >= 5 ? 1 : 2; if (f[0] !== 1 || f[n - 1] !== 5 || f.some((x, i) => i && (x < f[i - 1] || x - f[i - 1] > step))) bad.push(n + ':' + f); }
+  const ten = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((c) => D.chapterFlames(c, 10)).join(), three = [1, 2, 3].map((c) => D.chapterFlames(c, 3)).join();
+  return bad.length ? bad.join(' ') : ten === '1,1,2,2,3,3,4,4,5,5' && three === '1,3,5' ? true : ten + ' | ' + three;
+});
+t('Flames are honest: each chapter is harder than the one before (average difficulty of its normal levels)', () => {
+  const bad = [];
+  for (const id of D.BOARD_ORDER) {
+    const L = board(id), avg = [];
+    for (let ch = 1; ch <= Math.ceil(L.length / 10); ch++) { const d = L.filter((x) => x.chapter === ch && x.role === 'normal').map((x) => x.difficulty); avg.push(d.reduce((a, b) => a + b, 0) / d.length); }
+    avg.forEach((v, i) => { if (i && v <= avg[i - 1]) bad.push(id + (i + 1)); });
+  }
+  return bad.length ? bad.join(' ') : true;
+});
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exitCode = fail ? 1 : 0;

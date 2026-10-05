@@ -79,6 +79,7 @@ async function solveLevel(page, board, idx) {
     ok('Tutorial finishes with the welcome gift', await page.isVisible('text=Welcome gift'));
     await page.click('[data-act="boards"]');
     ok('Home greets the player by name', await page.isVisible('text=Hi, Alex Quinn'));
+    ok('Home: Classic chapter 1 is named "First Drops" with 1 of 5 flames lit', (await page.textContent('.chapter-head .t')) === 'First Drops' && (await page.locator('.chapter:not(.closed) .flames svg.on').count()) === 1 && (await page.locator('.chapter:not(.closed) .flames svg.off').count()) === 4);
     ok('Home shows the three boards', (await page.locator('[data-act="board"]').count()) === 3);
     ok('Classic is the starting board', await page.isVisible('[data-act="board"][data-b="classic"][aria-pressed="true"]'));
     ok('Play button names the board and level', await page.isVisible('text=Play Classic Level 1'));
@@ -116,6 +117,9 @@ async function solveLevel(page, board, idx) {
     ok('Home: any of the first five levels can be started directly (Level 4 is a play button)', (await page.getAttribute('.lv >> nth=3', 'data-act')) === 'play' && !(await page.isDisabled('.lv >> nth=3')));
     await page.click('.lv.locked >> nth=0');
     ok('Home: tapping a locked level explains how to unlock it', await page.isVisible('#toast >> text=Clear Level'));
+    ok('Home: open chapter shows its name, its level range and a flame meter that reads as text', (await page.textContent('.chapter:not(.closed) .chapter-head .t')) === 'Quick Start' && (await page.textContent('.chapter:not(.closed) .chapter-head .sub')).startsWith('Levels 1–10') && (await page.getAttribute('.chapter:not(.closed) .flames', 'aria-label')) === 'Difficulty 1 of 5 flames');
+    const lockedChapters = await page.$$eval('.chapter.closed', (els) => els.map((e) => ({ t: e.querySelector('.t').textContent, a: e.getAttribute('aria-label'), on: e.querySelectorAll('.flames svg.on').length })));
+    ok('Home: locked chapters are named and show their flames (Quick: 3 and 5 of 5)', lockedChapters.length === 2 && lockedChapters[0].t === 'Chapter 2 · Picking Up Pace' && lockedChapters[0].on === 3 && /difficulty 3 of 5, locked/.test(lockedChapters[0].a) && lockedChapters[1].t === 'Chapter 3 · Lightning Round' && lockedChapters[1].on === 5, JSON.stringify(lockedChapters));
     await page.click('[data-act="play"][data-i="1"]');
     await page.clock.runFor(29000);
     ok("Time's up pop-up appears at 0s", await page.isVisible("text=Time’s up!"));

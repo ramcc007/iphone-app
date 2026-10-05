@@ -226,7 +226,22 @@
   function praise(cleared) { var t = PRAISE[0][1]; PRAISE.forEach(function (p) { if (p[0] <= cleared) t = p[1]; }); return t; }
   function praiseIsNew(cleared) { return PRAISE.some(function (p) { return p[0] === cleared; }); }
 
-  var api = { praise: praise, praiseIsNew: praiseIsNew, PRAISE: PRAISE, variant: variant, freshVariant: freshVariant, BOARDS: BOARDS, BOARD_ORDER: BOARD_ORDER, timeLimit: timeLimit, newGame: newGame, landing: landing, left: left, drop: drop, tick: tick, undo: undo,
+  // ---- Chapter names and the 1-5 flame meter (mirrors ios/NumfallCore Chapters.swift) ----
+  var CHAPTER_NAMES = {
+    quick: ['Quick Start', 'Picking Up Pace', 'Lightning Round'],
+    classic: ['First Drops', 'Finding Your Feet', 'Picking Up Speed', 'Steady Hands', 'Sharp Eyes', 'Clever Moves', 'Cool Under Pressure', 'Pattern Hunters', 'Razor Focus', 'Grand Finale'],
+    master: ['Base Camp', 'Rising Ground', 'The Long Climb', 'Thin Air', 'Sharp Ridge', 'Above the Clouds', 'Storm Front', 'Sky High', 'Final Ascent', 'The Summit']
+  };
+  var MAX_FLAMES = 5;
+  function chapterName(board, chapter) { var l = CHAPTER_NAMES[board] || []; return l[chapter - 1] || 'Chapter ' + chapter; }
+  // First chapter of a board = 1 flame, last = 5, steady steps between (10 chapters: 1,1,2,2,3,3,4,4,5,5).
+  function chapterFlames(chapter, count) {
+    if (count <= 1) return 1;
+    var pos = Math.min(Math.max(chapter, 1), count) - 1;
+    return 1 + Math.floor((8 * pos + (count - 1)) / (2 * (count - 1)));
+  }
+
+  var api = { chapterName: chapterName, chapterFlames: chapterFlames, CHAPTER_NAMES: CHAPTER_NAMES, MAX_FLAMES: MAX_FLAMES, praise: praise, praiseIsNew: praiseIsNew, PRAISE: PRAISE, variant: variant, freshVariant: freshVariant, BOARDS: BOARDS, BOARD_ORDER: BOARD_ORDER, timeLimit: timeLimit, newGame: newGame, landing: landing, left: left, drop: drop, tick: tick, undo: undo,
     continueWithHeart: continueWithHeart, hint: hint, result: result, conflict: conflict, HEARTS: HEARTS, UNDOS_FREE: UNDOS_FREE };
   root.Numfall = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

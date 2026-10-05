@@ -15,6 +15,7 @@ enum Theme {
     static let accentEdge = Color(hex: 0x4A3DC0)
     static let accentSoft = Color(hex: 0xB3A8FF)
     static let spark = Color(hex: 0xFFB547)
+    static let flame = Color(hex: 0xFF8A4C)
     static let good = Color(hex: 0x6EE7A8)
     static let bad = Color(hex: 0xFF6B7A)
     static let pink = Color(hex: 0xFF8AD8)

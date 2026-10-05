@@ -203,6 +203,24 @@ struct BoardIcon: View {
     }
 }
 
+/// Difficulty meter: `lit` of 5 flames glow, the rest are dim. Read out as "Difficulty 3 of 5".
+private struct FlameMeter: View {
+    let lit: Int
+    var quiet = false
+
+    var body: some View {
+        HStack(spacing: 1) {
+            ForEach(1...Chapters.maxFlames, id: \.self) { index in
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 13))
+                    .foregroundStyle(index <= lit ? (quiet ? Theme.faint : Theme.flame) : Theme.faint.opacity(0.28))
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Difficulty \(lit) of \(Chapters.maxFlames)")
+    }
+}
+
 private struct ChapterCard: View {
     @EnvironmentObject private var app: AppModel
     let board: BoardKind
@@ -214,24 +232,38 @@ private struct ChapterCard: View {
     var body: some View {
         let indices = levels.indices.filter { levels[$0].chapter == chapter }
         let range = "Levels \(levels[indices.first!].number)\u{2013}\(levels[indices.last!].number)"
+        let name = Chapters.name(board: board, chapter: chapter)
+        let flames = Chapters.flames(chapter: chapter, of: chapterCount)
         if let first = indices.first, !app.progress.isUnlocked(first, in: levels) {
             // Locked chapters stay compact, so a 100-level board is still a short scroll.
             HStack {
-                Text("Chapter \(chapter) \u{00B7} \(range)").scaledFont(16)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Chapter \(chapter) \u{00B7} \(name)").scaledFont(16)
+                    HStack(spacing: 8) {
+                        Text(range).scaledFont(12, .medium)
+                        FlameMeter(lit: flames, quiet: true)
+                    }
+                }
                 Spacer()
-                Label("Locked", systemImage: "lock.fill").scaledFont(14, .medium)
+                Label("Locked", systemImage: "lock.fill").scaledFont(14, .medium).fixedSize()
             }
             .foregroundStyle(Theme.faint)
             .padding(16)
             .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Theme.surface))
-            .accessibilityElement(children: .combine)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Chapter \(chapter), \(name), \(range), difficulty \(flames) of \(Chapters.maxFlames), locked")
         } else {
             let stars = indices.reduce(0) { total, index in total + (app.progress.bestStars[levels[index].id] ?? 0) }
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("\(board.name.uppercased()) \u{00B7} CHAPTER \(chapter) OF \(chapterCount)").scaledFont(12, .semibold).foregroundStyle(Theme.muted).tracking(1.5)
-                        Text(range).scaledFont(20)
+                        Text(name).scaledFont(20)
+                        HStack(spacing: 8) {
+                            Text(range).scaledFont(13, .medium).foregroundStyle(Theme.muted)
+                            FlameMeter(lit: flames)
+                        }
+                        .padding(.top, 1)
                     }
                     Spacer()
                     Label("\(stars)/\(indices.count * 3)", systemImage: "star.fill")
