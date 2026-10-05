@@ -22,10 +22,6 @@ Use the final addresses for the three links in `ios/Numfall/Views/MenuViews.swif
 - [ ] Update `AppLinks` in the app and the URLs in App Store Connect.
 
 ## Vercel
-Project `numfall-site` in the owner's Vercel team. Build with `node tools/site/build.js`, then deploy the `site/dist` folder (it includes `vercel.json`: clean URLs such as `/privacy`, `/terms`, `/support`). Do not deploy to production until the placeholder list is empty.
-
-Private values (legal name, support email) go in `site/site.config.local.json` (git-ignored, overrides `site.config.json`).
-
-Live: https://numfall-site.vercel.app (/privacy, /terms, /support). Deployed 5 Oct 2026 to the `numfall-site` Vercel project (team onlinemoneyrcc-gmailcoms-projects), Vercel Authentication off so the pages are public.
-
-Vercel note: when files are sent through the API they land in a `src/` folder, so the project's Output Directory is set to `src`. If the site ever shows 404, check that setting and redeploy.
+The `numfall-site` project is linked to this repository: every push to `claude/happy-ride-mm490y` (and later `main`) builds the site with `node tools/site/build.js` (see the root `vercel.json`) and publishes `site/dist` to https://numfall-site.vercel.app.
+The private values come from Vercel project environment variables `SITE_LEGAL_NAME`, `SITE_SUPPORT_EMAIL`, `SITE_GOVERNING_LAW` (locally: `site/site.config.local.json`, git-ignored). The Vercel build fails on purpose if any placeholder is left, so a broken site never replaces a good one.
+Do not upload files to this project by hand: the git build is the source of truth.

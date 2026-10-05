@@ -8,6 +8,9 @@ const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'site.config.json'), 'utf
 // Private values (legal name, support email) live in site/site.config.local.json, which git ignores, so they never reach the repository.
 const localCfg = path.join(ROOT, 'site.config.local.json');
 if (fs.existsSync(localCfg)) Object.assign(cfg, JSON.parse(fs.readFileSync(localCfg, 'utf8')));
+// On Vercel the same private values come from project environment variables.
+const ENV = { SITE_LEGAL_NAME: 'legalName', SITE_SUPPORT_EMAIL: 'supportEmail', SITE_GOVERNING_LAW: 'governingLaw', SITE_URL: 'siteUrl', SITE_APPSTORE_URL: 'appStoreUrl' };
+for (const [k, v] of Object.entries(ENV)) if (process.env[k]) cfg[v] = process.env[k];
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const placeholders = [];
 const val = (k) => {
@@ -37,6 +40,6 @@ fs.rmSync(DIST, { recursive: true, force: true }); fs.mkdirSync(DIST, { recursiv
 for (const f of pages) fs.writeFileSync(path.join(DIST, f), out[f]);
 fs.copyFileSync(path.join(SRC, 'style.css'), path.join(DIST, 'style.css'));
 fs.copyFileSync(path.join(SRC, 'favicon.svg'), path.join(DIST, 'favicon.svg'));
-fs.copyFileSync(path.join(SRC, 'vercel.json'), path.join(DIST, 'vercel.json'));
 console.log('Wrote ' + pages.length + ' pages to site/dist/.');
 if (placeholders.length) console.log('NOT READY TO PUBLISH. Fill these in site/site.config.json:\n  ' + [...new Set(placeholders)].join('\n  '));
+if (placeholders.length && process.env.VERCEL) { console.error('Refusing to deploy a site with placeholders.'); process.exit(1); }
