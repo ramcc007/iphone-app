@@ -25,7 +25,8 @@ for (const f of pages) {
   if (!meta) throw new Error(f + ': missing "<!-- title: ... | description: ... -->" first line');
   body = body.slice(meta[0].length);
   const storeLine = cfg.appStoreUrl ? '<a href="' + esc(cfg.appStoreUrl) + '">Download on the App Store</a>' : 'Coming soon to the App Store for iPhone and iPad.';
-  const content = fill(body, { storeLine });
+  const storeButton = cfg.appStoreUrl ? 'Download on the App Store' : 'Coming soon to the App Store';
+  const content = fill(body, { storeLine, storeButton });
   const plain = (s) => fill(s).replace(/<[^>]+>/g, '');
   out[f] = fill(layout, { title: esc(plain(meta[1])), description: esc(plain(meta[2])), content, year: String(new Date().getFullYear()) });
   const left = out[f].match(/\{\{\w+\}\}/g);
@@ -35,6 +36,7 @@ if (process.argv.includes('--check')) { console.log('Site builds: ' + pages.leng
 fs.rmSync(DIST, { recursive: true, force: true }); fs.mkdirSync(DIST, { recursive: true });
 for (const f of pages) fs.writeFileSync(path.join(DIST, f), out[f]);
 fs.copyFileSync(path.join(SRC, 'style.css'), path.join(DIST, 'style.css'));
+fs.copyFileSync(path.join(SRC, 'favicon.svg'), path.join(DIST, 'favicon.svg'));
 fs.copyFileSync(path.join(SRC, 'vercel.json'), path.join(DIST, 'vercel.json'));
 console.log('Wrote ' + pages.length + ' pages to site/dist/.');
 if (placeholders.length) console.log('NOT READY TO PUBLISH. Fill these in site/site.config.json:\n  ' + [...new Set(placeholders)].join('\n  '));
