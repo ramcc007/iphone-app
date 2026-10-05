@@ -81,7 +81,9 @@ async function solveLevel(page, board, idx) {
     ok('Home greets the player by name', await page.isVisible('text=Hi, Alex Quinn'));
     ok('Home: the clock range never mixes seconds and minutes (Classic reads 1:30 to 3:05)', (await page.textContent('.bd-info')).includes('1:30 to 3:05 each.'));
     ok('Home: Classic chapter 1 is named "First Drops" with 1 of 5 flames lit', (await page.textContent('.chapter-head .t')) === 'First Drops' && (await page.locator('.chapter:not(.closed) .flames svg.on').count()) === 1 && (await page.locator('.chapter:not(.closed) .flames svg.off').count()) === 4);
-    ok('Home shows the three boards', (await page.locator('[data-act="board"]').count()) === 3);
+    ok('Home: no text is smaller than Apple’s 11pt minimum', await page.evaluate(() => [...document.querySelectorAll('.screen.home *')].filter(e => e.offsetParent && [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())).every(e => parseFloat(getComputedStyle(e).fontSize) >= 11)));
+    ok('Home: level tile labels fit inside their tiles', await page.evaluate(() => [...document.querySelectorAll('.lv small')].every(s => s.scrollWidth <= s.closest('.lv').clientWidth)));
+    ok('Home shows the three boards',(await page.locator('[data-act="board"]').count()) === 3);
     ok('Classic is the starting board', await page.isVisible('[data-act="board"][data-b="classic"][aria-pressed="true"]'));
     ok('Play button names the board and level', await page.isVisible('text=Play Classic Level 1'));
     await page.screenshot({ path: path.join(SHOTS, 'iphone-home.png') });

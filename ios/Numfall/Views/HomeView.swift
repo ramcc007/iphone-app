@@ -346,19 +346,17 @@ private struct LevelTile: View {
                 Text("\(level.number)").scaledFont(19)
                 if best > 0 {
                     Text(String(repeating: "\u{2605}", count: best) + String(repeating: "\u{2606}", count: 3 - best))
-                        .scaledFont(10, .semibold).foregroundStyle(Theme.spark)
+                        .scaledFont(11, .semibold).foregroundStyle(Theme.spark)
                 } else if skipped {
-                    Text("SKIPPED").scaledFont(9, .semibold)
+                    // An icon, because "SKIPPED" at Apple's 11pt minimum is wider than a tile on the smallest phone.
+                    Image(systemName: "forward.fill").scaledFont(11, .semibold)
                 } else if isNext {
-                    Text("PLAY").scaledFont(10, .semibold)
+                    Text("PLAY").scaledFont(11, .semibold)
                 } else if !unlocked {
-                    HStack(spacing: 2) {
-                        Image(systemName: "lock.fill").font(.system(size: 10, weight: .semibold))
-                        if level.role == .milestone { Text("CHEST").scaledFont(9, .semibold) }
-                    }
-                    .opacity(0.8)
+                    // A locked chest level keeps its gold border, so the lock alone is enough here.
+                    Image(systemName: "lock.fill").scaledFont(11, .semibold)
                 } else if level.role == .milestone {
-                    Text("CHEST").scaledFont(9, .semibold)
+                    Text("CHEST").scaledFont(11, .semibold)
                 }
             }
             .frame(maxWidth: .infinity).frame(minHeight: 60)
@@ -390,10 +388,11 @@ private struct LevelTile: View {
     }
 
     private func label(level: Level, best: Int, unlocked: Bool, skipped: Bool, isNext: Bool) -> String {
-        if best > 0 { return "Level \(level.number), \(best) stars" }
-        if skipped { return "Level \(level.number), skipped" }
-        if isNext { return "Level \(level.number), play now" }
-        return unlocked ? "Level \(level.number)" : "Level \(level.number), locked"
+        let chest = level.role == .milestone && best == 0 ? ", chest" : ""
+        if best > 0 { return "Level \(level.number), \(best) \(best == 1 ? "star" : "stars")" }
+        if skipped { return "Level \(level.number), skipped\(chest)" }
+        if isNext { return "Level \(level.number), play now\(chest)" }
+        return unlocked ? "Level \(level.number)\(chest)" : "Level \(level.number), locked\(chest)"
     }
 }
 
