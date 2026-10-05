@@ -29,8 +29,8 @@ The player chooses a board on the home screen. **All three are open from the sta
 
 | Board | Grid | Boxes | Levels | Gaps per level | Clock per level |
 |---|---|---|---|---|---|
-| **Quick** | 4×4 | 2×2 | 30 | 5 → 9 | 20s → 45s |
-| **Classic** (starting choice) | 6×6 | 2×3 | 100 | 12 → 21 | 55s → 150s |
+| **Quick** | 4×4 | 2×2 | 30 | 5 → 9 | 28s → 53s |
+| **Classic** (starting choice) | 6×6 | 2×3 | 100 | 12 → 21 | 70s → 165s |
 | **Master** | 9×9 | 3×3 | 100 | 28 → 41 | 180s → 275s |
 
 - The tutorial is always on a 4×4 grid. When it ends, the player picks a board. Classic is selected by default.
@@ -77,8 +77,8 @@ Each board has its own table. The limit is the same for each block of 5 levels, 
 
 | Board | Levels 1–5 | Step every 5 levels | Last block | Seconds per gap (first → last level) |
 |---|---|---|---|---|
-| Quick 4×4 | 20s | +5s | 45s (levels 26–30) | about 4 → 5 |
-| Classic 6×6 | 55s | +5s | 150s (levels 96–100) | about 4.6 → 7 |
+| Quick 4×4 | 28s | +5s | 53s (levels 26–30) | about 4.7 → 5.9 |
+| Classic 6×6 | 70s | +5s | 165s (levels 96–100) | about 5.8 → 9 |
 | Master 9×9 | 180s | +5s | 275s (levels 96–100) | about 6.4 → 6.7 |
 
 The early levels are the tightest on purpose (4 seconds per gap on Quick level 1): they are easy to solve, so the clock is what makes them a race. The validator rejects any level under 3 (Quick), 4 (Classic) or 6 (Master) seconds per gap. The tutorial is the only untimed play.
@@ -268,3 +268,6 @@ Built and compiling in CI: Daily Drop (Classic levels 31 to 90 chosen from the d
 
 ## Fresh boards on restart (5 October 2026)
 The first time a level (or the Daily Drop) is opened it is the original board. Every later start, whether a restart, a retry after time-up or a replay, uses a disguised copy: the digits are relabelled and whole columns are shuffled inside their box-wide groups. Rows are never moved because the givens are stacked at the bottom of each column. The puzzle keeps its gaps per column, its single solution, its logic path and its time limit, so difficulty is identical. Tests: `tools/failsafe/engine.test.js` (valid, one solution, same logic rounds, solved by logic alone, for all 230 levels over several seeds) and `ios/NumfallCore/Tests/NumfallCoreTests/VariantTests.swift`. Variants available per level: Quick 192, Classic 51,840, Master over 470 million.
+
+## Clock change (5 October 2026)
+The owner found the first levels too tight (Quick 3.3 to 4 s per gap, Classic 4.6 to 5). Start clocks are now **Quick 28s, Classic 70s, Master 180s (unchanged)**, still +5s every 5 levels: Quick 28 to 53s, Classic 70 to 165s. The full list is in `docs/TIME_LIMITS.md`. Side effect: stars and the time bonus use the time left, so a few more players reach three stars.

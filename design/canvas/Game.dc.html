@@ -21,7 +21,7 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
     </a>
     <div style="display: flex; flex-direction: column; align-items: center">
       <div style="font-size: 20px; font-weight: 700">Classic · Level 12</div>
-      <div style="font-size: 12px; font-weight: 500; color: #A3A9BF">Chapter 2 · 65-second limit</div>
+      <div style="font-size: 12px; font-weight: 500; color: #A3A9BF">Chapter 2 · 80-second limit</div>
     </div>
     <a href="Demo.dc.html" aria-label="How to play" style="width: 44px; height: 44px; border-radius: 22px; background: #1E2230; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #F5F6FA">?</a>
   </div>
@@ -104,7 +104,7 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
         <a href="LevelMap.dc.html" style="text-align: center; font-size: 15px; font-weight: 600; padding: 4px">Back to the map</a>
       </sc-if>
       <sc-if value="{{isLose}}" hint-placeholder-val="{{false}}">
-        <div style="font-size: 16px; line-height: 1.45; color: #C3C8DA">All 3 hearts are gone. Level 12 starts again with a fresh board and a full 65 seconds.</div>
+        <div style="font-size: 16px; line-height: 1.45; color: #C3C8DA">All 3 hearts are gone. Level 12 starts again with a fresh board and a full 80 seconds.</div>
         <div style="display: flex; gap: 10px">
           <button type="button" onClick="{{restart}}" style="flex-grow: 1; height: 54px; border-radius: 27px; border: none; background: #6B5CF0; color: #FFFFFF; font-family: inherit; font-size: 18px; font-weight: 700; cursor: pointer">Start again</button>
           <a href="Failed.dc.html" style="flex-grow: 1; height: 54px; border-radius: 27px; background: rgba(255,255,255,0.1); color: #F5F6FA; font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center">More options</a>
@@ -117,9 +117,9 @@ a{color:#B3A8FF;text-decoration:none}a:hover{color:#D2CBFF}
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 // Level 12 (6x6, boxes 2 rows x 3 cols). Generated and checked by the solver:
 // exactly one solution, and solvable by logic while respecting gravity.
-const N = 6, BR = 2, BC = 3, LIMIT = 65, SKIP_COST = 400, SKIP_AFTER_FAILS = 2, START_WALLET = 320;
+const N = 6, BR = 2, BC = 3, LIMIT = 80, SKIP_COST = 400, SKIP_AFTER_FAILS = 2, START_WALLET = 320;
 // v1 rules: the timer is always on, no paid continues, no ads, no purchases. Sparks are earned only.
-// Classic level 12 sits in the 11-15 block: 65 seconds (see tools/levelgen/validate.py time_limit()).
+// Classic level 12 sits in the 11-15 block: 80 seconds (see tools/levelgen/validate.py time_limit()).
 const SOL = [[3,5,1,4,2,6],[6,4,2,5,1,3],[1,6,4,3,5,2],[2,3,5,6,4,1],[4,2,3,1,6,5],[5,1,6,2,3,4]];
 const GIV = [[0,0,0,0,0,0],[6,0,2,5,0,0],[1,0,4,3,0,0],[2,3,5,6,0,0],[4,2,3,1,0,5],[5,1,6,2,0,4]];
 const TILE = { 1: ['#FF6B7A','#C94656'], 2: ['#FFB547','#C9862A'], 3: ['#F5E663','#BFB244'], 4: ['#6EE7A8','#3FB27A'], 5: ['#4FC3F7','#2E8DB8'], 6: ['#9D8CFF','#6F5ED1'] };
@@ -280,7 +280,7 @@ class Component extends DCLogic {
       flash: s.flash, flashColor: s.flashColor,
       undos: s.undos,
       showResult: s.status !== 'play', isWin: s.status === 'win', isLose: s.status === 'lose', isTimeUp: s.status === 'timeup',
-      timeUpText: 'You filled ' + s.history.length + ' of ' + GIV.flat().filter((x) => !x).length + ' gaps. Level 12 starts again with a fresh board and a full 65 seconds. Your Sparks are safe.',
+      timeUpText: 'You filled ' + s.history.length + ' of ' + GIV.flat().filter((x) => !x).length + ' gaps. Level 12 starts again with a fresh board and a full 80 seconds. Your Sparks are safe.',
       showSkip: (s.status === 'timeup' || s.status === 'lose') && s.fails >= SKIP_AFTER_FAILS,
       isSkipped: s.status === 'skipped',
       showMapLink: s.status === 'timeup' || s.status === 'lose',

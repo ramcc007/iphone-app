@@ -73,8 +73,8 @@ public enum BoardKind: String, Codable, CaseIterable, Identifiable, Sendable {
     /// Seconds for levels 1-5, and how much each later block of 5 levels adds.
     var firstLimit: Int {
         switch self {
-        case .quick: 20
-        case .classic: 55
+        case .quick: 28
+        case .classic: 70
         case .master: 180
         }
     }
