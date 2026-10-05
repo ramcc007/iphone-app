@@ -13,10 +13,10 @@ struct HomeView: View {
             let levels = app.levels(board)
             ScrollView {
                 VStack(spacing: 16) {
-                    // "How to play" always keeps its label. If the player's name does not fit beside it, the name moves to its own line.
+                    // Name and Sparks on the left, "How to play" on the right. On a narrow phone "How to play" drops to its own line, still on the right.
                     ViewThatFits(in: .horizontal) {
-                        topBar(nameBelow: false)
-                        topBar(nameBelow: true)
+                        topBar(howOnItsOwnLine: false)
+                        topBar(howOnItsOwnLine: true)
                     }
 
                     HStack(spacing: 18) {
@@ -86,26 +86,35 @@ struct HomeView: View {
     }
 
     @ViewBuilder
-    private func topBar(nameBelow: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+    private func topBar(howOnItsOwnLine: Bool) -> some View {
+        VStack(spacing: 8) {
             HStack(spacing: 8) {
-                Button("How to play") { showRules = true }
-                    .scaledFont(15, .semibold)
-                    .lineLimit(1)
-                    .padding(.horizontal, 14).frame(minHeight: 44)
-                    .background(Capsule().fill(Theme.surface))
-                    .layoutPriority(2)
-                if !nameBelow { greeting }
-                Spacer(minLength: 0)
+                greeting
                 SparksLabel(amount: app.progress.sparks, size: 16)
                     .padding(.horizontal, 14).frame(minHeight: 40)
                     .background(Capsule().fill(Theme.surface))
                     .layoutPriority(2)
+                Spacer(minLength: 0)
+                if !howOnItsOwnLine { howToPlayButton }
                 CircleButton(systemImage: "slider.horizontal.3", label: "Settings") { showSettings = true }
                     .layoutPriority(2)
             }
-            if nameBelow { greeting }
+            if howOnItsOwnLine {
+                HStack(spacing: 0) {
+                    Spacer(minLength: 0)
+                    howToPlayButton
+                }
+            }
         }
+    }
+
+    private var howToPlayButton: some View {
+        Button("How to play") { showRules = true }
+            .scaledFont(15, .semibold)
+            .lineLimit(1)
+            .padding(.horizontal, 14).frame(minHeight: 44)
+            .background(Capsule().fill(Theme.surface))
+            .layoutPriority(2)
     }
 
     @ViewBuilder

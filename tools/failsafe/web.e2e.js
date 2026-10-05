@@ -114,6 +114,7 @@ async function solveLevel(page, board, idx) {
   { const progress = { wallet: 500, best: { 'quick-001': 3 }, skipped: {}, fails: {}, chests: {}, tutorialDone: true, muted: true, board: 'quick', profile, sessions: [] };
     const { ctx, page, errors } = await open(browser, { width: 390, height: 844 }, progress);
     ok('Home: a locked level shows a lock icon', (await page.locator('.lv.locked svg.lk').count()) > 0);
+    ok('Home: "How to play" is a labelled button on the right, after the player name (never a bare ?)', await page.evaluate(() => { const who = document.querySelector('.tb-home .who').getBoundingClientRect(), how = document.querySelector('.tb-home .how'), h = how.getBoundingClientRect(); return how.textContent === 'How to play' && document.querySelectorAll('.tb-home .iconbtn').length === 0 && h.right > who.right && (h.left >= who.right - 1 || h.top >= who.bottom - 1) && h.right <= window.innerWidth; }));
     ok('Home: levels 1-5 are all open and levels 6-10 are locked (5 locked tiles in chapter 1)', (await page.locator('.lv.locked').count()) === 5 && (await page.locator('.lv:not(.locked)').count()) === 5, await page.locator('.lv.locked').count());
     ok('Home: any of the first five levels can be started directly (Level 4 is a play button)', (await page.getAttribute('.lv >> nth=3', 'data-act')) === 'play' && !(await page.isDisabled('.lv >> nth=3')));
     await page.click('.lv.locked >> nth=0');
