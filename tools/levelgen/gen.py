@@ -1,4 +1,4 @@
-# Dropku level generator prototype: builds a random Sudoku solution, keeps bottom-stacked
+# Numfall level generator prototype: builds a random Sudoku solution, keeps bottom-stacked
 # givens, and accepts the level only if it has exactly one solution and can be solved by
 # logic while respecting gravity (only the lowest gap of each column is playable).
 

@@ -1,5 +1,5 @@
 import SwiftUI
-import DropkuCore
+import NumfallCore
 
 /// Tile size and spacing, worked out from the space the board really gets once everything else
 /// on the screen is laid out (docs/DEVICES_AND_ASSETS.md). Same formula as the web version.

@@ -191,7 +191,7 @@
       "fill": "blue",
       "maxH": 760,
       "size": 24,
-      "text": "Dropku in 5 lines\n\n1. Sudoku rule: each number once per row, column and box.\n2. You don't tap cells. Pick a number, tap a COLUMN, and it falls to the lowest gap.\n3. So the ORDER matters: fill the lower gaps first.\n4. WIN: fill the grid before the countdown hits 0s.\n5. LOSE: time's up, or 3 wrong drops (each one cracks and costs a heart).\n\nThree boards, all open from the start: Quick 4×4 (30 levels), Classic 6×6 (100) and Master 9×9 (100).\n\nFirst run: Welcome, then \"Who's playing?\" (name only, kept on the device and in the player's own iCloud), then the tutorial.\n\nPress Play on screens 3, 4 and 7. They really work.",
+      "text": "Numfall in 5 lines\n\n1. Sudoku rule: each number once per row, column and box.\n2. You don't tap cells. Pick a number, tap a COLUMN, and it falls to the lowest gap.\n3. So the ORDER matters: fill the lower gaps first.\n4. WIN: fill the grid before the countdown hits 0s.\n5. LOSE: time's up, or 3 wrong drops (each one cracks and costs a heart).\n\nThree boards, all open from the start: Quick 4×4 (30 levels), Classic 6×6 (100) and Master 9×9 (100).\n\nFirst run: Welcome, then \"Who's playing?\" (name only, kept on the device and in the player's own iCloud), then the tutorial.\n\nPress Play on screens 3, 4 and 7. They really work.",
       "w": 420,
       "x": 2350,
       "y": 300
@@ -278,5 +278,5 @@
     "Devices.dc.html"
   ],
   "pages": [],
-  "title": "Dropku – Game Screens"
+  "title": "Numfall – Game Screens"
 }

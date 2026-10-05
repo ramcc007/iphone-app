@@ -84,7 +84,7 @@ public enum BoardKind: String, Codable, CaseIterable, Identifiable, Sendable {
     public var blurb: String {
         switch self {
         case .quick: "Short and snappy. Great for a coffee break."
-        case .classic: "The full Dropku workout, and the best place to start."
+        case .classic: "The full Numfall workout, and the best place to start."
         case .master: "Big 9\u{00D7}9 boards, tight clocks. For Sudoku fans."
         }
     }

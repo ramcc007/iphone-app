@@ -1,5 +1,5 @@
 import SwiftUI
-import DropkuCore
+import NumfallCore
 
 struct HomeView: View {
     @EnvironmentObject private var app: AppModel
@@ -43,7 +43,7 @@ struct HomeView: View {
                     HStack(spacing: 18) {
                         LogoMark(size: wide ? 44 : 30)
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Dropku").scaledFont(wide ? 64 : 44)
+                            Text("Numfall").scaledFont(wide ? 64 : 44)
                             Text("Sudoku. But the numbers fall.").font(Theme.rounded(.subheadline, .medium)).foregroundStyle(Theme.muted)
                         }
                         Spacer(minLength: 0)

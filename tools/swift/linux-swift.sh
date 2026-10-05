@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Runs the DropkuCore rule tests on Linux, with no Mac needed.
+# Runs the NumfallCore rule tests on Linux, with no Mac needed.
 # It fetches Ubuntu's Swift 6.0.3 packages (archive.ubuntu.com) into a cache folder once,
 # then runs `swift test`. SwiftUI screens still need Xcode on a Mac; this covers the game rules.
 #
-#   tools/swift/linux-swift.sh            # build and run all DropkuCore tests
+#   tools/swift/linux-swift.sh            # build and run all NumfallCore tests
 #   tools/swift/linux-swift.sh build      # any other swift package command
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
-CACHE="${SWIFT_CACHE:-$HOME/.cache/dropku-swift}"
+CACHE="${SWIFT_CACHE:-$HOME/.cache/numfall-swift}"
 POOL=http://archive.ubuntu.com/ubuntu/pool
 SWIFT_VER=6.0.3-2build1
 XML_DEB=libxml2-16_2.14.5+dfsg-0.2ubuntu0.2_amd64.deb
@@ -29,6 +29,6 @@ fi
 export PATH="$CACHE/root/usr/libexec/swift/bin:$PATH"
 export LD_LIBRARY_PATH="$CACHE/root/usr/lib/x86_64-linux-gnu:$CACHE/root/usr/libexec/swift/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
-cd "$REPO/ios/DropkuCore"
+cd "$REPO/ios/NumfallCore"
 if [ $# -eq 0 ]; then set -- test; fi
 exec swift "$@"

@@ -41,7 +41,7 @@ public struct Lesson: Sendable, Identifiable {
                costsHearts: false,
                steps: [Step(value: 2, column: 3), Step(value: 4, column: 3), Step(value: 3, column: 2)],
                stepTexts: ["Fill the lower gap first: drop the 2", "Now the 4 lands on top", "Last one: which number does column 3 need?"],
-               winText: "You planned the order: lower gaps first. That\u{2019}s the heart of Dropku.",
+               winText: "You planned the order: lower gaps first. That\u{2019}s the heart of Numfall.",
                level: board(gaps: [(0, 3), (1, 3), (0, 2)])),
         Lesson(id: 2, title: "On your own",
                instructions: "No more help. A wrong drop cracks and costs a heart. Lose all 3 and you start again. Fill the grid!",

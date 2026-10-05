@@ -1,5 +1,5 @@
 import SwiftUI
-import DropkuCore
+import NumfallCore
 
 /// Pause, win, time's up, out of hearts, skipped and tutorial results.
 /// On iPhone they slide up from the bottom; in the wide iPad layout they sit in the centre.
@@ -172,7 +172,7 @@ struct OverlayLayer: View {
 
     private func shareText(_ result: LevelResult) -> String {
         let stars = String(repeating: "\u{2605}", count: result.stars) + String(repeating: "\u{2606}", count: 3 - result.stars)
-        return "Dropku \(session.board?.name ?? "") \u{00B7} Level \(session.level.number) \(stars) \u{00B7} \(session.game.timeLeft)s to spare"
+        return "Numfall \(session.board?.name ?? "") \u{00B7} Level \(session.level.number) \(stars) \u{00B7} \(session.game.timeLeft)s to spare"
     }
 }
 

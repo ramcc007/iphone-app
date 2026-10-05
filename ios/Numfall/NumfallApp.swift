@@ -1,8 +1,8 @@
 import SwiftUI
-import DropkuCore
+import NumfallCore
 
 @main
-struct DropkuApp: App {
+struct NumfallApp: App {
     @StateObject private var app = AppModel()
 
     var body: some Scene {

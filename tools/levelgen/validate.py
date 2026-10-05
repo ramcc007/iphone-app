@@ -1,4 +1,4 @@
-"""Fail-safe validator for Dropku levels.
+"""Fail-safe validator for Numfall levels.
 
 Every level must pass ALL checks before it can ship:
   1. givens match the stored solution and the solution is a valid Sudoku
@@ -123,7 +123,7 @@ def validate(name, sol, giv, time_limit=None, min_secs_per_gap=6):
 
 # The three boards, all open from the start. Each board is its own path of levels.
 # Time limit per level (seconds): the same for each block of 5 levels, then +step.
-# Must match prototype/web/engine.js (BOARDS) and ios/DropkuCore Level.swift (Board, TimeTable).
+# Must match prototype/web/engine.js (BOARDS) and ios/NumfallCore Level.swift (Board, TimeTable).
 BOARDS = {
     'quick':   {'name': 'Quick',   'size': 4, 'boxRows': 2, 'boxCols': 2, 'levels': 30,  'start': 20,  'step': 5,  'minSecsPerGap': 3},
     'classic': {'name': 'Classic', 'size': 6, 'boxRows': 2, 'boxCols': 3, 'levels': 100, 'start': 55,  'step': 5,  'minSecsPerGap': 4},

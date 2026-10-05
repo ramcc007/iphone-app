@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!-- Dropku privacy manifest. v1: no tracking, no data collected, no third-party SDKs.
+<!-- Numfall privacy manifest. v1: no tracking, no data collected, no third-party SDKs.
      The player's name and session history stay on the device and in their own iCloud; they never reach a developer server,
      so nothing is declared as collected. If that ever changes, list the data types here and update the App Privacy label first.
      Required-reason API: UserDefaults stores this install's random device ID (Sparks ledger) and the chosen board.

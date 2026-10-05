@@ -1,8 +1,8 @@
 import XCTest
-@testable import DropkuCore
+@testable import NumfallCore
 
 /// Mirrors tools/failsafe/engine.test.js so the Swift rules behave exactly like the tested web engine.
-/// Run on a Mac: `cd ios/DropkuCore && swift test`, or on Linux: `tools/swift/linux-swift.sh`
+/// Run on a Mac: `cd ios/NumfallCore && swift test`, or on Linux: `tools/swift/linux-swift.sh`
 final class GameRulesTests: XCTestCase {
     let boards = LevelLibrary.bundled()
     var levels: [Level] { boards.flatMap(\.levels) }

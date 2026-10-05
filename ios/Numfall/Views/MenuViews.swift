@@ -1,12 +1,12 @@
 import SwiftUI
-import DropkuCore
+import NumfallCore
 
 /// Public web pages the app links to. These must exist before App Store submission
 /// (docs/APP_STORE_COMPLIANCE.md section 9). [Check] Replace with the real website addresses.
 enum AppLinks {
-    static let privacy = URL(string: "https://example.com/dropku/privacy")!
-    static let terms = URL(string: "https://example.com/dropku/terms")!
-    static let support = URL(string: "https://example.com/dropku/support")!
+    static let privacy = URL(string: "https://example.com/numfall/privacy")!
+    static let terms = URL(string: "https://example.com/numfall/terms")!
+    static let support = URL(string: "https://example.com/numfall/support")!
 }
 
 struct HowToPlayView: View {

@@ -1,6 +1,6 @@
 # App name search (5 October 2026)
 
-Goal: an easy-to-remember name that is free on the App Store and unlikely to cause trademark trouble. **Working name until the owner decides: "Dropku" is being replaced; the recommended name is Numpile.**
+Goal: an easy-to-remember name that is free on the App Store and unlikely to cause trademark trouble. **Decision (5 October 2026): the owner chose "Numfall"** as the working name. The old working name was "Dropku". See "Numfall: what is still open" below.
 
 ## What was checked, and what could not be
 - **Domains:** checked with a domain registrar lookup (.com and .app).
@@ -48,3 +48,18 @@ Lesson: an invented-looking word is rarely free, because short pronounceable wor
 2. Change `appName` in `site/site.config.json` and rebuild the website.
 3. Replace "Dropku" in the app (`CFBundleDisplayName` in `ios/project.yml`, the Home and Welcome screens, How to play, share text), the web preview, the icon wordmark, the canvas and the docs, then rerun every check.
 4. Reserve the name in App Store Connect as soon as the Developer account exists, and buy the domain.
+
+## Numfall: what is still open (owner chose it on 5 October 2026)
+- **App Store:** the owner searched `Numfall`, `Num fall` and `Num fall puzzle` in the App Store web search and sent screenshots. No app named Numfall or Num Fall appeared in the visible results. The `Numfall` screenshot was scrolled past the top results, so **recheck the top of that page.**
+- **Google Play:** an existing game "NumFall" by N8-Ball (a falling-block number puzzle inspired by 2048) uses the same name in the same kind of game. Different store, and a different mechanic (swap and stack blocks, not Sudoku), but it raises the chance of a naming dispute or a trademark objection.
+- **Trademark (not done):** search `numfall` at tmsearch.uspto.gov (classes 9 and 41) and, if you will sell outside the US, the EUIPO and WIPO databases. A trademark attorney's knockout search is the only real clearance.
+- **Do not spend money on the name** (domain, App Store name reservation, icon wordmark) until the USPTO check is clean.
+- **Fallback:** Numpile (see the shortlist). Renaming is a find-and-replace plus a rebuild, as done on 5 October 2026 (all files and folders, tests rerun).
+
+## Numfall: what is still open (owner chose it on 5 October 2026)
+- **USPTO (US federal trademarks):** the owner searched the wordmark `numfall` at tmsearch.uspto.gov with live and dead records included. **No results found.** This covers the exact word only. Similar-looking or sounding marks (for example "Num Fall", "Numfal", "Numfall" inside a longer mark) need the "similar" or wildcard searches (`numfal*`, `*numfall*`) and a class 9 and 41 filter.
+- **App Store:** the owner searched `Numfall`, `Num fall` and `Num fall puzzle` in the App Store web search and sent screenshots. No app named Numfall or Num Fall appeared in the visible results. The `Numfall` screenshot was scrolled past the top results, so **recheck the top of that page.**
+- **Google Play:** an existing game "NumFall" by N8-Ball (a falling-block number puzzle inspired by 2048) uses the same name in the same kind of game. Different store and a different mechanic (swap and stack blocks, not Sudoku). It has no US trademark record (see above), but a naming dispute or a store complaint is possible. Unregistered names can still carry "common law" rights.
+- **Other countries (not done):** EUIPO, UK IPO and WIPO Global Brand Database, if you will sell outside the US.
+- **Do not spend much on the name** (domain, icon wordmark) until the extra searches are clean. A trademark attorney's knockout search is the only real clearance.
+- **Fallback:** Numpile (see the shortlist). Renaming is a find-and-replace plus a rebuild, as done on 5 October 2026 (all files and folders, tests rerun).

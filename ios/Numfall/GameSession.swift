@@ -1,6 +1,6 @@
 import SwiftUI
 import UIKit
-import DropkuCore
+import NumfallCore
 
 /// One attempt at a level or tutorial lesson: the rules (Game) plus what the screen shows.
 @MainActor

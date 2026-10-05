@@ -1,4 +1,4 @@
-# Dropku (working title): project rules for Claude
+# Numfall (working title): project rules for Claude
 
 An original iPhone numbers puzzle game, Sudoku with gravity (see `docs/GAME_PLAN.md`). The earlier "Spill" concept was scrapped (`docs/archive/`).
 It **will be published on the Apple App Store**, and a marketing/support website will follow.
@@ -10,8 +10,8 @@ It **will be published on the Apple App Store**, and a marketing/support website
 - **Player profile (owner's decision, 4 October 2026):** the first-run screen asks for a name (no age, removed 5 October 2026). The name and the session history live only on the device and in the player's own iCloud (never a developer server). See `docs/APP_STORE_COMPLIANCE.md` section 4 before changing this.
 - **The timer is always on.** At 0s: "Time's up!" and the same level starts again. No untimed mode, no extra time.
 - **Three boards, all open from the start:** Quick 4×4 (30 levels), Classic 6×6 (100), Master 9×9 (100). Each has its own time table (`BOARDS` in `tools/levelgen/validate.py`, `engine.js` and `Level.swift` must match).
-- Before any change ships: `python3 tools/levelgen/validate.py`, `node tools/failsafe/engine.test.js`, `game.test.js`, `tutorial.test.js` and `web.e2e.js` must pass, and the Swift rule tests (`tools/swift/linux-swift.sh` on Linux, or `swift test` in `ios/DropkuCore` on a Mac).
-- The Swift rules (`ios/DropkuCore`) must stay identical to `prototype/web/engine.js`. Change both together, and keep their tests in step.
+- Before any change ships: `python3 tools/levelgen/validate.py`, `node tools/failsafe/engine.test.js`, `game.test.js`, `tutorial.test.js` and `web.e2e.js` must pass, and the Swift rule tests (`tools/swift/linux-swift.sh` on Linux, or `swift test` in `ios/NumfallCore` on a Mac).
+- The Swift rules (`ios/NumfallCore`) must stay identical to `prototype/web/engine.js`. Change both together, and keep their tests in step.
 
 ## Always
 - **App Store compliance comes first.** Every design, feature and code change must pass App Review. Check it against `docs/APP_STORE_COMPLIANCE.md` and the current App Review Guidelines (developer.apple.com/app-store/review/guidelines). If a request would break a guideline, say so and propose a compliant alternative before doing it.

@@ -1,6 +1,6 @@
-# Game Plan v2: "Dropku" (working title), Sudoku where numbers fall
+# Game Plan v2: "Numfall" (working title), Sudoku where numbers fall
 
-Status: **approved 3 October 2026.** Screens designed (canvas "Dropku – Game Screens", 18 screens incl. iPad). v1 decisions recorded in section 11.
+Status: **approved 3 October 2026.** Screens designed (canvas "Numfall – Game Screens", 18 screens incl. iPad). v1 decisions recorded in section 11.
 **Update 3 October 2026:** after playtesting the web version ("levels feel too easy"), the game now has **three boards to choose from** (Quick 4×4, Classic 6×6, Master 9×9), 230 levels in all, harder levels and tighter clocks. See sections 2 and 7.
 Previous concept ("Spill") was scrapped and moved to `docs/archive/`.
 Last updated: 3 October 2026.
@@ -9,12 +9,12 @@ Last updated: 3 October 2026.
 
 ## 1. The brief
 
-**Dropku is Sudoku with gravity.**
+**Numfall is Sudoku with gravity.**
 - The rule everyone already knows stays the same: every row, column and box must contain each number exactly once.
 - The twist: **you never tap a cell.** You choose a number and **drop it into a column**, and it falls to the lowest empty space.
 - To get a number high up in a column, you must first fill the cells beneath it, in an order that never breaks the rules.
 
-Sudoku asks *what* goes where. Dropku also asks **in what order**. That ordering is the new layer of challenge, and it makes every level feel like a small strategy puzzle rather than a fill-in exercise.
+Sudoku asks *what* goes where. Numfall also asks **in what order**. That ordering is the new layer of challenge, and it makes every level feel like a small strategy puzzle rather than a fill-in exercise.
 
 - **Audience:** 16–30. Also accessible to anyone who has seen a Sudoku.
 - **Session length:** under a minute (Quick) to about 5 minutes (Master) per level. The player picks the board.
@@ -110,7 +110,7 @@ I checked before choosing:
 | Falling Sudoku blocks, arcade style | **Partly:** an obscure web game, "Falling Sudoku" (Tetris-style, real-time) |
 | **Turn-based level puzzles where you plan the drop order, plus a number queue, board rotation and the dead-end rule** | **Not found on the App Store** |
 
-Game mechanics can't be owned (copyright protects code, art, text and names, not rules). Our protection is an original combination, our own art and code, and a cleared name. "Dropku" still needs a trademark and App Store name search [Check].
+Game mechanics can't be owned (copyright protects code, art, text and names, not rules). Our protection is an original combination, our own art and code, and a cleared name. "Numfall" still needs a trademark and App Store name search [Check].
 
 ---
 
@@ -189,7 +189,7 @@ Version 1 has **no ads and no In-App Purchases**. Every Spark is earned by playi
 **Possible later versions** (not in v1, to be decided after launch):
 - **Skip now:** a single skip bought with real money.
 - **Sparks packs:** for example 500 / 1,500 / 4,000 Sparks.
-- **Dropku Complete:** a one-time purchase that unlocks all themes and gives bonus Sparks.
+- **Numfall Complete:** a one-time purchase that unlocks all themes and gives bonus Sparks.
 - **Rewarded ads:** watch an ad for Sparks.
 
 Because v1 players will have earned everything by playing, any later purchases must only be optional shortcuts. Levels must never be made harder to push people towards paying.
@@ -247,12 +247,12 @@ The whole set is generated deterministically (`python3 tools/levelgen/build_leve
 1. ~~Design the screens on a new canvas.~~ Done (18 screens, including iPad, app icon and device spec).
 2. ~~Generate and validate the real level set.~~ Done: 230 levels on three boards.
 3. ~~Make a playable web version.~~ Done (`prototype/web`, published as a private link).
-4. iPhone/iPad app in SwiftUI (`ios/`). The game rules (`DropkuCore`) now compile and pass their tests on Linux (`tools/swift/linux-swift.sh`). The screens still need their first build in Xcode on a Mac. Then: sound, Game Center and the Daily Drop.
+4. iPhone/iPad app in SwiftUI (`ios/`). The game rules (`NumfallCore`) now compile and pass their tests on Linux (`tools/swift/linux-swift.sh`). The screens still need their first build in Xcode on a Mac. Then: sound, Game Center and the Daily Drop.
 
 ---
 
 ## 11. Decisions confirmed at approval
-- Working name: **Dropku** (trademark and App Store search still pending).
+- Working name: **Numfall** (trademark and App Store search still pending).
 - 3 hearts per level. A wrong drop costs 1 heart. Retry is always free.
 - **Timer always on** (decided after the fail-safe review): every level has a hard countdown in seconds. At 0s, "Time's up!" and the same level starts again. No relaxed mode, no paid or earned extra time.
 - **v1: no ads and no In-App Purchases.** Sparks are earned only. Purchases may come in a later version.

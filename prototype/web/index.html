@@ -1,4 +1,4 @@
-<title>Dropku</title>
+<title>Numfall</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: one-screen game. Phone/tall = stacked column (max 540px). Wide (landscape iPad, desktop) = board left, side panel right. */
@@ -236,7 +236,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
 <script>
 (function () {
   'use strict';
-  var D = window.Dropku, BOARDS = window.DROPKU_BOARDS || [], LEVELS = [];
+  var D = window.Numfall, BOARDS = window.NUMFALL_BOARDS || [], LEVELS = [];
   var TILE = { 1: ['#FF6B7A', '#FF97A2', '#C94656'], 2: ['#FFB547', '#FFCF85', '#C9862A'], 3: ['#F5E663', '#FAF29A', '#BFB244'],
     4: ['#6EE7A8', '#A0F2C6', '#3FB27A'], 5: ['#4FC3F7', '#8ADAFB', '#2E8DB8'], 6: ['#9D8CFF', '#BDB2FF', '#6F5ED1'],
     7: ['#FF8AD8', '#FFB3E6', '#C25CA6'], 8: ['#2DD4BF', '#7EE6D7', '#1E9E8E'], 9: ['#C0C7D6', '#DDE1EA', '#8A91A3'] };
@@ -245,12 +245,12 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   var HEART = '<path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.3 5 6.8 5c2 0 3.6 1.1 5.2 3 1.6-1.9 3.2-3 5.2-3 3.5 0 5.6 3.6 4.3 6.8C19.5 16.4 12 21 12 21z"/>';
   var STAR = '<polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21.5 12,17.3 5.5,21.5 7.5,14 2,9.3 9,9"/>';
   var SPARK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#FFB547" aria-hidden="true"><path d="M12 1l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"/></svg>';
-  var BOARD_TEXT = { quick: 'Short and snappy. Great for a coffee break.', classic: 'The full Dropku workout, and the best place to start.', master: 'Big 9×9 boards, tight clocks. For Sudoku fans.' };
+  var BOARD_TEXT = { quick: 'Short and snappy. Great for a coffee break.', classic: 'The full Numfall workout, and the best place to start.', master: 'Big 9×9 boards, tight clocks. For Sudoku fans.' };
   function boardById(id) { for (var i = 0; i < BOARDS.length; i++) if (BOARDS[i].id === id) return BOARDS[i]; return BOARDS[0]; }
   function minutes(s) { return s < 120 ? s + 's' : Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
 
   // ---------- saved progress (this browser only; the real app uses iCloud) ----------
-  var KEY = 'dropku.web.v2';
+  var KEY = 'numfall.web.v2';
   function fresh() { return { wallet: 0, best: {}, skipped: {}, fails: {}, chests: {}, tutorialDone: false, muted: false, board: 'classic', profile: null, sessions: [] }; }
   function load() { try { var raw = localStorage.getItem(KEY); if (raw) { var p = JSON.parse(raw); var f = fresh(); for (var k in f) if (p[k] !== undefined) f[k] = p[k]; return f; } } catch (e) {} return fresh(); }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} }
@@ -264,7 +264,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   function lessonLevel(empties) { return { id: 'tutorial', number: 0, size: 4, boxRows: 2, boxCols: 2, timeLimit: 0, solution: S4, givens: S4.map(function (row, r) { return row.map(function (v, c) { return empties.some(function (e) { return e[0] === r && e[1] === c; }) ? 0 : v; }); }) }; }
   var LESSONS = [
     { title: 'Drop a number', text: 'The top row is missing a 2 and a 4. Column 2 already has a 4, so it needs the 2. Tap 2, then tap column 2.', empties: [[0, 1], [0, 3]], hearts: false, steps: [{ v: 2, c: 1 }, { v: 4, c: 3 }], stepText: ['Tap 2, then the glowing column', 'Now the 4 into the last gap'], win: 'That’s the basic move: pick a number, tap a column, and it drops in.' },
-    { title: 'Order matters', text: 'Column 4 has two gaps. The TOP one needs a 4, but numbers fall to the LOWEST gap first. Try dropping the 4 first if you’re curious.', empties: [[0, 3], [1, 3], [0, 2]], hearts: false, steps: [{ v: 2, c: 3 }, { v: 4, c: 3 }, { v: 3, c: 2 }], stepText: ['Fill the lower gap first: drop the 2', 'Now the 4 lands on top', 'Last one: which number does column 3 need?'], win: 'You planned the order: lower gaps first. That’s the heart of Dropku.' },
+    { title: 'Order matters', text: 'Column 4 has two gaps. The TOP one needs a 4, but numbers fall to the LOWEST gap first. Try dropping the 4 first if you’re curious.', empties: [[0, 3], [1, 3], [0, 2]], hearts: false, steps: [{ v: 2, c: 3 }, { v: 4, c: 3 }, { v: 3, c: 2 }], stepText: ['Fill the lower gap first: drop the 2', 'Now the 4 lands on top', 'Last one: which number does column 3 need?'], win: 'You planned the order: lower gaps first. That’s the heart of Numfall.' },
     { title: 'On your own', text: 'No more help. A wrong drop cracks and costs a heart. Lose all 3 and you start again. Fill the grid!', empties: [[0, 0], [1, 0], [0, 2], [0, 3], [1, 3]], hearts: true, steps: null, win: 'Real levels add a countdown, and seconds left turn into Sparks. Now pick a board: Quick 4×4, Classic 6×6 or Master 9×9.' }
   ];
 
@@ -287,7 +287,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   };
 
   // ---------- helpers ----------
-  // The name stays in this browser (the iPhone app also keeps it in the player's own iCloud). No age is asked. Same rules as DropkuCore.
+  // The name stays in this browser (the iPhone app also keeps it in the player's own iCloud). No age is asked. Same rules as NumfallCore.
   function cleanName(raw) { var t = String(raw || '').replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ').replace(/\s+/g, ' ').trim(); t = Array.from(t).slice(0, 20).join('').trim(); return t || null; }
   function formOk() { return !!cleanName(S.form.name); }
   function formMessage() {
@@ -539,7 +539,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
     if (o === 'won') {
       var r = S.result, last = S.levelIndex === LEVELS.length - 1;
       var rows = S.replay ? '<div><span>Replay: ' + (S.award ? 'new stars' : 'no new stars') + '</span><b>+' + S.award + ' ✦</b></div>' : r.breakdown.map(function (b) { return '<div><span>' + esc(b.label) + '</span><b>+' + b.n + ' ✦</b></div>'; }).join('');
-      var share = 'Dropku ' + boardById(lv.board).name + ' · Level ' + lv.number + ' ' + '★★★'.slice(0, r.stars) + '☆☆☆'.slice(0, 3 - r.stars) + ' · ' + g.timeLeft + 's to spare';
+      var share = 'Numfall ' + boardById(lv.board).name + ' · Level ' + lv.number + ' ' + '★★★'.slice(0, r.stars) + '☆☆☆'.slice(0, 3 - r.stars) + ' · ' + g.timeLeft + 's to spare';
       return '<div class="veil"><div class="sheet win"><h2>' + (r.stars === 3 ? 'Perfect!' : 'Level ' + lv.number + ' complete!') + '</h2>' + starsSvg(r.stars, 46) +
         '<div class="breakdown">' + rows + '</div>' + (S.chest ? '<div class="chest">' + SPARK + 'Chapter ' + lv.chapter + ' milestone chest: +' + S.chest + ' Sparks</div>' : '') +
         '<p style="font-size:14px">Wallet: ' + P.wallet + ' Sparks</p>' +
@@ -599,7 +599,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
       t += '<div class="wl-col">' + cells + '</div>';
     }
     return '<div class="screen welcome scroll"><div class="wl-board" aria-hidden="true">' + t + '</div>' +
-      '<h1>Welcome to Dropku</h1><p class="wl-p">Sudoku, but the numbers fall. Beat the clock on three boards. First, who’s playing?</p>' +
+      '<h1>Welcome to Numfall</h1><p class="wl-p">Sudoku, but the numbers fall. Beat the clock on three boards. First, who’s playing?</p>' +
       profileForm('new') +
       '<p class="priv">Your name stays on this device (the iPhone app also keeps it in your own iCloud). It is never sent to us, and you can change or delete it any time.</p></div>';
   }
@@ -648,7 +648,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
     var logo = '<div class="logo" aria-hidden="true"><i></i><i style="background:linear-gradient(180deg,#FFCF85 0%,#FFB547 58%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 #C9862A"></i><i style="background:linear-gradient(180deg,#8ADAFB 0%,#4FC3F7 58%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 #2E8DB8"></i><i style="background:linear-gradient(180deg,#363D57 0%,#2A3045 60%);box-shadow:0 3px 0 #1C2030"></i></div>';
     var nm = P.profile ? P.profile.name : '', hi = '<button class="pill who" data-act="player" aria-label="Player: ' + esc(nm) + '. Open profile and sessions"><span class="av">' + esc((Array.from(nm)[0] || '?').toUpperCase()) + '</span><span class="nm">Hi, ' + esc(nm) + '</span></button>';
     return '<div class="screen home scroll"><div class="topbar">' + hi + '<span style="display:flex;gap:8px;align-items:center"><span class="pill spark" aria-label="' + P.wallet + ' Sparks">' + SPARK + P.wallet + '</span><button class="iconbtn" data-act="rules" aria-label="How to play">?</button></span></div>' +
-      '<div class="hero">' + logo + '<div><h1>Dropku</h1><p>Sudoku. But the numbers fall.</p></div></div>' +
+      '<div class="hero">' + logo + '<div><h1>Numfall</h1><p>Sudoku. But the numbers fall.</p></div></div>' +
       '<div class="boards" role="group" aria-label="Choose a board">' + picker + '</div>' +
       '<div class="bd-info">' + esc(BOARD_TEXT[board.id] || '') + ' ' + board.levels.length + ' levels, ' + minutes(board.levels[0].timeLimit) + ' to ' + minutes(board.levels[board.levels.length - 1].timeLimit) + ' each.</div>' +
       '<button class="primary pulse" data-act="play" data-i="' + next + '" style="height:66px;flex-shrink:0">' + (P.best[nl.id] ? 'Replay' : 'Play') + ' ' + board.name + ' Level ' + nl.number + ' · ' + minutes(nl.timeLimit) + '</button>' +

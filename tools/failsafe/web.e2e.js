@@ -5,7 +5,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '../../prototype/web');
-const SHOTS = process.argv[2] || path.join(require('os').tmpdir(), 'dropku-shots');
+const SHOTS = process.argv[2] || path.join(require('os').tmpdir(), 'numfall-shots');
 fs.mkdirSync(SHOTS, { recursive: true });
 // Mimic the artifact page skeleton (doctype, viewport-fit=cover, safe-area padding) around index.html.
 const wrapper = path.join(ROOT, '.e2e.html');
@@ -21,7 +21,7 @@ async function open(browser, viewport, progress) {
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(m.text()); }); // font requests are blocked offline on purpose
   await page.clock.install();
-  if (progress) await page.addInitScript((p) => localStorage.setItem('dropku.web.v2', JSON.stringify(p)), progress);
+  if (progress) await page.addInitScript((p) => localStorage.setItem('numfall.web.v2', JSON.stringify(p)), progress);
   await page.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
   await page.goto(URL);
   return { ctx, page, errors };
@@ -35,7 +35,7 @@ const boardFits = (page) => page.evaluate(() => { const b = document.querySelect
 // Picking the number that is already selected would un-select it, so only tap the tray when needed.
 async function drop(page, v, c) { if ((await page.getAttribute(`[data-act="pick"][data-v="${v}"]`, 'aria-pressed')) !== 'true') await page.click(`[data-act="pick"][data-v="${v}"]`); await page.click(`[data-act="drop"][data-c="${c}"]`); }
 async function solveLevel(page, board, idx) {
-  const L = await page.evaluate(([b, i]) => window.DROPKU_BOARDS.find((x) => x.id === b).levels[i], [board, idx]);
+  const L = await page.evaluate(([b, i]) => window.NUMFALL_BOARDS.find((x) => x.id === b).levels[i], [board, idx]);
   const n = L.size, g = L.givens.map((r) => r.slice());
   for (let guard = 0; guard < 200; guard++) {
     let moved = false;
@@ -50,7 +50,7 @@ async function solveLevel(page, board, idx) {
   // 1. iPhone: tutorial -> level 1 -> win
   { const { ctx, page, errors } = await open(browser, { width: 390, height: 844 });
     // First run: the intro asks who's playing before anything else.
-    ok('iPhone: first launch opens the intro screen', await page.isVisible('text=Welcome to Dropku'));
+    ok('iPhone: first launch opens the intro screen', await page.isVisible('text=Welcome to Numfall'));
     await page.screenshot({ path: path.join(SHOTS, 'iphone-welcome.png') });
     ok('Intro: "Let\u2019s play" is disabled until a name is filled', await page.isDisabled('#f-go'));
     ok('Intro: there is no age question', (await page.locator('#f-age').count()) === 0 && !(await page.isVisible('text=Your age')));
@@ -62,7 +62,7 @@ async function solveLevel(page, board, idx) {
     ok('Intro: typing keeps focus (the page does not redraw)', await page.evaluate(() => document.activeElement && document.activeElement.id === 'f-name'));
     await page.fill('#f-name', '   Alex   Quinn  ');
     await page.click('#f-go');
-    const prof = await page.evaluate(() => JSON.parse(localStorage.getItem('dropku.web.v2')).profile);
+    const prof = await page.evaluate(() => JSON.parse(localStorage.getItem('numfall.web.v2')).profile);
     ok('Intro: name is cleaned and saved on the device', prof && prof.name === 'Alex Quinn' && !('age' in prof), JSON.stringify(prof));
     ok('Intro leads into the tutorial, whose steps are called levels', await page.isVisible('text=Tutorial · Level 1 of 3'));
     await page.screenshot({ path: path.join(SHOTS, 'iphone-tutorial.png') });
@@ -98,7 +98,7 @@ async function solveLevel(page, board, idx) {
     await solveLevel(page, 'quick', 0);
     ok('Level 1 can be won by tapping', await page.isVisible('.sheet.win'));
     await page.screenshot({ path: path.join(SHOTS, 'iphone-win.png') });
-    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('dropku.web.v2')));
+    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('numfall.web.v2')));
     ok('Win is saved (stars + Sparks + board)', saved.best['quick-001'] >= 1 && saved.wallet > 50 && saved.board === 'quick', JSON.stringify(saved));
     ok('Win is recorded as a session (level, outcome, time used)', saved.sessions.length === 1 && saved.sessions[0].level === 'quick-001' && saved.sessions[0].out === 'won' && saved.sessions[0].secs >= 5 && saved.sessions[0].stars >= 1, JSON.stringify(saved.sessions));
     ok('Confetti plays on a win', (await page.locator('#fx .conf').count()) > 20);
@@ -117,7 +117,7 @@ async function solveLevel(page, board, idx) {
     await page.screenshot({ path: path.join(SHOTS, 'iphone-timeup.png') });
     ok('Time\u2019s up still shows Skip, locked until the 2nd try', (await page.isVisible('.veil [data-act="skip"]')) && (await page.isDisabled('.veil [data-act="skip"]')) && (await page.isVisible('text=Unlocks after 2 tries (1 more)')));
     ok('Time\u2019s up offers a tip and a way to switch board', (await page.isVisible('.veil .tip')) && (await page.isVisible('.veil >> text=Switch board or level')));
-    const s1 = await page.evaluate(() => JSON.parse(localStorage.getItem('dropku.web.v2')).sessions);
+    const s1 = await page.evaluate(() => JSON.parse(localStorage.getItem('numfall.web.v2')).sessions);
     ok('Time\u2019s up is recorded as a session', s1.length === 1 && s1[0].out === 'timeUp' && s1[0].secs === 20, JSON.stringify(s1));
     await page.click('.veil [data-act="restart"]');
     ok('Start again gives the full 20s', await page.isVisible('#timer >> text=20s'));
@@ -125,7 +125,7 @@ async function solveLevel(page, board, idx) {
     ok('Skip is unlocked after 2 fails', (await page.isVisible('.veil [data-act="skip"]')) && !(await page.isDisabled('.veil [data-act="skip"]')));
     await page.click('.veil [data-act="skip"]');
     ok('Skip spends 400 Sparks and unlocks the next level', await page.isVisible('text=Level skipped'));
-    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('dropku.web.v2')));
+    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('numfall.web.v2')));
     ok('Skip saved, wallet 100', saved.skipped['quick-002'] === true && saved.wallet === 100, JSON.stringify(saved));
     // pause hides the board and stops the clock
     await page.click('.veil [data-act="next"]');

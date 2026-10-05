@@ -1,5 +1,5 @@
 import SwiftUI
-import DropkuCore
+import NumfallCore
 
 /// First screen on first launch: asks for a name.
 /// Both are saved on the device and in the player's own iCloud only. There is no developer server, so nobody else receives them.
@@ -20,7 +20,7 @@ struct WelcomeView: View {
                         .padding(.top, 8)
 
                     VStack(spacing: 8) {
-                        Text("Welcome to Dropku")
+                        Text("Welcome to Numfall")
                             .font(Theme.rounded(.largeTitle))
                             .multilineTextAlignment(.center)
                             .accessibilityAddTraits(.isHeader)

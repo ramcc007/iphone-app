@@ -14,7 +14,7 @@ The pages describe what the app really does (name and progress on the device and
 ## Free hosting (any one of these)
 - **Cloudflare Pages, Netlify or Vercel:** create a free project and upload the `site/dist` folder (drag and drop works). You get an `https://something.pages.dev` / `netlify.app` / `vercel.app` address at no cost.
 - **GitHub Pages:** publish `site/dist` (free for public repositories).
-Use the final addresses for the three links in `ios/Dropku/Views/MenuViews.swift` (`AppLinks`) and in App Store Connect (Privacy Policy URL, Support URL, Marketing URL). When you buy a domain later, add it as a custom domain and update those links.
+Use the final addresses for the three links in `ios/Numfall/Views/MenuViews.swift` (`AppLinks`) and in App Store Connect (Privacy Policy URL, Support URL, Marketing URL). When you buy a domain later, add it as a custom domain and update those links.
 
 ## Before publishing
 - [ ] Fill in the placeholders and rebuild.

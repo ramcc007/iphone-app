@@ -1,12 +1,12 @@
-/* Dropku game engine (web prototype). Pure game rules, no UI.
+/* Numfall game engine (web prototype). Pure game rules, no UI.
  * The same rules will be ported to Swift for the iPhone/iPad app.
- * Works in the browser (window.Dropku) and in Node (module.exports) so tests can run it. */
+ * Works in the browser (window.Numfall) and in Node (module.exports) so tests can run it. */
 (function (root) {
   'use strict';
 
   // The three boards, all open from the start; each is its own path of levels (docs/GAME_PLAN.md §2).
   // Seconds per level: the same for each block of 5 levels, then +5s.
-  // Must match tools/levelgen/validate.py (BOARDS) and ios/DropkuCore Level.swift (Board).
+  // Must match tools/levelgen/validate.py (BOARDS) and ios/NumfallCore Level.swift (Board).
   const BOARDS = {
     quick:   { name: 'Quick',   size: 4, levels: 30,  start: 20,  step: 5 },
     classic: { name: 'Classic', size: 6, levels: 100, start: 55,  step: 5 },
@@ -171,6 +171,6 @@
 
   var api = { BOARDS: BOARDS, BOARD_ORDER: BOARD_ORDER, timeLimit: timeLimit, newGame: newGame, landing: landing, left: left, drop: drop, tick: tick, undo: undo,
     continueWithHeart: continueWithHeart, hint: hint, result: result, conflict: conflict, HEARTS: HEARTS, UNDOS_FREE: UNDOS_FREE };
-  root.Dropku = api;
+  root.Numfall = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
