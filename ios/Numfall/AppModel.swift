@@ -56,6 +56,9 @@ final class AppModel: ObservableObject {
             Task { @MainActor in self?.pullFromCloud() }
         }
         store.synchronize()
+        #if DEBUG
+        ScreenshotScene.apply(to: self)   // CI screenshots only; not compiled into release builds
+        #endif
     }
 
     /// First launch (no profile yet) starts at the Welcome screen; after that the tutorial (once), then home.

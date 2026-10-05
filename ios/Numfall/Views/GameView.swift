@@ -93,7 +93,12 @@ struct GameView: View {
             }
         }
         .dynamicTypeSize(...DynamicTypeSize.xxxLarge)   // the board and tray stay playable; menus and pop-ups scale further
-        .onAppear { session.start() }
+        .onAppear {
+            session.start()
+            #if DEBUG
+            ScreenshotScene.afterGameAppears(session)
+            #endif
+        }
         .onDisappear { session.stop() }
         .onChange(of: scenePhase) { _, phase in
             if phase != .active { session.pause() }   // phone call, app switch, lock screen
