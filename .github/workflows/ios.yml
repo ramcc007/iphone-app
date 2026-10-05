@@ -18,7 +18,7 @@ concurrency:
 jobs:
   build:
     runs-on: macos-latest
-    timeout-minutes: 40
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
 
@@ -53,13 +53,26 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             2>&1 | tee "$RUNNER_TEMP/app-build.log"
 
-      - name: Screenshots from the iPhone and iPad simulators
+      - name: Screenshots, iPhone 6.9-inch
         continue-on-error: true
-        timeout-minutes: 15
+        timeout-minutes: 12
         run: |
           APP=$(find "$RUNNER_TEMP/dd/Build/Products" -name Numfall.app -path '*Debug-iphonesimulator*' | head -1)
-          echo "app: $APP"
-          bash tools/ci/screenshots.sh "$APP" "$RUNNER_TEMP/screenshots" 2>&1 | tee "$RUNNER_TEMP/screenshots.log"
+          bash tools/ci/screenshots.sh "$APP" "$RUNNER_TEMP/screenshots" phone 2>&1 | tee -a "$RUNNER_TEMP/screenshots.log"
+
+      - name: Screenshots, iPhone SE (smallest screen)
+        continue-on-error: true
+        timeout-minutes: 12
+        run: |
+          APP=$(find "$RUNNER_TEMP/dd/Build/Products" -name Numfall.app -path '*Debug-iphonesimulator*' | head -1)
+          bash tools/ci/screenshots.sh "$APP" "$RUNNER_TEMP/screenshots" small 2>&1 | tee -a "$RUNNER_TEMP/screenshots.log"
+
+      - name: Screenshots, iPad 13-inch
+        continue-on-error: true
+        timeout-minutes: 12
+        run: |
+          APP=$(find "$RUNNER_TEMP/dd/Build/Products" -name Numfall.app -path '*Debug-iphonesimulator*' | head -1)
+          bash tools/ci/screenshots.sh "$APP" "$RUNNER_TEMP/screenshots" pad 2>&1 | tee -a "$RUNNER_TEMP/screenshots.log"
 
       - name: Keep the screenshots
         if: always()

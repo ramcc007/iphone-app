@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Boots iOS simulators on the CI Mac, opens the app on chosen screens and saves screenshots.
-# Usage: tools/ci/screenshots.sh <path to Numfall.app> <output folder>
+# Usage: tools/ci/screenshots.sh <path to Numfall.app> <output folder> <phone|small|pad>
+# One device per call, so each can have its own time limit in the workflow.
 set -uo pipefail
-APP="$1"; OUT="$2"; BUNDLE="${BUNDLE_ID:-com.example.numfall}"
+APP="$1"; OUT="$2"; WHICH="${3:-phone}"; BUNDLE="${BUNDLE_ID:-com.example.numfall}"
 mkdir -p "$OUT"
 log() { echo "[$(date +%H:%M:%S)] $*"; }
 # Any single simulator command that hangs is killed after N seconds, so one stuck device cannot block the whole job.
@@ -41,7 +42,9 @@ shoot_device() {   # <label> <udid> <scene list...>
 }
 
 SCENES=(welcome tutorial home-quick home-classic home-master level-quick level-classic level-classic+3 level-master)
-shoot_device iphone-pro-max "$PHONE" "${SCENES[@]}"
-shoot_device iphone-se "$SMALL" level-master level-classic home-classic
-shoot_device ipad-pro-13 "$PAD" "${SCENES[@]}"
+case "$WHICH" in
+  phone) shoot_device iphone-pro-max "$PHONE" "${SCENES[@]}" ;;
+  small) shoot_device iphone-se "$SMALL" level-master level-classic home-classic welcome ;;
+  pad)   shoot_device ipad-pro-13 "$PAD" "${SCENES[@]}" ;;
+esac
 ls -la "$OUT"
