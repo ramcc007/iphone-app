@@ -55,6 +55,7 @@ jobs:
 
       - name: Screenshots from the iPhone and iPad simulators
         continue-on-error: true
+        timeout-minutes: 15
         run: |
           APP=$(find "$RUNNER_TEMP/dd/Build/Products" -name Numfall.app -path '*Debug-iphonesimulator*' | head -1)
           echo "app: $APP"
