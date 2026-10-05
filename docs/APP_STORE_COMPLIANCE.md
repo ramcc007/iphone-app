@@ -22,7 +22,7 @@ This is not legal advice. Items marked **[Check]** need confirming with Apple's 
 - [ ] Original mechanic and look, not a clone (4.1 copycats, 4.3 spam).
 - [ ] The game is fully playable without signing in to anything.
 - [ ] No "Quit" button, and the app never closes itself (HIG).
-- [ ] Support iPhone screen sizes, safe areas, light and dark mode, and Dynamic Type.
+- [ ] Support iPhone screen sizes, safe areas, Dynamic Type. (The app is dark-only by design: say so, and never claim a light mode in listing text.)
 - [ ] **iPad (universal app):** a real iPad layout, not a stretched iPhone one. Apple rejects iPad versions that are just scaled-up iPhone screens (Guideline 2.4.1). Support all iPad orientations and resizable windows (Split View, iPadOS 26 windowing). Apple is phasing out the old "requires full screen" opt-out [Check current status].
 - [ ] **Mac (Apple silicon) and Vision Pro:** the iPad app is offered there automatically. Either test it with keyboard and pointer, or opt out in App Store Connect (Pricing and Availability).
 - [ ] Don't mention other platforms (Android, etc.) in the app or metadata (2.3.10).

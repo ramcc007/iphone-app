@@ -43,7 +43,7 @@ EARN, NEVER BUY
 Collect Sparks by clearing levels, finishing without mistakes, finishing fast and opening chests every ten levels. Spend them on hints, undos, an extra heart, or to skip a level that has you stuck. Sparks cannot be bought, because there are no purchases at all.
 
 MADE TO FEEL GOOD
-• Crisp vector graphics at any size, in light and dark
+• Crisp vector graphics at any size, with a rich dark look
 • Smooth animation, haptics and sound you can switch off
 • Works on iPhone and iPad, in any orientation
 • Large Text, VoiceOver and Reduce Motion supported

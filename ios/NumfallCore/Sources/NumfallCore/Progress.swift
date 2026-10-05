@@ -128,6 +128,8 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
     public var profile: PlayerProfile?
     /// Most recent last. Only the newest 300 are kept.
     public var sessions: [SessionRecord] = []
+    /// One result per calendar day ("2026-10-05") for the Daily Drop. Streaks and achievements are derived from this.
+    public var dailyResults: [String: DailyResult] = [:]
 
     public static let maxSessions = 300
 
@@ -135,7 +137,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case earnedByDevice, spentByDevice, bestStars, skipped, failedAttempts, chestsOpened
-        case tutorialDone, soundOn, hapticsOn, profile, sessions
+        case tutorialDone, soundOn, hapticsOn, profile, sessions, dailyResults
     }
 
     /// Fail-safe: every field is optional on disk, so a saved file from an older or newer version
@@ -154,6 +156,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         profile = try? c.decodeIfPresent(PlayerProfile.self, forKey: .profile)
         let lossy = (try? c.decodeIfPresent([Lossy<SessionRecord>].self, forKey: .sessions)) ?? []
         sessions = Array(lossy.compactMap(\.value).suffix(Self.maxSessions))
+        dailyResults = (try? c.decodeIfPresent([String: DailyResult].self, forKey: .dailyResults)) ?? [:]
     }
 
     public var sparks: Int {
@@ -268,6 +271,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         for session in sessions + other.sessions where byID[session.id] == nil { byID[session.id] = session }
         let ordered = byID.values.sorted { $0.startedAt != $1.startedAt ? $0.startedAt < $1.startedAt : $0.id < $1.id }
         result.sessions = Array(ordered.suffix(Self.maxSessions))
+        result.dailyResults.merge(other.dailyResults) { mine, theirs in theirs.isBetter(than: mine) ? theirs : mine }
         return result
     }
 }
