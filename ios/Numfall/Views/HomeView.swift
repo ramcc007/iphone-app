@@ -88,6 +88,20 @@ struct HomeView: View {
         }
         .background { AnimatedBackground() }
         .foregroundStyle(Theme.text)
+        .overlay(alignment: .bottom) {
+            if let toast = app.toast {
+                Text(toast)
+                    .scaledFont(15, .semibold)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 16).padding(.vertical, 12)
+                    .frame(maxWidth: 440)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Theme.raised))
+                    .shadow(color: .black.opacity(0.4), radius: 12, y: 6)
+                    .padding(.horizontal, 16).padding(.bottom, 24)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.easeOut(duration: 0.2), value: app.toast)
         .sheet(isPresented: $showRules) { HowToPlayView() }
         .sheet(isPresented: $showSettings) { SettingsView() }
     }
@@ -249,7 +263,11 @@ private struct LevelTile: View {
         let unlocked = app.progress.isUnlocked(index, in: levels)
         let isNext = app.progress.nextLevelIndex(in: levels) == index && best == 0 && !skipped
         Button {
-            app.play(board, index)
+            if unlocked {
+                app.play(board, index)
+            } else {
+                app.showToast("Clear Level \(level.number - 1) first to unlock Level \(level.number). Stuck? You can skip a level after 2 tries.")
+            }
         } label: {
             VStack(spacing: 1) {
                 Text("\(level.number)").scaledFont(19)
@@ -260,6 +278,12 @@ private struct LevelTile: View {
                     Text("SKIPPED").scaledFont(9, .semibold)
                 } else if isNext {
                     Text("PLAY").scaledFont(10, .semibold)
+                } else if !unlocked {
+                    HStack(spacing: 2) {
+                        Image(systemName: "lock.fill").font(.system(size: 10, weight: .semibold))
+                        if level.role == .milestone { Text("CHEST").scaledFont(9, .semibold) }
+                    }
+                    .opacity(0.8)
                 } else if level.role == .milestone {
                     Text("CHEST").scaledFont(9, .semibold)
                 }
@@ -274,8 +298,8 @@ private struct LevelTile: View {
             }
         }
         .buttonStyle(.plain)
-        .disabled(!unlocked)
         .accessibilityLabel(label(level: level, best: best, unlocked: unlocked, skipped: skipped, isNext: isNext))
+        .accessibilityHint(unlocked ? "" : "Clear level \(level.number - 1) to unlock it")
     }
 
     @ViewBuilder

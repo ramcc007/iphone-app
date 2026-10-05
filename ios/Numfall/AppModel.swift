@@ -23,6 +23,20 @@ final class AppModel: ObservableObject {
         didSet { UserDefaults.standard.set(selectedBoard.rawValue, forKey: "numfall.board") }
     }
 
+    /// A short message shown over the home screen (for example why a level is locked). Clears itself.
+    @Published var toast: String?
+    private var toastTask: Task<Void, Never>?
+
+    func showToast(_ text: String) {
+        toast = text
+        UIAccessibility.post(notification: .announcement, argument: text)
+        toastTask?.cancel()
+        toastTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(2.4))
+            if !Task.isCancelled { self?.toast = nil }
+        }
+    }
+
     let deviceID: String
     private let fileURL: URL
     private let cloud = NSUbiquitousKeyValueStore.default

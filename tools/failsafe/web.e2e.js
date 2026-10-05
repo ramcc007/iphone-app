@@ -111,6 +111,9 @@ async function solveLevel(page, board, idx) {
   const profile = { name: 'Sam', created: 1, updated: 1 };
   { const progress = { wallet: 500, best: { 'quick-001': 3 }, skipped: {}, fails: {}, chests: {}, tutorialDone: true, muted: true, board: 'quick', profile, sessions: [] };
     const { ctx, page, errors } = await open(browser, { width: 390, height: 844 }, progress);
+    ok('Home: a locked level shows a lock icon', (await page.locator('.lv.locked svg.lk').count()) > 0);
+    await page.click('.lv.locked >> nth=0');
+    ok('Home: tapping a locked level explains how to unlock it', await page.isVisible('#toast >> text=Clear Level'));
     await page.click('[data-act="play"][data-i="1"]');
     await page.clock.runFor(21000);
     ok("Time's up pop-up appears at 0s", await page.isVisible("text=Time’s up!"));
