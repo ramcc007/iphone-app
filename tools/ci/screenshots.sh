@@ -14,6 +14,18 @@ udid() { xcrun simctl list devices available | grep -E "$1" | tail -1 | sed -E '
 PHONE=$(udid 'iPhone [0-9]+ Pro Max')
 [ -z "$PHONE" ] && PHONE=$(udid 'iPhone .*Pro Max')
 SMALL=$(udid 'iPhone SE')
+if [ -z "$SMALL" ] && [ "$WHICH" = small ]; then
+  # Recent Xcode images ship no iPhone SE simulator, but the device type can often still be created on the newest iOS runtime.
+  echo "--- no ready-made iPhone SE. Small device types known to this Xcode:"
+  xcrun simctl list devicetypes | grep -E "iPhone (SE|[0-9]+ mini)" || echo "(none)"
+  SE_TYPE=$(xcrun simctl list devicetypes | grep -E "iPhone SE" | tail -1 | sed -E 's/.*\((com\.apple\.CoreSimulator\.SimDeviceType\.[^)]*)\).*/\1/')
+  RUNTIME=$(xcrun simctl list runtimes available | grep -E "^iOS" | tail -1 | sed -E 's/.* - (com\.apple\.CoreSimulator\.SimRuntime\.[^ ]+).*/\1/')
+  echo "se_type=${SE_TYPE:-none} runtime=${RUNTIME:-none}"
+  if [ -n "$SE_TYPE" ] && [ -n "$RUNTIME" ]; then
+    SMALL=$(xcrun simctl create "Numfall SE" "$SE_TYPE" "$RUNTIME" 2>&1 | tail -1)
+    case "$SMALL" in [0-9A-F]*-*-*-*-*) echo "created iPhone SE simulator $SMALL" ;; *) echo "could not create an iPhone SE: $SMALL"; SMALL="" ;; esac
+  fi
+fi
 PAD=$(udid 'iPad Pro 13-inch')
 [ -z "$PAD" ] && PAD=$(udid 'iPad Pro 12.9-inch')
 echo "phone=$PHONE small=$SMALL pad=$PAD"
@@ -44,7 +56,7 @@ shoot_device() {   # <label> <udid> <scene list...>
 SCENES=(welcome home-classic daily daily+3 level-classic+3 level-master home-quick tutorial home-master level-quick)
 case "$WHICH" in
   phone) shoot_device iphone-pro-max "$PHONE" "${SCENES[@]}" ;;
-  small) shoot_device iphone-se "$SMALL" level-master level-classic home-classic welcome ;;
+  small) shoot_device iphone-se "$SMALL" level-master level-classic home-classic home-master welcome ;;
   pad)   shoot_device ipad-pro-13 "$PAD" "${SCENES[@]}" ;;
 esac
 ls -la "$OUT"
