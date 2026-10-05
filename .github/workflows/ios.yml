@@ -1,0 +1,63 @@
+# Builds and tests the Numfall iPhone/iPad app on a GitHub-hosted Mac, so no local Mac is needed.
+# Runs when anything under ios/ changes (macOS minutes cost 10x on private repositories, so it ignores other changes).
+# No code signing and no upload to Apple here: that is added later (TestFlight) once the developer account is active.
+name: iOS build
+
+on:
+  push:
+    branches: ['claude/**', main]
+    paths: ['ios/**', '.github/workflows/ios.yml']
+  pull_request:
+    paths: ['ios/**', '.github/workflows/ios.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select the newest installed Xcode
+        run: |
+          XC=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)
+          [ -n "$XC" ] && sudo xcode-select -s "$XC"
+          xcodebuild -version
+          swift --version
+
+      - name: Game rules tests (NumfallCore)
+        working-directory: ios/NumfallCore
+        run: |
+          set -o pipefail
+          swift test 2>&1 | tee "$RUNNER_TEMP/core-tests.log"
+
+      - name: Generate the Xcode project
+        working-directory: ios
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Build the app for the iOS Simulator
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project Numfall.xcodeproj \
+            -scheme Numfall \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee "$RUNNER_TEMP/app-build.log"
+
+      - name: Keep the logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-logs
+          path: |
+            ${{ runner.temp }}/core-tests.log
+            ${{ runner.temp }}/app-build.log
+          if-no-files-found: ignore
