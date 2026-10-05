@@ -26,6 +26,7 @@ This is not legal advice. Items marked **[Check]** need confirming with Apple's 
 - [ ] **iPad (universal app):** a real iPad layout, not a stretched iPhone one. Apple rejects iPad versions that are just scaled-up iPhone screens (Guideline 2.4.1). Support all iPad orientations and resizable windows (Split View, iPadOS 26 windowing). Apple is phasing out the old "requires full screen" opt-out [Check current status].
 - [ ] **Mac (Apple silicon) and Vision Pro:** the iPad app is offered there automatically. Either test it with keyboard and pointer, or opt out in App Store Connect (Pricing and Availability).
 - [ ] Don't mention other platforms (Android, etc.) in the app or metadata (2.3.10).
+- [ ] **No other game or brand names in anything public (owner's rule, 5 October 2026).** The word "Sudoku" and any other game, company or trademark name must not appear in the app, the App Store name, subtitle, keywords, description, screenshots, website or share text (2.3.7 metadata, 5.2 intellectual property). Describe the rule instead: "each row, column and box holds each number once". Checked by `grep -rIni sudoku` on app, web, canvas and `site/` before each submission (only code comments and `docs/` may use it).
 - [ ] App Review notes explain the game and how to reach late levels, with a short video of later chapters. **No hidden unlock or secret feature in the release build** (Guideline 2.3.1 forbids hidden features).
 
 ## 3. Payments (Guideline 3.1): (later), not in v1

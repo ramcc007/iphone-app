@@ -1,6 +1,6 @@
 # Numfall (working title)
 
-Sudoku with gravity: pick a number, drop it into a column, and it falls to the lowest gap. An original puzzle game for iPhone and iPad.
+A number puzzle with gravity: pick a number, drop it into a column, and it falls to the lowest gap. An original puzzle game for iPhone and iPad.
 
 | Where | What |
 |---|---|

@@ -22,7 +22,7 @@ struct HowToPlayView: View {
     }
 
     private let rules: [Rule] = [
-        Rule(symbol: "checkmark", color: Theme.good, title: "The Sudoku rule", text: "Each row, column and box holds each number once."),
+        Rule(symbol: "checkmark", color: Theme.good, title: "One of each", text: "Each row, column and box holds each number once."),
         Rule(symbol: "arrow.down", color: Color(hex: 0x4FC3F7), title: "Numbers fall", text: "Pick a number, tap a column: it drops to the lowest gap. So fill lower gaps first."),
         Rule(symbol: "square.grid.3x3.fill", color: Theme.pink, title: "Three boards", text: "Quick 4\u{00D7}4, Classic 6\u{00D7}6 or Master 9\u{00D7}9. All open from the start."),
         Rule(symbol: "timer", color: Theme.spark, title: "Beat the countdown", text: "Every level has one: seconds on Quick, minutes on Master. Time\u{2019}s up = start the level again."),

@@ -24,7 +24,7 @@ struct WelcomeView: View {
                             .font(Theme.rounded(.largeTitle))
                             .multilineTextAlignment(.center)
                             .accessibilityAddTraits(.isHeader)
-                        Text("Sudoku, but the numbers fall. Pick a number, drop it in a column and beat the clock.")
+                        Text("Pick a number, drop it in a column and beat the clock.")
                             .font(Theme.rounded(.body, .medium))
                             .foregroundStyle(Theme.soft)
                             .multilineTextAlignment(.center)

@@ -245,7 +245,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   var HEART = '<path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.3 5 6.8 5c2 0 3.6 1.1 5.2 3 1.6-1.9 3.2-3 5.2-3 3.5 0 5.6 3.6 4.3 6.8C19.5 16.4 12 21 12 21z"/>';
   var STAR = '<polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21.5 12,17.3 5.5,21.5 7.5,14 2,9.3 9,9"/>';
   var SPARK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#FFB547" aria-hidden="true"><path d="M12 1l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"/></svg>';
-  var BOARD_TEXT = { quick: 'Short and snappy. Great for a coffee break.', classic: 'The full Numfall workout, and the best place to start.', master: 'Big 9×9 boards, tight clocks. For Sudoku fans.' };
+  var BOARD_TEXT = { quick: 'Short and snappy. Great for a coffee break.', classic: 'The full Numfall workout, and the best place to start.', master: 'Big 9×9 boards, tight clocks. For number-puzzle fans.' };
   function boardById(id) { for (var i = 0; i < BOARDS.length; i++) if (BOARDS[i].id === id) return BOARDS[i]; return BOARDS[0]; }
   function minutes(s) { return s < 120 ? s + 's' : Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
 
@@ -559,7 +559,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   }
 
   function rulesSheet() {
-    var rules = [['✓', '#6EE7A8', 'The Sudoku rule', 'Each row, column and box holds each number once.'], ['↓', '#4FC3F7', 'Numbers fall', 'Pick a number, tap a column: it drops to the lowest gap. So fill lower gaps first.'],
+    var rules = [['✓', '#6EE7A8', 'One of each', 'Each row, column and box holds each number once.'], ['↓', '#4FC3F7', 'Numbers fall', 'Pick a number, tap a column: it drops to the lowest gap. So fill lower gaps first.'],
       ['3', '#FF8AD8', 'Three boards', 'Quick 4×4, Classic 6×6 or Master 9×9. All open from the start.'], ['20s', '#FFB547', 'Beat the countdown', 'Every level has one: about 20 seconds on the first Quick levels, a few minutes on Master. Time’s up = start again.'], ['♥', '#FF6B7A', '3 hearts', 'A wrong drop cracks and costs a heart.'],
       ['★', '#FFB547', 'Up to 3 stars', 'No mistakes, with a quarter of the time still left.'], ['✦', '#9D8CFF', 'Sparks', 'Earned by playing. Spend them on hints, or 400 to skip a level after 2 tries.']];
     return '<div class="veil"><div class="sheet"><h2>How to play</h2><div class="rules">' + rules.map(function (r) { return '<div class="rule"><div class="ic" style="background:' + r[1] + '">' + r[0] + '</div><div><b>' + r[2] + '</b><span>' + r[3] + '</span></div></div>'; }).join('') +
@@ -599,7 +599,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
       t += '<div class="wl-col">' + cells + '</div>';
     }
     return '<div class="screen welcome scroll"><div class="wl-board" aria-hidden="true">' + t + '</div>' +
-      '<h1>Welcome to Numfall</h1><p class="wl-p">Sudoku, but the numbers fall. Beat the clock on three boards. First, who’s playing?</p>' +
+      '<h1>Welcome to Numfall</h1><p class="wl-p">Drop numbers into columns and beat the clock on three boards. First, who’s playing?</p>' +
       profileForm('new') +
       '<p class="priv">Your name stays on this device (the iPhone app also keeps it in your own iCloud). It is never sent to us, and you can change or delete it any time.</p></div>';
   }
@@ -648,7 +648,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
     var logo = '<div class="logo" aria-hidden="true"><i></i><i style="background:linear-gradient(180deg,#FFCF85 0%,#FFB547 58%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 #C9862A"></i><i style="background:linear-gradient(180deg,#8ADAFB 0%,#4FC3F7 58%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 #2E8DB8"></i><i style="background:linear-gradient(180deg,#363D57 0%,#2A3045 60%);box-shadow:0 3px 0 #1C2030"></i></div>';
     var nm = P.profile ? P.profile.name : '', hi = '<button class="pill who" data-act="player" aria-label="Player: ' + esc(nm) + '. Open profile and sessions"><span class="av">' + esc((Array.from(nm)[0] || '?').toUpperCase()) + '</span><span class="nm">Hi, ' + esc(nm) + '</span></button>';
     return '<div class="screen home scroll"><div class="topbar">' + hi + '<span style="display:flex;gap:8px;align-items:center"><span class="pill spark" aria-label="' + P.wallet + ' Sparks">' + SPARK + P.wallet + '</span><button class="iconbtn" data-act="rules" aria-label="How to play">?</button></span></div>' +
-      '<div class="hero">' + logo + '<div><h1>Numfall</h1><p>Sudoku. But the numbers fall.</p></div></div>' +
+      '<div class="hero">' + logo + '<div><h1>Numfall</h1><p>Drop the numbers. Beat the clock.</p></div></div>' +
       '<div class="boards" role="group" aria-label="Choose a board">' + picker + '</div>' +
       '<div class="bd-info">' + esc(BOARD_TEXT[board.id] || '') + ' ' + board.levels.length + ' levels, ' + minutes(board.levels[0].timeLimit) + ' to ' + minutes(board.levels[board.levels.length - 1].timeLimit) + ' each.</div>' +
       '<button class="primary pulse" data-act="play" data-i="' + next + '" style="height:66px;flex-shrink:0">' + (P.best[nl.id] ? 'Replay' : 'Play') + ' ' + board.name + ' Level ' + nl.number + ' · ' + minutes(nl.timeLimit) + '</button>' +

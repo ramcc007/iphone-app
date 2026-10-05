@@ -1,6 +1,6 @@
 # Numfall (working title): project rules for Claude
 
-An original iPhone numbers puzzle game, Sudoku with gravity (see `docs/GAME_PLAN.md`). The earlier "Spill" concept was scrapped (`docs/archive/`).
+An original iPhone numbers puzzle game: a one-of-each number grid with gravity (see `docs/GAME_PLAN.md`). The earlier "Spill" concept was scrapped (`docs/archive/`).
 It **will be published on the Apple App Store**, and a marketing/support website will follow.
 
 ## v1 scope (owner's decisions, 3 October 2026)
@@ -14,6 +14,7 @@ It **will be published on the Apple App Store**, and a marketing/support website
 - The Swift rules (`ios/NumfallCore`) must stay identical to `prototype/web/engine.js`. Change both together, and keep their tests in step.
 
 ## Always
+- **Never use "Sudoku" or any other game, brand or trademark name in anything users or App Review can see** (app text, App Store name, subtitle, keywords, description, screenshots, website, share text). Describe the rule instead ("each row, column and box holds each number once"). Guidelines 2.3.7 and 5.2. Internal code comments and planning docs may use the word.
 - **App Store compliance comes first.** Every design, feature and code change must pass App Review. Check it against `docs/APP_STORE_COMPLIANCE.md` and the current App Review Guidelines (developer.apple.com/app-store/review/guidelines). If a request would break a guideline, say so and propose a compliant alternative before doing it.
 - Follow Apple's Human Interface Guidelines: native iOS controls and patterns, safe areas, Dynamic Type, dark mode, VoiceOver, Reduce Motion, 44pt minimum touch targets.
 - **Privacy by default:** no accounts, no cross-app tracking, and no personal data beyond the player's own name kept on their device and iCloud, unless the owner explicitly decides otherwise. Any new data use must update the privacy policy, the App Privacy label and `PrivacyInfo.xcprivacy`.

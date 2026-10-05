@@ -44,7 +44,7 @@ struct HomeView: View {
                         LogoMark(size: wide ? 44 : 30)
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Numfall").scaledFont(wide ? 64 : 44)
-                            Text("Sudoku. But the numbers fall.").font(Theme.rounded(.subheadline, .medium)).foregroundStyle(Theme.muted)
+                            Text("Drop the numbers. Beat the clock.").font(Theme.rounded(.subheadline, .medium)).foregroundStyle(Theme.muted)
                         }
                         Spacer(minLength: 0)
                     }
