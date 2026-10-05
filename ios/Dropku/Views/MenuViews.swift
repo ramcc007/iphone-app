@@ -77,8 +77,7 @@ struct SettingsView: View {
             Form {
                 Section {
                     LabeledContent("Name", value: app.progress.profile?.name ?? "Not set")
-                    LabeledContent("Age", value: app.progress.profile.map { "\($0.age)" } ?? "Not set")
-                    NavigationLink("Edit name and age") { ProfileEditView() }
+                    NavigationLink("Edit name") { ProfileEditView() }
                     LabeledContent("Sessions played", value: "\(app.progress.sessions.count)")
                     NavigationLink("Recent sessions") { SessionsView() }
                 } header: {
@@ -119,22 +118,21 @@ struct SettingsView: View {
                     app.resetProgress()
                 }
             } message: {
-                Text("This removes your name and age, stars, skipped levels, Sparks and session history on this device and in iCloud, and starts again from the Welcome screen.")
+                Text("This removes your name, stars, skipped levels, Sparks and session history on this device and in iCloud, and starts again from the Welcome screen.")
             }
         }
     }
 }
 
-/// Change the name and age (same checks as the Welcome screen). Saved on the device and in the player's own iCloud only.
+/// Change the name (same checks as the Welcome screen). Saved on the device and in the player's own iCloud only.
 struct ProfileEditView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var app: AppModel
     @State private var name = ""
-    @State private var age = 18
     @State private var loaded = false
     @FocusState private var nameFocused: Bool
 
-    private var valid: Bool { PlayerProfile.cleanName(name) != nil && PlayerProfile.validAge(age) }
+    private var valid: Bool { PlayerProfile.cleanName(name) != nil }
 
     var body: some View {
         Form {
@@ -148,26 +146,22 @@ struct ProfileEditView: View {
             } header: {
                 Text("Name")
             }
-            Section("Age") {
-                AgeRow(age: $age)
-            }
             Section {
                 Button("Save") {
                     nameFocused = false
-                    if app.saveProfile(name: name, age: age) { dismiss() }
+                    if app.saveProfile(name: name) { dismiss() }
                 }
                 .disabled(!valid)
             } footer: {
-                Text("Your name and age stay on this device and in your own iCloud. We never receive them.")
+                Text("Your name stays on this device and in your own iCloud. We never receive it.")
             }
         }
-        .navigationTitle("Your name and age")
+        .navigationTitle("Your name")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             guard !loaded else { return }
             loaded = true
             name = app.progress.profile?.name ?? ""
-            age = app.progress.profile?.age ?? 18
         }
     }
 }

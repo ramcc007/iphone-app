@@ -1,17 +1,16 @@
 import SwiftUI
 import DropkuCore
 
-/// First screen on first launch: asks for a name and an age.
+/// First screen on first launch: asks for a name.
 /// Both are saved on the device and in the player's own iCloud only. There is no developer server, so nobody else receives them.
 struct WelcomeView: View {
     @EnvironmentObject private var app: AppModel
     @State private var name = ""
-    @State private var age = 18
     @State private var nameTouched = false
     @FocusState private var nameFocused: Bool
 
     private var cleanName: String? { PlayerProfile.cleanName(name) }
-    private var valid: Bool { cleanName != nil && PlayerProfile.validAge(age) }
+    private var valid: Bool { cleanName != nil }
 
     var body: some View {
         GeometryReader { geo in
@@ -46,20 +45,13 @@ struct WelcomeView: View {
                             }
                         }
 
-                        VStack(alignment: .leading, spacing: 8) {
-                            AgeRow(age: $age)
-                            if !PlayerProfile.validAge(age) {
-                                Text("Please choose an age from \(PlayerProfile.ageRange.lowerBound) to \(PlayerProfile.ageRange.upperBound).")
-                                    .font(Theme.rounded(13, .medium)).foregroundStyle(Theme.bad)
-                            }
-                        }
                     }
                     .padding(18)
                     .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Theme.surface.opacity(0.92)))
 
                     HStack(alignment: .top, spacing: 10) {
                         Image(systemName: "lock.fill").foregroundStyle(Theme.good)
-                        Text("Your name and age stay on this device and in your own iCloud. We never receive them.")
+                        Text("Your name stays on this device and in your own iCloud. We never receive it.")
                             .font(Theme.rounded(13, .medium))
                             .foregroundStyle(Theme.soft)
                             .fixedSize(horizontal: false, vertical: true)
@@ -90,7 +82,7 @@ struct WelcomeView: View {
     private func submit() {
         nameFocused = false
         guard valid else { return }
-        app.saveProfile(name: name, age: age)
+        app.saveProfile(name: name)
     }
 }
 
@@ -133,28 +125,5 @@ struct NameField: View {
         .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Theme.background.opacity(0.7)))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
             .strokeBorder(focused.wrappedValue ? Theme.accentSoft : Color.white.opacity(0.12), lineWidth: 1.5))
-    }
-}
-
-/// "Age" with a menu of 5...99. A menu needs no keyboard, so there is nothing to dismiss and no way to type a bad value.
-struct AgeRow: View {
-    @Binding var age: Int
-
-    var body: some View {
-        HStack {
-            Text("Your age").font(Theme.rounded(.headline))
-            Spacer(minLength: 12)
-            Picker("Age", selection: $age) {
-                ForEach(Array(PlayerProfile.ageRange), id: \.self) { value in
-                    Text("\(value)").tag(value)
-                }
-            }
-            .pickerStyle(.menu)
-            .labelsHidden()
-            .tint(Theme.accentSoft)
-            .frame(minHeight: 44)
-            .accessibilityLabel("Age")
-            .accessibilityValue("\(age)")
-        }
     }
 }

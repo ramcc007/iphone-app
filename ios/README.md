@@ -32,18 +32,18 @@ swift test               # 37 tests: rules on all 230 levels of the 3 boards, ti
 ## How it's organised
 | Folder | What |
 |---|---|
-| `DropkuCore/` | Swift package with no UI: levels (`Resources/levels.json`), rules (`Game.swift`), hints and scoring, tutorial lessons, Sparks economy, saved progress, the player profile (name and age) and the session history |
+| `DropkuCore/` | Swift package with no UI: levels (`Resources/levels.json`), rules (`Game.swift`), hints and scoring, tutorial lessons, Sparks economy, saved progress, the player profile (name) and the session history |
 | `Dropku/AppModel.swift` | Loads levels and progress, saves after every change (atomic file plus iCloud key-value sync), navigation (Welcome, tutorial, home, level) |
 | `Dropku/GameSession.swift` | One attempt: countdown that pauses in the background, drops, hints, undo, continue, skip, win/lose, and one session-history record per attempt |
-| `Dropku/Views/` | Screens: Welcome (name and age, first launch), gameplay (adaptive iPhone/iPad layout), pop-ups, home with level map, How to play, Settings (Player section, recent sessions) |
+| `Dropku/Views/` | Screens: Welcome (name, first launch), gameplay (adaptive iPhone/iPad layout), pop-ups, home with level map, How to play, Settings (Player section, recent sessions) |
 | `Dropku/Theme.swift` | Colours, glossy vector tiles, rounded system font, haptics, the drifting-tiles background and pulse effects (all code-drawn, still under Reduce Motion) |
 | `Dropku/Resources/` | App icon (1024 px master), colours, privacy manifest |
 
-## Player name, age and session history (privacy)
-- The first launch shows a **Welcome** screen that asks for a name (up to 20 characters) and an age (5 to 99). Both can be changed in Settings, Player.
+## Player name and session history (privacy)
+- The first launch shows a **Welcome** screen that asks for a name (up to 20 characters). Both can be changed in Settings, Player.
 - Every attempt at a real level (not the tutorial) is recorded: board and level, outcome (won, time's up, out of hearts, left early), stars, Sparks, time used and date. The newest 300 are kept; Settings lists the latest 30.
 - All of it is saved exactly like the rest of the progress: an atomic file in Application Support on the device, plus the player's **own** iCloud key-value store. There is **no developer server**, so the privacy label stays "Data Not Collected". Do not add any network upload without updating the privacy policy, the App Privacy label and `PrivacyInfo.xcprivacy`.
-- "Reset all progress" deletes the name, age and session history too, and returns to the Welcome screen.
+- "Reset all progress" deletes the name and session history too, and returns to the Welcome screen.
 - Saved files are decoded fail-safe: a file from an older or newer version of the app (missing or unknown fields) always loads.
 
 ## Before submitting to the App Store

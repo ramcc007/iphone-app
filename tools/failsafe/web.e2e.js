@@ -52,20 +52,18 @@ async function solveLevel(page, board, idx) {
     // First run: the intro asks who's playing before anything else.
     ok('iPhone: first launch opens the intro screen', await page.isVisible('text=Welcome to Dropku'));
     await page.screenshot({ path: path.join(SHOTS, 'iphone-welcome.png') });
-    ok('Intro: "Let\u2019s play" is disabled until name and age are filled', await page.isDisabled('#f-go'));
-    await page.fill('#f-name', '   Alex   Quinn  ');
-    await page.fill('#f-age', '4');
-    ok('Intro: age 4 is refused with a message', (await page.isDisabled('#f-go')) && /5 to 99/.test(await page.textContent('#f-msg')));
-    await page.fill('#f-age', 'a7x');
-    ok('Intro: age box only keeps digits', (await page.inputValue('#f-age')) === '7');
-    await page.fill('#f-age', '24');
-    ok('Intro: valid name and age enable the button', !(await page.isDisabled('#f-go')));
+    ok('Intro: "Let\u2019s play" is disabled until a name is filled', await page.isDisabled('#f-go'));
+    ok('Intro: there is no age question', (await page.locator('#f-age').count()) === 0 && !(await page.isVisible('text=Your age')));
+    await page.fill('#f-name', '   ');
+    ok('Intro: a blank name is refused', await page.isDisabled('#f-go'));
+    await page.fill('#f-name', 'Alex');
+    ok('Intro: a valid name enables the button', !(await page.isDisabled('#f-go')));
     await page.focus('#f-name'); await page.keyboard.type('!');
     ok('Intro: typing keeps focus (the page does not redraw)', await page.evaluate(() => document.activeElement && document.activeElement.id === 'f-name'));
     await page.fill('#f-name', '   Alex   Quinn  ');
     await page.click('#f-go');
     const prof = await page.evaluate(() => JSON.parse(localStorage.getItem('dropku.web.v2')).profile);
-    ok('Intro: name is cleaned and saved on the device', prof && prof.name === 'Alex Quinn' && prof.age === 24, JSON.stringify(prof));
+    ok('Intro: name is cleaned and saved on the device', prof && prof.name === 'Alex Quinn' && !('age' in prof), JSON.stringify(prof));
     ok('Intro leads into the tutorial, whose steps are called levels', await page.isVisible('text=Tutorial · Level 1 of 3'));
     await page.screenshot({ path: path.join(SHOTS, 'iphone-tutorial.png') });
     await drop(page, 2, 1); await drop(page, 4, 3);
@@ -110,7 +108,7 @@ async function solveLevel(page, board, idx) {
     await ctx.close(); }
 
   // 2. iPhone: time's up on Quick level 2, then restart; skip offered after 2 fails
-  const profile = { name: 'Sam', age: 19, created: 1, updated: 1 };
+  const profile = { name: 'Sam', created: 1, updated: 1 };
   { const progress = { wallet: 500, best: { 'quick-001': 3 }, skipped: {}, fails: {}, chests: {}, tutorialDone: true, muted: true, board: 'quick', profile, sessions: [] };
     const { ctx, page, errors } = await open(browser, { width: 390, height: 844 }, progress);
     await page.click('[data-act="play"][data-i="1"]');
@@ -140,7 +138,7 @@ async function solveLevel(page, board, idx) {
     await ctx.close(); }
 
   // 3. Layout checks on 6x6 (Classic level 12) and 9x9 (Master level 1) across devices
-  const unlockAll = { wallet: 320, best: Object.fromEntries(Array.from({ length: 11 }, (_, i) => ['classic-' + String(i + 1).padStart(3, '0'), 3])), skipped: {}, fails: {}, chests: {}, tutorialDone: true, muted: true, board: 'classic', profile: { name: 'Sam', age: 19, created: 1, updated: 1 }, sessions: [] };
+  const unlockAll = { wallet: 320, best: Object.fromEntries(Array.from({ length: 11 }, (_, i) => ['classic-' + String(i + 1).padStart(3, '0'), 3])), skipped: {}, fails: {}, chests: {}, tutorialDone: true, muted: true, board: 'classic', profile: { name: 'Sam', created: 1, updated: 1 }, sessions: [] };
   for (const [name, vp] of [['iPhone SE', { width: 375, height: 667 }], ['iPhone 16 Pro Max', { width: 440, height: 956 }], ['iPad mini portrait', { width: 744, height: 1133 }], ['iPad 13 landscape', { width: 1376, height: 1032 }], ['iPad split view narrow', { width: 375, height: 1032 }]]) {
     const { ctx, page, errors } = await open(browser, vp, unlockAll);
     await page.screenshot({ path: path.join(SHOTS, name.replace(/ /g, '-') + '-home.png') });

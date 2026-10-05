@@ -14,28 +14,20 @@ public enum Economy {
 }
 
 /// Who is playing. Asked once on the Welcome screen. Saved on the device and in the player's OWN iCloud only:
-/// there is no developer server, so the name and age are never received by anyone else.
+/// there is no developer server, so the name is never received by anyone else. (No age is asked or stored.)
 public struct PlayerProfile: Codable, Equatable, Sendable {
     public var name: String
-    public var age: Int
     /// Seconds since 1970.
     public var createdAt: Double
     public var updatedAt: Double
 
-    public init(name: String, age: Int, createdAt: Double, updatedAt: Double) {
+    public init(name: String, createdAt: Double, updatedAt: Double) {
         self.name = name
-        self.age = age
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
 
     public static let maxNameLength = 20
-    public static let ageRange = 5...99
-
-    public static func validAge(_ age: Int) -> Bool {
-        ageRange.contains(age)
-    }
-
     /// Trims, turns every run of whitespace into one space, drops control characters and keeps at most
     /// 20 characters (by Character, so an emoji is never cut in half). Returns nil when nothing is left.
     public static func cleanName(_ raw: String) -> String? {
@@ -63,8 +55,7 @@ public struct PlayerProfile: Codable, Equatable, Sendable {
         guard let a else { return b }
         guard let b else { return a }
         if a.updatedAt != b.updatedAt { return a.updatedAt > b.updatedAt ? a : b }
-        if a.name != b.name { return a.name > b.name ? a : b }
-        return a.age >= b.age ? a : b
+        return a.name >= b.name ? a : b
     }
 }
 
@@ -184,11 +175,11 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
 
     // MARK: - Profile and sessions
 
-    /// Saves the player's name and age if both are valid (see PlayerProfile). Editing keeps `createdAt`.
+    /// Saves the player's name if it is valid (see PlayerProfile). Editing keeps `createdAt`.
     @discardableResult
-    public mutating func setProfile(name: String, age: Int, now: Double) -> Bool {
-        guard let clean = PlayerProfile.cleanName(name), PlayerProfile.validAge(age) else { return false }
-        profile = PlayerProfile(name: clean, age: age, createdAt: profile?.createdAt ?? now, updatedAt: now)
+    public mutating func setProfile(name: String, now: Double) -> Bool {
+        guard let clean = PlayerProfile.cleanName(name) else { return false }
+        profile = PlayerProfile(name: clean, createdAt: profile?.createdAt ?? now, updatedAt: now)
         return true
     }
 

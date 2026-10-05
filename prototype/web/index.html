@@ -269,7 +269,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   ];
 
   // ---------- app state ----------
-  var S = { form: { name: '', age: '', edit: false }, attempt: null, screen: 'home', game: null, levelIndex: 0, lesson: -1, step: 0, sel: null, cursor: 0, hintCol: null, flash: '', flashKind: 'info', guideOverride: '', paused: false, overlay: null, anim: null, crack: null, glow: [], result: null, award: 0, chest: 0, copied: '', confirmReset: false };
+  var S = { form: { name: '', edit: false }, attempt: null, screen: 'home', game: null, levelIndex: 0, lesson: -1, step: 0, sel: null, cursor: 0, hintCol: null, flash: '', flashKind: 'info', guideOverride: '', paused: false, overlay: null, anim: null, crack: null, glow: [], result: null, award: 0, chest: 0, copied: '', confirmReset: false };
   // First run: who's playing -> tutorial -> home. Anyone with saved progress but no profile is asked once.
   if (!P.profile) S.screen = 'welcome'; else if (!P.tutorialDone) startLesson(0);
 
@@ -287,14 +287,11 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   };
 
   // ---------- helpers ----------
-  // Name and age stay in this browser (the iPhone app also keeps them in the player's own iCloud). Same rules as DropkuCore.
+  // The name stays in this browser (the iPhone app also keeps it in the player's own iCloud). No age is asked. Same rules as DropkuCore.
   function cleanName(raw) { var t = String(raw || '').replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ').replace(/\s+/g, ' ').trim(); t = Array.from(t).slice(0, 20).join('').trim(); return t || null; }
-  function parseAge(v) { return /^\d{1,2}$/.test(String(v).trim()) ? Number(v) : NaN; }
-  function validAge(n) { return Number.isInteger(n) && n >= 5 && n <= 99; }
-  function formOk() { return !!cleanName(S.form.name) && validAge(parseAge(S.form.age)); }
+  function formOk() { return !!cleanName(S.form.name); }
   function formMessage() {
     if (S.form.name && !cleanName(S.form.name)) return 'Please enter your name.';
-    if (S.form.age && !validAge(parseAge(S.form.age))) return 'Age must be a whole number from 5 to 99.';
     return '';
   }
   var REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -589,8 +586,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
 
   function profileForm(mode) {
     var f = S.form;
-    return '<label class="fld"><span>Your name</span><input id="f-name" type="text" maxlength="20" autocomplete="given-name" autocapitalize="words" spellcheck="false" enterkeyhint="next" placeholder="e.g. Alex" value="' + esc(f.name) + '"></label>' +
-      '<label class="fld"><span>Your age</span><input id="f-age" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" enterkeyhint="done" placeholder="5 to 99" value="' + esc(f.age) + '"></label>' +
+    return '<label class="fld"><span>Your name</span><input id="f-name" type="text" maxlength="20" autocomplete="given-name" autocapitalize="words" spellcheck="false" enterkeyhint="done" placeholder="e.g. Alex" value="' + esc(f.name) + '"></label>' +
       '<div id="f-msg" class="fmsg" role="status">' + esc(formMessage()) + '</div>' +
       '<button id="f-go" class="primary" data-act="saveProfile"' + (formOk() ? '' : ' disabled') + '>' + (mode === 'edit' ? 'Save' : 'Let’s play') + '</button>';
   }
@@ -605,22 +601,22 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
     return '<div class="screen welcome scroll"><div class="wl-board" aria-hidden="true">' + t + '</div>' +
       '<h1>Welcome to Dropku</h1><p class="wl-p">Sudoku, but the numbers fall. Beat the clock on three boards. First, who’s playing?</p>' +
       profileForm('new') +
-      '<p class="priv">Your name and age stay on this device (the iPhone app also keeps them in your own iCloud). They are never sent to us, and you can change or delete them any time.</p></div>';
+      '<p class="priv">Your name stays on this device (the iPhone app also keeps it in your own iCloud). It is never sent to us, and you can change or delete it any time.</p></div>';
   }
 
   function ago(t) { try { return new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
   function outcomeText(r) { return r.out === 'won' ? '★★★'.slice(0, r.stars) + '☆☆☆'.slice(0, 3 - r.stars) + ' cleared' : r.out === 'timeUp' ? 'Time’s up' : r.out === 'outOfHearts' ? 'Out of hearts' : 'Left early'; }
 
   function playerSheet() {
-    var p = P.profile || { name: '', age: '' };
-    if (S.form.edit) return '<div class="veil"><div class="sheet"><h2>Your details</h2>' + profileForm('edit') + '<button class="link" data-act="closePlayer">Cancel</button></div></div>';
+    var p = P.profile || { name: '' };
+    if (S.form.edit) return '<div class="veil"><div class="sheet"><h2>Your name</h2>' + profileForm('edit') + '<button class="link" data-act="closePlayer">Cancel</button></div></div>';
     var cleared = Object.keys(P.best).length, list = P.sessions.slice(-8).reverse().map(function (r) { var b = boardById(r.board); return '<div><span>' + esc(b.name) + ' ' + r.n + ' · ' + esc(outcomeText(r)) + '</span><small>' + r.secs + 's · ' + esc(ago(r.t)) + '</small></div>'; }).join('');
-    var reset = S.confirmReset ? '<p style="color:var(--bad)">This deletes your name, age, stars, Sparks and session history from this browser.</p><button class="secondary" style="color:var(--bad)" data-act="resetYes">Yes, delete everything</button><button class="link" data-act="resetNo">Keep my progress</button>' : '<button class="link" style="color:var(--faint)" data-act="reset">Delete my data…</button>';
-    return '<div class="veil"><div class="sheet"><div style="display:flex;align-items:center;gap:12px"><span class="av" style="width:48px;height:48px;border-radius:24px;font-size:22px">' + esc(Array.from(p.name)[0] || '?').toUpperCase() + '</span><div style="min-width:0"><h2 style="font-size:24px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(p.name) + '</h2><div style="color:var(--muted);font-size:14px">Age ' + esc(p.age) + '</div></div></div>' +
+    var reset = S.confirmReset ? '<p style="color:var(--bad)">This deletes your name, stars, Sparks and session history from this browser.</p><button class="secondary" style="color:var(--bad)" data-act="resetYes">Yes, delete everything</button><button class="link" data-act="resetNo">Keep my progress</button>' : '<button class="link" style="color:var(--faint)" data-act="reset">Delete my data…</button>';
+    return '<div class="veil"><div class="sheet"><div style="display:flex;align-items:center;gap:12px"><span class="av" style="width:48px;height:48px;border-radius:24px;font-size:22px">' + esc(Array.from(p.name)[0] || '?').toUpperCase() + '</span><div style="min-width:0"><h2 style="font-size:24px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(p.name) + '</h2><div style="color:var(--muted);font-size:14px">Player</div></div></div>' +
       '<div class="stats"><div class="stat"><b>' + P.sessions.length + '</b><span>sessions</span></div><div class="stat"><b>' + cleared + '</b><span>levels cleared</span></div><div class="stat"><b>' + P.wallet + '</b><span>Sparks</span></div></div>' +
       (list ? '<div class="hist" aria-label="Recent sessions">' + list + '</div>' : '<p style="font-size:14px">No sessions yet. Play a level and it shows up here.</p>') +
       '<p style="font-size:12.5px;color:var(--muted);text-align:center">Sessions are saved in this browser. The iPhone app also saves them to your own iCloud, never to our servers.</p>' +
-      '<button class="secondary" data-act="editProfile">Change name or age</button><button class="primary" data-act="closePlayer">Done</button>' + reset + '</div></div>';
+      '<button class="secondary" data-act="editProfile">Change name</button><button class="primary" data-act="closePlayer">Done</button>' + reset + '</div></div>';
   }
 
   function homeScreen() {
@@ -718,14 +714,14 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
       case 'mute': P.muted = !P.muted; save(); break;
       case 'reset': S.confirmReset = true; break;
       case 'resetNo': S.confirmReset = false; break;
-      case 'resetYes': P = fresh(); save(); setBoard(P.board); S.confirmReset = false; S.overlay = null; S.game = null; S.form = { name: '', age: '', edit: false }; S.screen = 'welcome'; break;
-      case 'player': S.overlay = 'player'; S.form = { name: '', age: '', edit: false }; break;
+      case 'resetYes': P = fresh(); save(); setBoard(P.board); S.confirmReset = false; S.overlay = null; S.game = null; S.form = { name: '', edit: false }; S.screen = 'welcome'; break;
+      case 'player': S.overlay = 'player'; S.form = { name: '', edit: false }; break;
       case 'closePlayer': S.overlay = null; S.confirmReset = false; S.form.edit = false; break;
-      case 'editProfile': S.form = { name: P.profile ? P.profile.name : '', age: P.profile ? String(P.profile.age) : '', edit: true }; break;
+      case 'editProfile': S.form = { name: P.profile ? P.profile.name : '', edit: true }; break;
       case 'saveProfile':
-        var nm = cleanName(S.form.name), ag = parseAge(S.form.age); if (!nm || !validAge(ag)) break;
-        var now = Date.now(); P.profile = { name: nm, age: ag, created: P.profile ? P.profile.created : now, updated: now }; save();
-        S.form = { name: '', age: '', edit: false }; S.overlay = null;
+        var nm = cleanName(S.form.name); if (!nm) break;
+        var now = Date.now(); P.profile = { name: nm, created: P.profile ? P.profile.created : now, updated: now }; save();
+        S.form = { name: '', edit: false }; S.overlay = null;
         if (S.screen === 'welcome') { if (!P.tutorialDone) { startLesson(0); } else { S.screen = 'home'; } }
         break;
       case 'share':
@@ -740,17 +736,15 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   document.getElementById('app').addEventListener('input', function (e) {
     var t = e.target;
     if (t.id === 'f-name') S.form.name = t.value;
-    else if (t.id === 'f-age') { var d = t.value.replace(/\D/g, '').slice(0, 2); if (d !== t.value) t.value = d; S.form.age = d; }
     else return;
     var go = document.getElementById('f-go'), msg = document.getElementById('f-msg');
     if (go) go.disabled = !formOk();
     if (msg) msg.textContent = formMessage();
   });
   document.getElementById('app').addEventListener('keydown', function (e) {
-    if (e.key !== 'Enter' || !e.target || (e.target.id !== 'f-name' && e.target.id !== 'f-age')) return;
+    if (e.key !== 'Enter' || !e.target || e.target.id !== 'f-name') return;
     e.preventDefault();
-    if (e.target.id === 'f-name') { var a = document.getElementById('f-age'); if (a) a.focus(); }
-    else if (formOk()) { var go = document.getElementById('f-go'); if (go) go.click(); }
+    if (formOk()) { var go = document.getElementById('f-go'); if (go) go.click(); }
   });
 
   // Keyboard (iPad keyboards and Mac): 1-9 pick, arrows choose a column, Return/Space drops, P pauses, Z undo, H hint.

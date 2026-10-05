@@ -42,17 +42,16 @@ v1 has nothing to buy. Sparks are earned only and can't be bought, sold or excha
 - [ ] **Privacy policy URL**, shown in App Store Connect *and* inside the app (Settings → Privacy Policy). Hosted on the website.
 - [ ] **App Privacy label** (the "nutrition label") filled in accurately. **v1 target: "Data Not Collected"** (no ads, no analytics SDKs, no accounts). iCloud data lives in the player's own iCloud and isn't collected by us. Game Center is Apple's service [Check the wording when filling in the form].
 - [ ] **Privacy manifest (`PrivacyInfo.xcprivacy`)** declaring "required reason" APIs. UserDefaults, file timestamps and similar APIs count. Every third-party SDK must ship its own manifest and signature.
-- [ ] **Player name and age (added 4 October 2026, owner's decision).** The first-run "Who's playing?" screen asks for a name and an age (5 to 99). Rules this must follow:
-  - Stored **only on the device and in the player's own iCloud** (key-value store). **No developer server, no analytics, no sharing**, so the App Privacy label can stay "Data Not Collected". If a developer-run cloud is ever added, this changes to "Contact Info: Name" and "Other: Age" linked to the user, and the privacy policy, label and manifest must change first.
-  - Data minimisation (5.1.1): in v1 the name is used for the greeting and the session history, and **the age has no function yet**. [Decision] Give age a clear purpose (for example age groups on a leaderboard) or drop the field before submission.
-  - Players under 13: COPPA (US), GDPR-K (EU/UK) and the Kids rules (1.3, 5.1.4) need a check, because the game asks for an age. The data never reaches us, but have a lawyer confirm [Check before launch]. The age rating should stay low and the app stays out of the Kids category.
-  - The player can change or delete both at any time (Settings, "Delete everything"). There is no account, so 5.1.1(v) account deletion does not apply, but deletion is offered anyway.
-  - The privacy policy must say what is stored, where, and how to delete it. Session history (level, result, time used, date) is stored the same way.
+- [ ] **Player name (owner's decision, 4 October 2026; the age question was removed on 5 October 2026).** The first-run "Who's playing?" screen asks for a name only. Rules this must follow:
+  - Stored **only on the device and in the player's own iCloud** (key-value store). **No developer server, no analytics, no sharing**, so the App Privacy label can stay "Data Not Collected". If a developer-run cloud is ever added, this changes to "Contact Info: Name" linked to the user, and the privacy policy, label and manifest must change first.
+  - **No age is asked or stored.** That keeps data collection minimal (5.1.1) and avoids the young-player questions (COPPA, GDPR-K, Kids rules) that an age field would raise. Old saves that contain an age drop it on the next save.
+  - The player can change or delete the name at any time (Settings, "Delete everything"). There is no account, so 5.1.1(v) account deletion does not apply, but deletion is offered anyway.
+  - The privacy policy must say what is stored (name, progress, session history of level, result, time used and date), where, and how to delete it.
 - [ ] **No account system**, so no account-deletion requirement. If accounts are ever added, in-app account deletion is mandatory (5.1.1(v)), and Sign in with Apple is required if any third-party login is offered (4.8).
 - [ ] **App Tracking Transparency:** v1 does no tracking and has no ad SDKs, so there's no prompt.
 - [ ] Ask for permissions (notifications) only in context, with a clear reason. The game still works if the player says no.
 - [ ] v1 analytics: Apple's built-in App Analytics and crash reports only (App Store Connect), plus TestFlight feedback. No third-party analytics SDK.
-- [ ] GDPR (EU/UK) and CCPA (California): the name, age and session history never leave the device or the player's own iCloud, so we do not collect them. The privacy policy states that [Check with a template or lawyer].
+- [ ] GDPR (EU/UK) and CCPA (California): the name and session history never leave the device or the player's own iCloud, so we do not collect them. The privacy policy states that [Check with a template or lawyer].
 
 ## 5. Age rating and young players
 - [ ] Complete Apple's **age rating questionnaire** honestly. The game should rate low (4+ or 9+), with no violence, chat or user-generated content.

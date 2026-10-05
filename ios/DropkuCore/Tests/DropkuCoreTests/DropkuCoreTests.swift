@@ -360,32 +360,31 @@ final class ProfileAndSessionTests: XCTestCase {
         XCTAssertNil(PlayerProfile.cleanName("\u{0007}\u{0008}"))
     }
 
-    func testAgeBounds() {
-        XCTAssertFalse(PlayerProfile.validAge(4))
-        XCTAssertTrue(PlayerProfile.validAge(5))
-        XCTAssertTrue(PlayerProfile.validAge(99))
-        XCTAssertFalse(PlayerProfile.validAge(100))
-        XCTAssertFalse(PlayerProfile.validAge(-1))
+    func testOldSaveWithAnAgeStillLoadsAndTheAgeIsDropped() throws {
+        let old = #"{"profile":{"name":"Ada","age":30,"createdAt":1,"updatedAt":2}}"#
+        let progress = try JSONDecoder().decode(PlayerProgress.self, from: Data(old.utf8))
+        XCTAssertEqual(progress.profile, PlayerProfile(name: "Ada", createdAt: 1, updatedAt: 2))
+        let again = String(decoding: try JSONEncoder().encode(progress), as: UTF8.self)
+        XCTAssertFalse(again.contains("age"), "re-saving must not write the age back")
     }
 
     func testSetProfileValidatesAndEditKeepsCreatedAt() {
         var progress = PlayerProgress()
         XCTAssertNil(progress.profile)
-        XCTAssertFalse(progress.setProfile(name: "  ", age: 20, now: 1))
-        XCTAssertFalse(progress.setProfile(name: "Ada", age: 4, now: 1))
+        XCTAssertFalse(progress.setProfile(name: "  ", now: 1))
         XCTAssertNil(progress.profile)
-        XCTAssertTrue(progress.setProfile(name: "  Ada  ", age: 30, now: 100))
-        XCTAssertEqual(progress.profile, PlayerProfile(name: "Ada", age: 30, createdAt: 100, updatedAt: 100))
-        XCTAssertTrue(progress.setProfile(name: "Ada L", age: 31, now: 500))
-        XCTAssertEqual(progress.profile, PlayerProfile(name: "Ada L", age: 31, createdAt: 100, updatedAt: 500))
-        XCTAssertFalse(progress.setProfile(name: "", age: 31, now: 900))
+        XCTAssertTrue(progress.setProfile(name: "  Ada  ", now: 100))
+        XCTAssertEqual(progress.profile, PlayerProfile(name: "Ada", createdAt: 100, updatedAt: 100))
+        XCTAssertTrue(progress.setProfile(name: "Ada L", now: 500))
+        XCTAssertEqual(progress.profile, PlayerProfile(name: "Ada L", createdAt: 100, updatedAt: 500))
+        XCTAssertFalse(progress.setProfile(name: "", now: 900))
         XCTAssertEqual(progress.profile?.updatedAt, 500, "a refused edit changes nothing")
     }
 
     func testMergePicksNewerProfile() {
         var a = PlayerProgress(), b = PlayerProgress()
-        _ = a.setProfile(name: "Old", age: 10, now: 100)
-        _ = b.setProfile(name: "New", age: 11, now: 200)
+        _ = a.setProfile(name: "Old", now: 100)
+        _ = b.setProfile(name: "New", now: 200)
         XCTAssertEqual(a.merged(with: b).profile?.name, "New")
         XCTAssertEqual(b.merged(with: a).profile?.name, "New")
         XCTAssertEqual(a.merged(with: PlayerProgress()).profile?.name, "Old", "nil loses to a profile")
@@ -423,7 +422,7 @@ final class ProfileAndSessionTests: XCTestCase {
     func testProfileAndSessionsRoundTripThroughJSON() throws {
         var progress = PlayerProgress()
         progress.earn(50, device: "A")
-        _ = progress.setProfile(name: "Ada", age: 30, now: 1_700_000_000)
+        _ = progress.setProfile(name: "Ada", now: 1_700_000_000)
         progress.record(session("s1", at: 1_700_000_100, outcome: .timeUp))
         progress.record(session("s2", at: 1_700_000_200, outcome: .outOfHearts))
         let data = try JSONEncoder().encode(progress)
@@ -453,7 +452,7 @@ final class ProfileAndSessionTests: XCTestCase {
 
     func testResetProgressHasNoProfileOrSessions() {
         var progress = PlayerProgress()
-        _ = progress.setProfile(name: "Ada", age: 30, now: 1)
+        _ = progress.setProfile(name: "Ada", now: 1)
         progress.record(session("s1", at: 1))
         progress = PlayerProgress()   // what AppModel.resetProgress does
         XCTAssertNil(progress.profile)

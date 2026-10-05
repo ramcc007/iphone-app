@@ -113,12 +113,12 @@ final class AppModel: ObservableObject {
         update { $0.finishTutorial(device: deviceID) }
     }
 
-    /// Saves the player's name and age (both must be valid). From the Welcome screen it moves on to the
+    /// Saves the player's name (it must be valid). From the Welcome screen it moves on to the
     /// tutorial (first time) or home; from Settings it only saves. Stays on this device and the player's own iCloud.
     @discardableResult
-    func saveProfile(name: String, age: Int) -> Bool {
+    func saveProfile(name: String) -> Bool {
         var updated = progress
-        guard updated.setProfile(name: name, age: age, now: Date().timeIntervalSince1970) else { return false }
+        guard updated.setProfile(name: name, now: Date().timeIntervalSince1970) else { return false }
         progress = updated
         save()
         if route == .welcome { route = progress.tutorialDone ? .home : .tutorial(lesson: 0) }
@@ -132,7 +132,7 @@ final class AppModel: ObservableObject {
         update { $0.record(record) }
     }
 
-    /// Removes everything, including the name, age and session history, and starts again at Welcome.
+    /// Removes everything, including the name and session history, and starts again at Welcome.
     func resetProgress() {
         progress = PlayerProgress()
         save()
