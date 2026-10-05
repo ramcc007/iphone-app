@@ -42,6 +42,9 @@ A three-level tutorial teaches the whole game: the basic move, why order matters
 DAILY DROP
 A new puzzle every day, the same for everyone. Clear it to earn bonus Sparks, build a streak and share your result as a picture with no spoilers. An optional reminder is off until you turn it on.
 
+FRESH EVERY TIME
+Restart a level and the numbers change while the difficulty stays exactly the same, so you can never beat it from memory. Every board is solvable by logic alone.
+
 EARN, NEVER BUY
 Collect Sparks by clearing levels, finishing without mistakes, finishing fast and opening chests every ten levels. Spend them on hints, undos, an extra heart, or to skip a level that has you stuck. Sparks cannot be bought, because there are no purchases at all.
 

@@ -265,3 +265,6 @@ The whole set is generated deterministically (`python3 tools/levelgen/build_leve
 
 ## Update 5 October 2026
 Built and compiling in CI: Daily Drop (Classic levels 31 to 90 chosen from the date, streak, bonus Sparks), procedural sound effects, Game Center achievements and two leaderboards, a share image, and an opt-in 7 pm reminder. Still open: a Home Screen widget (needs a separate app extension and an App Group), background music, and a dedicated pool of Daily Drop puzzles.
+
+## Fresh boards on restart (5 October 2026)
+The first time a level (or the Daily Drop) is opened it is the original board. Every later start, whether a restart, a retry after time-up or a replay, uses a disguised copy: the digits are relabelled and whole columns are shuffled inside their box-wide groups. Rows are never moved because the givens are stacked at the bottom of each column. The puzzle keeps its gaps per column, its single solution, its logic path and its time limit, so difficulty is identical. Tests: `tools/failsafe/engine.test.js` (valid, one solution, same logic rounds, solved by logic alone, for all 230 levels over several seeds) and `ios/NumfallCore/Tests/NumfallCoreTests/VariantTests.swift`. Variants available per level: Quick 192, Classic 51,840, Master over 470 million.

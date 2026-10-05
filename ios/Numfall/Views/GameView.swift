@@ -87,7 +87,7 @@ struct GameView: View {
                         TrayView(session: session, wide: false, compact: compact)
                         ControlsRow(session: session, wide: false)
                     }
-                    .frame(maxWidth: 540)
+                    .frame(maxWidth: geo.size.width >= 700 ? 820 : 540)   // portrait iPad: a wider column, so the board is not a small island
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
                 }

@@ -119,8 +119,13 @@ async function solveLevel(page, board, idx) {
     ok('Time\u2019s up offers a tip and a way to switch board', (await page.isVisible('.veil .tip')) && (await page.isVisible('.veil >> text=Switch board or level')));
     const s1 = await page.evaluate(() => JSON.parse(localStorage.getItem('numfall.web.v2')).sessions);
     ok('Time\u2019s up is recorded as a session', s1.length === 1 && s1[0].out === 'timeUp' && s1[0].secs === 20, JSON.stringify(s1));
+    const cellsOf = () => page.$$eval('.board .cell', (c) => c.map((x) => x.textContent.trim()));
+    const beforeCells = await cellsOf();
     await page.click('.veil [data-act="restart"]');
     ok('Start again gives the full 20s', await page.isVisible('#timer >> text=20s'));
+    const afterCells = await cellsOf();
+    ok('Start again shows different numbers on the same puzzle strength (same gaps, new digits and columns)', afterCells.join() !== beforeCells.join() && afterCells.filter((x) => x === '').length === beforeCells.filter((x) => x === '').length, beforeCells.join('') + ' vs ' + afterCells.join(''));
+    ok('Start again says so', await page.isVisible('text=New numbers, same difficulty.'));
     await page.clock.runFor(21000);
     ok('Skip is unlocked after 2 fails', (await page.isVisible('.veil [data-act="skip"]')) && !(await page.isDisabled('.veil [data-act="skip"]')));
     await page.click('.veil [data-act="skip"]');

@@ -90,5 +90,69 @@ t('Economy: a strong player (no mistakes, 2/3/4s per gap on 4x4/6x6/9x9) earns 3
   return bad.length ? bad.join(' ') : true;
 });
 t('Untimed mode (tutorial) never times out', () => { const g = D.newGame(LEVELS[0], { timed: false }); const fired = D.tick(g, 9999); return !fired && g.status === 'play' ? true : g.status; });
+
+// ---- Variants: same puzzle strength, different numbers (used when a level is started again) ----
+const boxOf = (L, r, c) => { const out = []; const r0 = Math.floor(r / L.boxRows) * L.boxRows, c0 = Math.floor(c / L.boxCols) * L.boxCols; for (let i = r0; i < r0 + L.boxRows; i++) for (let j = c0; j < c0 + L.boxCols; j++) out.push([i, j]); return out; };
+const validSolution = (L) => { const n = L.size, all = [...Array(n)].map((_, i) => i + 1).join(); const ok = (cells) => cells.map((p) => L.solution[p[0]][p[1]]).sort((a, b) => a - b).join() === all;
+  for (let i = 0; i < n; i++) { if (!ok([...Array(n)].map((_, j) => [i, j])) || !ok([...Array(n)].map((_, j) => [j, i]))) return false; }
+  for (let r = 0; r < n; r += L.boxRows) for (let c = 0; c < n; c += L.boxCols) if (!ok(boxOf(L, r, c))) return false; return true; };
+// Counts completions of the givens (up to `limit`), ignoring gravity: the puzzle must have exactly one.
+const countSolutions = (L, limit) => { const n = L.size, g = L.givens.map((r) => r.slice()); let found = 0;
+  const cands = (r, c) => { const used = new Set(g[r]); for (let i = 0; i < n; i++) used.add(g[i][c]); boxOf(L, r, c).forEach((p) => used.add(g[p[0]][p[1]])); const out = []; for (let v = 1; v <= n; v++) if (!used.has(v)) out.push(v); return out; };
+  const go = () => { if (found >= limit) return; let best = null;
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!g[r][c]) { const cs = cands(r, c); if (!best || cs.length < best.cs.length) best = { r, c, cs }; }
+    if (!best) { found++; return; }
+    for (const v of best.cs) { g[best.r][best.c] = v; go(); g[best.r][best.c] = 0; if (found >= limit) return; } };
+  go(); return found; };
+// How many "rounds" logic needs when every available single is played at once. This count is identical for any two puzzles that are the same puzzle in disguise.
+const logicRounds = (L) => { const n = L.size, g = L.givens.map((r) => r.slice()); let rounds = 0;
+  const cands = (r, c) => { const out = []; for (let v = 1; v <= n; v++) if (!D.conflict({ grid: g, n, br: L.boxRows, bc: L.boxCols }, r, c, v)) out.push(v); return out; };
+  while (g.some((row) => row.some((x) => !x))) { const lowest = new Set(), cand = {}, move = {};
+    for (let c = 0; c < n; c++) for (let r = n - 1; r >= 0; r--) if (!g[r][c]) { lowest.add(r + ',' + c); break; }
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!g[r][c]) cand[r + ',' + c] = cands(r, c);
+    for (const k of lowest) if (cand[k].length === 1) move[k] = cand[k][0];
+    const units = []; for (let i = 0; i < n; i++) { units.push([...Array(n)].map((_, j) => [i, j])); units.push([...Array(n)].map((_, j) => [j, i])); }
+    for (let r = 0; r < n; r += L.boxRows) for (let c = 0; c < n; c += L.boxCols) units.push(boxOf(L, r, c));
+    for (const u of units) for (let v = 1; v <= n; v++) { const spots = u.filter((p) => cand[p[0] + ',' + p[1]] && cand[p[0] + ',' + p[1]].includes(v)); if (spots.length === 1 && lowest.has(spots[0].join(','))) move[spots[0].join(',')] = v; }
+    const keys = Object.keys(move); if (!keys.length) return -1;
+    keys.forEach((k) => { const [r, c] = k.split(',').map(Number); g[r][c] = move[k]; }); rounds++; }
+  return rounds; };
+const lowStack = (L) => L.givens[0].every((_, c) => { let seenGiven = false; for (let r = 0; r < L.size; r++) { if (L.givens[r][c]) seenGiven = true; else if (seenGiven) return false; } return true; });
+const SEEDS = [1, 7, 12345, 99999, 4000000000];
+t('Variants of all 230 levels keep the exact puzzle: valid solution, one solution, same gaps per column, givens stacked at the bottom', () => {
+  const bad = [];
+  for (const L of LEVELS) for (const seed of SEEDS) {
+    const V = D.variant(L, seed);
+    const gapsPerColumn = (X) => X.givens[0].map((_, c) => X.givens.filter((row) => row[c] === 0).length).sort().join();
+    const fits = V.givens.every((row, r) => row.every((x, c) => x === 0 || x === V.solution[r][c]));
+    if (!validSolution(V) || !fits || !lowStack(V) || V.id !== L.id || V.timeLimit !== L.timeLimit || V.gaps !== L.gaps || gapsPerColumn(V) !== gapsPerColumn(L) || countSolutions(V, 2) !== 1) bad.push(L.id + '#' + seed);
+  }
+  return bad.length ? bad.slice(0, 8).join(' ') : true;
+});
+t('Variants of all 230 levels are solved by logic alone (no guessing) and need exactly as many logic rounds as the original', () => {
+  const bad = [];
+  for (const L of LEVELS) { const base = logicRounds(L); for (const seed of SEEDS.slice(0, 3)) {
+    const V = D.variant(L, seed), g = D.newGame(V), r = solveByHints(g);
+    if (typeof r === 'string' || r.status !== 'won' || r.fallback || logicRounds(V) !== base || base < 1) bad.push(L.id + '#' + seed + ':' + base + '/' + logicRounds(V)); } }
+  return bad.length ? bad.slice(0, 8).join(' ') : true;
+});
+t('Variants really differ: most seeds change the board, and the same seed always gives the same board', () => {
+  const bad = [];
+  for (const L of LEVELS) { let diff = 0; for (const seed of SEEDS) { if (JSON.stringify(D.variant(L, seed).givens) !== JSON.stringify(L.givens)) diff++; }
+    if (JSON.stringify(D.variant(L, 5)) !== JSON.stringify(D.variant(L, 5))) bad.push(L.id + ' not repeatable');
+    if (diff < 4) bad.push(L.id + ' changes only ' + diff + '/5'); }
+  return bad.length ? bad.slice(0, 8).join(' ') : true;
+});
+t('freshVariant never returns the board that is already on screen, and a new variant works in a real game', () => {
+  const rand = Math.random;
+  const bad = [];
+  for (const L of LEVELS) { const shown = D.freshVariant(L, rand, null); const next = D.freshVariant(L, rand, shown); if (JSON.stringify(next.givens) === JSON.stringify(shown.givens)) bad.push(L.id);
+    const g = D.newGame(next); if (g.level.timeLimit !== L.timeLimit || g.timeLeft !== L.timeLimit || D.hint(g) === null) bad.push(L.id + ' game'); }
+  return bad.length ? bad.slice(0, 8).join(' ') : true;
+});
+t('The number of different variants per board is large enough (Quick 4x4 at least 150, Classic and Master far more)', () => {
+  const counts = {}; for (const id of ['quick', 'classic', 'master']) { const L = board(id)[5], seen = new Set(); for (let s = 0; s < 4000; s++) seen.add(JSON.stringify(D.variant(L, s * 2654435761 % 4294967296).givens)); counts[id] = seen.size; }
+  return counts.quick >= 150 && counts.classic >= 3000 && counts.master >= 3900 ? true : JSON.stringify(counts);
+});
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exitCode = fail ? 1 : 0;

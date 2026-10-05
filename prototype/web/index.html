@@ -342,10 +342,16 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   }
   function leaveAttempt() { var g = S.game; if (S.screen === 'game' && S.attempt && !S.attempt.recId && g && g.status === 'play' && (g.history.length || g.mistakes)) logSession('left'); }
 
-  function startLevel(i) {
+  // The first time a level is opened it is the original board. Every later start (Restart, Try again, a replay) gets the same puzzle
+  // strength with different numbers and columns, so nobody can memorise where each digit goes (see variant() in engine.js).
+  function startLevel(i, again) {
     leaveAttempt(); newAttempt();
-    S.levelIndex = i; S.game = D.newGame(LEVELS[i]); S.screen = 'game'; S.lesson = -1;
-    resetTurn(); S.paused = false; S.overlay = null; render();
+    var base = LEVELS[i], seen = again || P.fails[base.id] > 0 || P.best[base.id] > 0;
+    var board = seen ? D.freshVariant(base, Math.random, S.game && S.game.level.id === base.id ? S.game.level : null) : base;
+    S.levelIndex = i; S.game = D.newGame(board); S.screen = 'game'; S.lesson = -1;
+    resetTurn(); S.paused = false; S.overlay = null;
+    if (seen) setFlash('New numbers, same difficulty.', 'info');
+    render();
   }
   function startLesson(k) {
     S.lesson = k; S.step = 0; S.game = D.newGame(lessonLevel(LESSONS[k].empties), { timed: false }); S.screen = 'tutorial';
@@ -686,7 +692,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
       case 'resume': S.paused = false; break;
       case 'restart':
         if (inLesson()) { startLesson(S.lesson); break; }
-        startLevel(S.levelIndex); return;
+        startLevel(S.levelIndex, true); return;
       case 'undo':
         if (!g || g.status !== 'play') break;
         if (!g.history.length) { setFlash('Nothing to undo', 'info'); break; }

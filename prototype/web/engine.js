@@ -169,7 +169,55 @@
     return { stars: stars, breakdown: breakdown, earned: breakdown.reduce(function (a, b) { return a + b.n; }, 0) };
   }
 
-  var api = { BOARDS: BOARDS, BOARD_ORDER: BOARD_ORDER, timeLimit: timeLimit, newGame: newGame, landing: landing, left: left, drop: drop, tick: tick, undo: undo,
+  // ---- Same puzzle strength, different numbers ("variants") ----
+  // Used when a player starts a level again, so the board cannot be memorised. Two changes keep the puzzle exactly as hard:
+  //   1. Relabel the digits (every 3 becomes a 5, and so on). Every rule treats the numbers alike.
+  //   2. Shuffle whole columns: swap columns inside a box-wide group, and swap the groups. Each column keeps its own stack, so
+  //      the gravity order, the gaps per column, the box rules and the unique solution all stay the same.
+  // Rows are never moved (the givens are stacked at the bottom of each column, and moving rows would break that).
+  function seeded(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function shuffled(list, rand) {
+    var a = list.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rand() * (i + 1)); var x = a[i]; a[i] = a[j]; a[j] = x; }
+    return a;
+  }
+
+  function variant(level, seed) {
+    var rand = seeded(seed), n = level.size, bc = level.boxCols, groups = n / bc;
+    var digit = [0].concat(shuffled(Array.apply(null, Array(n)).map(function (_, i) { return i + 1; }), rand));   // digit[v] = new number for v
+    var order = shuffled(Array.apply(null, Array(groups)).map(function (_, i) { return i; }), rand);
+    var cols = [];
+    order.forEach(function (gi) {
+      shuffled(Array.apply(null, Array(bc)).map(function (_, i) { return gi * bc + i; }), rand).forEach(function (c) { cols.push(c); });
+    });
+    var remap = function (grid) { return grid.map(function (row) { return cols.map(function (c) { return row[c] ? digit[row[c]] : 0; }); }); };
+    var copy = {};
+    for (var k in level) copy[k] = level[k];
+    copy.givens = remap(level.givens);
+    copy.solution = remap(level.solution);
+    return copy;
+  }
+
+  // A variant that really looks different from the board on screen (a rare repeat is re-rolled).
+  function freshVariant(level, rand, avoid) {
+    for (var tries = 0; tries < 8; tries++) {
+      var v = variant(level, Math.floor(rand() * 4294967296));
+      if (!avoid || JSON.stringify(v.givens) !== JSON.stringify(avoid.givens)) return v;
+    }
+    return variant(level, Math.floor(rand() * 4294967296));
+  }
+
+  var api = { variant: variant, freshVariant: freshVariant, BOARDS: BOARDS, BOARD_ORDER: BOARD_ORDER, timeLimit: timeLimit, newGame: newGame, landing: landing, left: left, drop: drop, tick: tick, undo: undo,
     continueWithHeart: continueWithHeart, hint: hint, result: result, conflict: conflict, HEARTS: HEARTS, UNDOS_FREE: UNDOS_FREE };
   root.Numfall = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

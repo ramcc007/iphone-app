@@ -66,14 +66,24 @@ final class GameSession: ObservableObject {
     init(mode: Mode, app: AppModel) {
         self.mode = mode
         self.app = app
+        // The first time a level is opened it is the original board. Every later start gets the same puzzle strength with different
+        // numbers and columns, so nobody can memorise where each digit goes (Level.variant in NumfallCore).
+        var generator = SystemRandomNumberGenerator()
+        var disguised = false
         switch mode {
         case .level(let board, let index):
-            game = Game(level: app.levels(board)[index])
+            let level = app.levels(board)[index]
+            disguised = app.progress.bestStars[level.id] != nil || (app.progress.failedAttempts[level.id] ?? 0) > 0
+            game = Game(level: disguised ? level.freshVariant(using: &generator) : level)
         case .lesson(let index):
             game = Game(level: Lesson.all[index].level, timed: false)
-        case .daily(_, let levelIndex):
-            game = Game(level: app.levels(.classic)[levelIndex])
+        case .daily(let day, let levelIndex):
+            // The Daily Drop is the same board for everyone on a player's first try; replays are disguised.
+            let level = app.levels(.classic)[levelIndex]
+            disguised = app.progress.dailyDone(on: day)
+            game = Game(level: disguised ? level.freshVariant(using: &generator) : level)
         }
+        if disguised { flash = Flash(text: "New numbers, same difficulty.", tone: .info) }
     }
 
     var isDaily: Bool {
@@ -300,7 +310,10 @@ final class GameSession: ObservableObject {
         attemptRecorded = false
         pendingOutcome = nil
         floatingGain = nil
-        game = Game(level: game.level, timed: game.isTimed)
+        // Restarting keeps the puzzle strength but changes the digits and columns, so the old board cannot be replayed from memory.
+        var generator = SystemRandomNumberGenerator()
+        let next = lesson == nil ? game.level.freshVariant(avoiding: game.level, using: &generator) : game.level
+        game = Game(level: next, timed: game.isTimed)
         selected = nil
         hintColumn = nil
         hintText = nil
@@ -311,6 +324,7 @@ final class GameSession: ObservableObject {
         paused = false
         overlay = nil
         lessonStep = 0
+        if lesson == nil { show("New numbers, same difficulty.", .info) }
     }
 
     var canBuyHeart: Bool {
