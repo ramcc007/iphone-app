@@ -18,7 +18,9 @@ struct BoardLayout {
         let gapsAcross = CGFloat(n - 1) * gap + boxesAcross * boxGap + 20
         let gapsDown = CGFloat(n - 1) * gap + boxesDown * boxGap + 20
         let fit = min((area.width - gapsAcross) / CGFloat(n), (area.height - gapsDown) / CGFloat(n))
-        tile = max(22, min(wide ? 96 : 92, fit.rounded(.down)))
+        // Portrait iPad (wide area, not the side-by-side layout) gets bigger tiles than a phone, so the board is not a small island.
+        let cap: CGFloat = wide ? 96 : (area.width >= 700 ? 128 : 92)
+        tile = max(22, min(cap, fit.rounded(.down)))
     }
 }
 
