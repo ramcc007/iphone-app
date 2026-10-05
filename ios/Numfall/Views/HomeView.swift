@@ -13,10 +13,10 @@ struct HomeView: View {
             let levels = app.levels(board)
             ScrollView {
                 VStack(spacing: 16) {
-                    // On the narrowest phones "How to play" shrinks to a "?" button, so the player's name is never cut off.
+                    // "How to play" always keeps its label. If the player's name does not fit beside it, the name moves to its own line.
                     ViewThatFits(in: .horizontal) {
-                        topBar(compact: false)
-                        topBar(compact: true)
+                        topBar(nameBelow: false)
+                        topBar(nameBelow: true)
                     }
 
                     HStack(spacing: 18) {
@@ -86,37 +86,40 @@ struct HomeView: View {
     }
 
     @ViewBuilder
-    private func topBar(compact: Bool) -> some View {
-        HStack(spacing: 8) {
-            if compact {
-                CircleButton(systemImage: "questionmark", label: "How to play") { showRules = true }
-                    .layoutPriority(2)
-            } else {
+    private func topBar(nameBelow: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
                 Button("How to play") { showRules = true }
                     .scaledFont(15, .semibold)
                     .lineLimit(1)
                     .padding(.horizontal, 14).frame(minHeight: 44)
                     .background(Capsule().fill(Theme.surface))
                     .layoutPriority(2)
-            }
-            if let name = app.progress.profile?.name {
-                Text("Hi, \(name)")
-                    .scaledFont(15, .semibold)
-                    .foregroundStyle(Theme.soft)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                if !nameBelow { greeting }
+                Spacer(minLength: 0)
+                SparksLabel(amount: app.progress.sparks, size: 16)
                     .padding(.horizontal, 14).frame(minHeight: 40)
-                    .background(Capsule().fill(Theme.surface.opacity(0.85)))
-                    .layoutPriority(0)
-                    .accessibilityLabel("Hi, \(name)")
+                    .background(Capsule().fill(Theme.surface))
+                    .layoutPriority(2)
+                CircleButton(systemImage: "slider.horizontal.3", label: "Settings") { showSettings = true }
+                    .layoutPriority(2)
             }
-            Spacer(minLength: 0)
-            SparksLabel(amount: app.progress.sparks, size: 16)
+            if nameBelow { greeting }
+        }
+    }
+
+    @ViewBuilder
+    private var greeting: some View {
+        if let name = app.progress.profile?.name {
+            Text("Hi, \(name)")
+                .scaledFont(15, .semibold)
+                .foregroundStyle(Theme.soft)
+                .lineLimit(1)
+                .truncationMode(.tail)
                 .padding(.horizontal, 14).frame(minHeight: 40)
-                .background(Capsule().fill(Theme.surface))
-                .layoutPriority(2)
-            CircleButton(systemImage: "slider.horizontal.3", label: "Settings") { showSettings = true }
-                .layoutPriority(2)
+                .background(Capsule().fill(Theme.surface.opacity(0.85)))
+                .layoutPriority(0)
+                .accessibilityLabel("Hi, \(name)")
         }
     }
 
