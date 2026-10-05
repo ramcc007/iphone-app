@@ -58,7 +58,8 @@ struct HomeView: View {
                     Text("No ads, nothing to buy. Every Spark is earned by playing.")
                         .scaledFont(13, .medium).foregroundStyle(Theme.muted)
                         .multilineTextAlignment(.center)
-                        .padding(.bottom, 12)
+
+                    HomeFooter().padding(.bottom, 12)
                 }
                 .frame(maxWidth: wide ? 820 : 540)
                 .padding(.horizontal, 16)

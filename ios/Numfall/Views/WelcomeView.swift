@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import NumfallCore
 
 /// First screen on first launch: asks for a name.
@@ -88,7 +89,7 @@ struct WelcomeView: View {
     }
 }
 
-/// Privacy Policy, Terms and Help links at the foot of the first screen (App Review 5.1.1(i): the policy must be reachable in the app).
+/// Privacy Policy, Terms and Support links at the foot of the first screen and the home screen (App Review 5.1.1(i): the policy must be reachable in the app).
 struct LegalLinks: View {
     var body: some View {
         ViewThatFits(in: .horizontal) {
@@ -102,7 +103,27 @@ struct LegalLinks: View {
     @ViewBuilder private var links: some View {
         Link("Privacy Policy", destination: AppLinks.privacy).frame(minHeight: 44)
         Link("Terms of Use", destination: AppLinks.terms).frame(minHeight: 44)
-        Link("Help & Contact", destination: AppLinks.support).frame(minHeight: 44)
+        Link("Support", destination: AppLinks.support).frame(minHeight: 44)
+    }
+}
+
+/// Foot of the home screen: a feedback line with the support email (shown as text too, so it can be copied when no
+/// mail app is set up), then the Privacy Policy, Terms and Support links.
+struct HomeFooter: View {
+    var body: some View {
+        VStack(spacing: 4) {
+            VStack(spacing: 0) {
+                Text("Questions or feedback? Write to us:").scaledFont(14, .medium).foregroundStyle(Theme.muted)
+                Link(AppLinks.supportEmail, destination: AppLinks.feedbackEmail)
+                    .scaledFont(15, .semibold).tint(Theme.accentSoft)
+                    .frame(minHeight: 44)
+                    .accessibilityLabel("Email \(AppLinks.supportEmail) to send feedback")
+                    .contextMenu { Button("Copy email address", systemImage: "doc.on.doc") { UIPasteboard.general.string = AppLinks.supportEmail } }
+            }
+            .multilineTextAlignment(.center)
+            LegalLinks()
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 

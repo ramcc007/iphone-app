@@ -218,6 +218,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
 /* Welcome and player */
 .welcome { gap: 14px; padding-block: 20px; }
 .welcome h1 { margin: 4px 0 0; font-size: 34px; line-height: 1.1; text-align: center; }
+.home-foot { text-align: center; margin-top: 8px; } .home-foot p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.5; } .home-foot .mail { color: var(--accent-soft); font-size: 15px; font-weight: 600; display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; }
 .legal { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 18px; margin-top: 4px; }
 .legal a { color: var(--accent-soft); font-size: 14px; font-weight: 600; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
 .wl-p { margin: 0; text-align: center; font-size: 16px; line-height: 1.45; color: var(--soft); }
@@ -639,9 +640,12 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
       '<h1>Welcome to NumFall</h1><p class="wl-p">Drop numbers into columns and beat the clock on three boards. But first, who’s playing?</p>' +
       profileForm('new') +
       '<p class="priv">Your name stays on this device (the iPhone app also keeps it in your own iCloud). It is never sent to us, and you can change or delete it any time.</p>' +
-      '<nav class="legal" aria-label="Legal and help"><a href="https://www.numfall.store/privacy" target="_blank" rel="noopener">Privacy Policy</a><a href="https://www.numfall.store/terms" target="_blank" rel="noopener">Terms of Use</a><a href="https://www.numfall.store/support" target="_blank" rel="noopener">Help &amp; Contact</a></nav></div>';
+      '' + LEGAL + '</div>';
   }
 
+  var LEGAL = '<nav class="legal" aria-label="Legal and help"><a href="https://www.numfall.store/privacy" target="_blank" rel="noopener">Privacy Policy</a><a href="https://www.numfall.store/terms" target="_blank" rel="noopener">Terms of Use</a><a href="https://www.numfall.store/support" target="_blank" rel="noopener">Support</a></nav>';
+  // Foot of the home screen: the support email as visible text (so it can be copied without a mail app) plus the three links.
+  var FEEDBACK = '<footer class="home-foot"><p>Questions or feedback? Write to us:<br><a class="mail" href="mailto:support@numfall.store?subject=NumFall%20feedback">support@numfall.store</a></p>' + LEGAL + '</footer>';
   function ago(t) { try { return new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
   function outcomeText(r) { return r.out === 'won' ? '★★★'.slice(0, r.stars) + '☆☆☆'.slice(0, 3 - r.stars) + ' cleared' : r.out === 'timeUp' ? 'Time’s up' : r.out === 'outOfHearts' ? 'Out of hearts' : 'Left early'; }
 
@@ -699,7 +703,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
       '<div class="boards" role="group" aria-label="Choose a board">' + picker + '</div>' +
       '<div class="bd-info">' + esc(BOARD_TEXT[board.id] || '') + ' ' + board.levels.length + ' levels, ' + minuteRange(board.levels[0].timeLimit, board.levels[board.levels.length - 1].timeLimit) + ' each.</div>' +
       '<button class="primary pulse" data-act="play" data-i="' + next + '" style="height:66px;flex-shrink:0">' + (P.best[nl.id] ? 'Replay' : 'Play') + ' ' + board.name + ' Level ' + nl.number + ' · ' + minutes(nl.timeLimit) + '</button>' +
-      chaptersHtml + '<div class="note">' + BOARDS.reduce(function (a, b) { return a + b.levels.length; }, 0) + ' levels on 3 boards. No ads, nothing to buy. Progress is saved in this browser only.</div>' + (S.overlay === 'rules' ? rulesSheet() : S.overlay === 'player' ? playerSheet() : '') + '</div>';
+      chaptersHtml + '<div class="note">' + BOARDS.reduce(function (a, b) { return a + b.levels.length; }, 0) + ' levels on 3 boards. No ads, nothing to buy. Progress is saved in this browser only.</div>' + FEEDBACK + (S.overlay === 'rules' ? rulesSheet() : S.overlay === 'player' ? playerSheet() : '') + '</div>';
   }
 
   var lastScreen = '', lastSheet = '';

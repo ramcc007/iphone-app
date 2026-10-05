@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import GameKit
 import NumfallCore
 
@@ -8,6 +9,20 @@ enum AppLinks {
     static let privacy = URL(string: "https://www.numfall.store/privacy")!
     static let terms = URL(string: "https://www.numfall.store/terms")!
     static let support = URL(string: "https://www.numfall.store/support")!
+    static let supportEmail = "support@numfall.store"
+
+    /// Opens the player's own mail app with the address and a subject filled in. The app and iOS version help us answer
+    /// bug reports; the player sees and can delete them before sending. Nothing is sent unless they press Send.
+    static var feedbackEmail: URL {
+        let info = Bundle.main.infoDictionary
+        let version = (info?["CFBundleShortVersionString"] as? String ?? "?") + " (" + (info?["CFBundleVersion"] as? String ?? "?") + ")"
+        let body = "\n\n\n---\nNumFall \(version), \(UIDevice.current.systemName) \(UIDevice.current.systemVersion)"
+        var parts = URLComponents()
+        parts.scheme = "mailto"
+        parts.path = supportEmail
+        parts.queryItems = [URLQueryItem(name: "subject", value: "NumFall feedback"), URLQueryItem(name: "body", value: body)]
+        return parts.url ?? URL(string: "mailto:\(supportEmail)")!
+    }
 }
 
 struct HowToPlayView: View {
@@ -131,7 +146,8 @@ struct SettingsView: View {
                     }
                     Link("Privacy Policy", destination: AppLinks.privacy)
                     Link("Terms of Use", destination: AppLinks.terms)
-                    Link("Help & Contact", destination: AppLinks.support)
+                    Link("Support", destination: AppLinks.support)
+                    Link("Send feedback (\(AppLinks.supportEmail))", destination: AppLinks.feedbackEmail)
                 }
                 Section {
                     Button("Reset all progress\u{2026}", role: .destructive) { confirmReset = true }
