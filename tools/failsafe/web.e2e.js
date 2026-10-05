@@ -79,6 +79,7 @@ async function solveLevel(page, board, idx) {
     ok('Tutorial finishes with the welcome gift', await page.isVisible('text=Welcome gift'));
     await page.click('[data-act="boards"]');
     ok('Home greets the player by name', await page.isVisible('text=Hi, Alex Quinn'));
+    ok('Home: the clock range never mixes seconds and minutes (Classic reads 1:30 to 3:05)', (await page.textContent('.bd-info')).includes('1:30 to 3:05 each.'));
     ok('Home: Classic chapter 1 is named "First Drops" with 1 of 5 flames lit', (await page.textContent('.chapter-head .t')) === 'First Drops' && (await page.locator('.chapter:not(.closed) .flames svg.on').count()) === 1 && (await page.locator('.chapter:not(.closed) .flames svg.off').count()) === 4);
     ok('Home shows the three boards', (await page.locator('[data-act="board"]').count()) === 3);
     ok('Classic is the starting board', await page.isVisible('[data-act="board"][data-b="classic"][aria-pressed="true"]'));

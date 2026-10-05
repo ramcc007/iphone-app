@@ -13,31 +13,10 @@ struct HomeView: View {
             let levels = app.levels(board)
             ScrollView {
                 VStack(spacing: 16) {
-                    HStack(spacing: 8) {
-                        Button("How to play") { showRules = true }
-                            .scaledFont(15, .semibold)
-                            .lineLimit(1)
-                            .padding(.horizontal, 14).frame(minHeight: 44)
-                            .background(Capsule().fill(Theme.surface))
-                            .layoutPriority(2)
-                        if let name = app.progress.profile?.name {
-                            Text("Hi, \(name)")
-                                .scaledFont(15, .semibold)
-                                .foregroundStyle(Theme.soft)
-                                .lineLimit(1)
-                                .truncationMode(.tail)
-                                .padding(.horizontal, 14).frame(minHeight: 40)
-                                .background(Capsule().fill(Theme.surface.opacity(0.85)))
-                                .layoutPriority(0)
-                                .accessibilityLabel("Hi, \(name)")
-                        }
-                        Spacer(minLength: 0)
-                        SparksLabel(amount: app.progress.sparks, size: 16)
-                            .padding(.horizontal, 14).frame(minHeight: 40)
-                            .background(Capsule().fill(Theme.surface))
-                            .layoutPriority(2)
-                        CircleButton(systemImage: "slider.horizontal.3", label: "Settings") { showSettings = true }
-                            .layoutPriority(2)
+                    // On the narrowest phones "How to play" shrinks to a "?" button, so the player's name is never cut off.
+                    ViewThatFits(in: .horizontal) {
+                        topBar(compact: false)
+                        topBar(compact: true)
                     }
 
                     HStack(spacing: 18) {
@@ -55,7 +34,7 @@ struct HomeView: View {
                     BoardPicker(wide: wide)
 
                     if let first = levels.first, let last = levels.last {
-                        Text("\(board.blurb) \(levels.count) levels, \(clockText(first.timeLimit)) to \(clockText(last.timeLimit)) each.")
+                        Text("\(board.blurb) \(levels.count) levels, \(ResultFormat.clockRange(first.timeLimit, last.timeLimit)) each.")
                             .scaledFont(14, .medium).foregroundStyle(Theme.soft)
                             .multilineTextAlignment(.center)
                     }
@@ -104,6 +83,41 @@ struct HomeView: View {
         .animation(.easeOut(duration: 0.2), value: app.toast)
         .sheet(isPresented: $showRules) { HowToPlayView() }
         .sheet(isPresented: $showSettings) { SettingsView() }
+    }
+
+    @ViewBuilder
+    private func topBar(compact: Bool) -> some View {
+        HStack(spacing: 8) {
+            if compact {
+                CircleButton(systemImage: "questionmark", label: "How to play") { showRules = true }
+                    .layoutPriority(2)
+            } else {
+                Button("How to play") { showRules = true }
+                    .scaledFont(15, .semibold)
+                    .lineLimit(1)
+                    .padding(.horizontal, 14).frame(minHeight: 44)
+                    .background(Capsule().fill(Theme.surface))
+                    .layoutPriority(2)
+            }
+            if let name = app.progress.profile?.name {
+                Text("Hi, \(name)")
+                    .scaledFont(15, .semibold)
+                    .foregroundStyle(Theme.soft)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .padding(.horizontal, 14).frame(minHeight: 40)
+                    .background(Capsule().fill(Theme.surface.opacity(0.85)))
+                    .layoutPriority(0)
+                    .accessibilityLabel("Hi, \(name)")
+            }
+            Spacer(minLength: 0)
+            SparksLabel(amount: app.progress.sparks, size: 16)
+                .padding(.horizontal, 14).frame(minHeight: 40)
+                .background(Capsule().fill(Theme.surface))
+                .layoutPriority(2)
+            CircleButton(systemImage: "slider.horizontal.3", label: "Settings") { showSettings = true }
+                .layoutPriority(2)
+        }
     }
 
     private func chapters(_ levels: [Level]) -> [Int] {

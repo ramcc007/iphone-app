@@ -176,5 +176,8 @@ final class DailyTests: XCTestCase {
         XCTAssertEqual(ResultFormat.clock(41), "0:41")
         XCTAssertEqual(ResultFormat.clock(125), "2:05")
         XCTAssertEqual(ResultFormat.clock(-5), "0:00")
+        XCTAssertEqual(ResultFormat.clockRange(28, 53), "28s to 53s")
+        XCTAssertEqual(ResultFormat.clockRange(90, 185), "1:30 to 3:05")
+        XCTAssertEqual(ResultFormat.clockRange(240, 335), "4:00 to 5:35")
     }
 }

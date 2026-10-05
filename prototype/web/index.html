@@ -258,6 +258,9 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
   var BOARD_TEXT = { quick: 'Short and snappy. Great for a coffee break.', classic: 'The full Numfall workout, and the best place to start.', master: 'Big 9×9 boards and a long clock. For number-puzzle fans.' };
   function boardById(id) { for (var i = 0; i < BOARDS.length; i++) if (BOARDS[i].id === id) return BOARDS[i]; return BOARDS[0]; }
   function minutes(s) { return s < 120 ? s + 's' : Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
+  // "28s to 53s", or "1:30 to 3:05" once the longer end is two minutes or more (never a mix like "90s to 3:05").
+  function minuteRange(a, b) { return Math.max(a, b) >= 120 ? clock(a) + ' to ' + clock(b) : a + 's to ' + b + 's'; }
+  function clock(s) { return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
 
   // ---------- saved progress (this browser only; the real app uses iCloud) ----------
   var KEY = 'numfall.web.v2';
@@ -686,7 +689,7 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
     return '<div class="screen home scroll"><div class="topbar">' + hi + '<span style="display:flex;gap:8px;align-items:center"><span class="pill spark" aria-label="' + P.wallet + ' Sparks">' + SPARK + P.wallet + '</span><button class="iconbtn" data-act="rules" aria-label="How to play">?</button></span></div>' +
       '<div class="hero">' + logo + '<div><h1>Numfall</h1><p>Drop the numbers. Beat the clock.</p></div></div>' +
       '<div class="boards" role="group" aria-label="Choose a board">' + picker + '</div>' +
-      '<div class="bd-info">' + esc(BOARD_TEXT[board.id] || '') + ' ' + board.levels.length + ' levels, ' + minutes(board.levels[0].timeLimit) + ' to ' + minutes(board.levels[board.levels.length - 1].timeLimit) + ' each.</div>' +
+      '<div class="bd-info">' + esc(BOARD_TEXT[board.id] || '') + ' ' + board.levels.length + ' levels, ' + minuteRange(board.levels[0].timeLimit, board.levels[board.levels.length - 1].timeLimit) + ' each.</div>' +
       '<button class="primary pulse" data-act="play" data-i="' + next + '" style="height:66px;flex-shrink:0">' + (P.best[nl.id] ? 'Replay' : 'Play') + ' ' + board.name + ' Level ' + nl.number + ' · ' + minutes(nl.timeLimit) + '</button>' +
       chaptersHtml + '<div class="note">' + BOARDS.reduce(function (a, b) { return a + b.levels.length; }, 0) + ' levels on 3 boards. No ads, nothing to buy. Progress is saved in this browser only.</div>' + (S.overlay === 'rules' ? rulesSheet() : S.overlay === 'player' ? playerSheet() : '') + '</div>';
   }
