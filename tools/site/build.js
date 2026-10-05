@@ -5,6 +5,9 @@
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '../../site'), SRC = path.join(ROOT, 'src'), DIST = path.join(ROOT, 'dist');
 const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'site.config.json'), 'utf8'));
+// Private values (legal name, support email) live in site/site.config.local.json, which git ignores, so they never reach the repository.
+const localCfg = path.join(ROOT, 'site.config.local.json');
+if (fs.existsSync(localCfg)) Object.assign(cfg, JSON.parse(fs.readFileSync(localCfg, 'utf8')));
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const placeholders = [];
 const val = (k) => {
