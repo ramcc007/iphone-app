@@ -88,3 +88,7 @@ v1 has nothing to buy. Sparks are earned only and can't be bought, sold or excha
 - [ ] `/terms`: terms of use (or use Apple's standard EULA)
 - [ ] `/support`: FAQ and contact email
 - [ ] `/`: marketing page with the App Store badge (follow Apple's marketing guidelines for badge usage)
+
+
+## Links shown in the app (added 5 Oct 2026)
+First screen footer: Privacy Policy, Terms of Use, Help & Contact (same links in Settings). Other common links we do not need yet: Restore Purchases (no IAP), Rate the app (use SKStoreReviewController, never gate on a rating), Licenses/Acknowledgements (only if third-party code is added), Delete my data (already in the player sheet).

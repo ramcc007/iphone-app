@@ -204,6 +204,8 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
 /* Welcome and player */
 .welcome { gap: 14px; padding-block: 20px; }
 .welcome h1 { margin: 4px 0 0; font-size: 34px; line-height: 1.1; text-align: center; }
+.legal { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 18px; margin-top: 4px; }
+.legal a { color: var(--accent-soft); font-size: 14px; font-weight: 600; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
 .wl-p { margin: 0; text-align: center; font-size: 16px; line-height: 1.45; color: var(--soft); }
 .wl-board { align-self: center; display: flex; gap: 6px; padding: 10px; border-radius: 22px; background: var(--surface); box-shadow: 0 10px 40px rgba(0,0,0,0.35); }
 .wl-col { display: flex; flex-direction: column; gap: 6px; }
@@ -601,7 +603,8 @@ input { font-family: inherit; -webkit-user-select: text; user-select: text; }
     return '<div class="screen welcome scroll"><div class="wl-board" aria-hidden="true">' + t + '</div>' +
       '<h1>Welcome to Numfall</h1><p class="wl-p">Drop numbers into columns and beat the clock on three boards. But first, who’s playing?</p>' +
       profileForm('new') +
-      '<p class="priv">Your name stays on this device (the iPhone app also keeps it in your own iCloud). It is never sent to us, and you can change or delete it any time.</p></div>';
+      '<p class="priv">Your name stays on this device (the iPhone app also keeps it in your own iCloud). It is never sent to us, and you can change or delete it any time.</p>' +
+      '<nav class="legal" aria-label="Legal and help"><a href="https://example.com/numfall/privacy" target="_blank" rel="noopener">Privacy Policy</a><a href="https://example.com/numfall/terms" target="_blank" rel="noopener">Terms of Use</a><a href="https://example.com/numfall/support" target="_blank" rel="noopener">Help &amp; Contact</a></nav></div>';
   }
 
   function ago(t) { try { return new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }

@@ -63,7 +63,9 @@ struct WelcomeView: View {
                         .disabled(!valid)
                         .opacity(valid ? 1 : 0.45)
                         .pulse(valid, scale: 1.03, duration: 1.0)
-                        .padding(.bottom, 12)
+                        .padding(.bottom, 4)
+
+                    LegalLinks()
                 }
                 .frame(maxWidth: 520)
                 .padding(.horizontal, 20)
@@ -83,6 +85,24 @@ struct WelcomeView: View {
         nameFocused = false
         guard valid else { return }
         app.saveProfile(name: name)
+    }
+}
+
+/// Privacy Policy, Terms and Help links at the foot of the first screen (App Review 5.1.1(i): the policy must be reachable in the app).
+struct LegalLinks: View {
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 18) { links }
+            VStack(spacing: 0) { links }
+        }
+        .scaledFont(14, .semibold)
+        .tint(Theme.accentSoft)
+    }
+
+    @ViewBuilder private var links: some View {
+        Link("Privacy Policy", destination: AppLinks.privacy).frame(minHeight: 44)
+        Link("Terms of Use", destination: AppLinks.terms).frame(minHeight: 44)
+        Link("Help & Contact", destination: AppLinks.support).frame(minHeight: 44)
     }
 }
 
