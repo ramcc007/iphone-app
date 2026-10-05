@@ -98,3 +98,4 @@ Marketing URL: https://www.numfall.store
 Privacy Policy URL: https://www.numfall.store/privacy
 Support URL: https://www.numfall.store/support
 Terms: https://www.numfall.store/terms
+Support email: support@numfall.store (forwards to the owner's inbox through ForwardEmail DNS records in Vercel DNS; replies are sent from Gmail "Send mail as").
