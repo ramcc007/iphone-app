@@ -192,6 +192,8 @@ Version 1 has **no ads and no In-App Purchases**. Every Spark is earned by playi
 - **NumFall Complete:** a one-time purchase that unlocks all themes and gives bonus Sparks.
 - **Rewarded ads:** watch an ad for Sparks.
 
+**Owner's decision (7 October 2026):** v1 ships with no ads, no In-App Purchases and no third-party SDKs. **Ads and In-App Purchases are planned for a later version.** Nothing is installed for them now. When that version is planned, follow the checklist in "Adding ads and purchases later" below.
+
 Because v1 players will have earned everything by playing, any later purchases must only be optional shortcuts. Levels must never be made harder to push people towards paying.
 
 **Rules we'll follow:**
@@ -301,3 +303,11 @@ Checked against Apple's Human Interface Guidelines. Fonts are the system rounded
 
 ### Name spelling: NumFall (5 October 2026)
 The name is written **NumFall** everywhere players and App Review see it: the Home Screen name under the icon (`CFBundleDisplayName`), the title and welcome screens, the web preview, the website, the App Store listing and the design canvas. Code names stay as they are (the `Numfall` Xcode target and folder, the `NumfallCore` package, saved-data keys, the numfall.store domain and email) so nothing breaks and no saved progress is lost. Use the same spelling when creating the App Store Connect record.
+
+### Adding ads and purchases later (checklist)
+Owner's decision, 7 October 2026: ads and In-App Purchases come in a version after v1. When we start it:
+- **Purchases:** StoreKit 2 only (Apple's own In-App Purchase, no extra SDK). Prices from StoreKit in local currency, a Restore Purchases button, the Paid Apps Agreement plus tax and bank details in App Store Connect, and sandbox tests (buy, restore, interrupted purchase, Ask to Buy). Anything that unlocks content in the app must use In-App Purchase (Guideline 3.1.1).
+- **Ads:** an ad SDK (for example Google AdMob) is a third-party SDK, so the App Privacy label stops being "Data Not Collected", the privacy policy and `PrivacyInfo.xcprivacy` must be updated, and personalised ads need Apple's App Tracking Transparency prompt. Rewarded ads only (the player chooses to watch for Sparks); never in the middle of a level or while the clock runs; always closable; suitable for the age rating. Players in the EU and UK also need a consent form (the ad provider offers one).
+- **Paying to remove ads:** if ads come in, offer a one-time "Remove ads" purchase.
+- **Fairness:** levels and timers are never made harder to push people to pay. v1 players keep everything they earned.
+- **Words to change when it ships:** "No ads", "nothing to buy", "Sparks cannot be bought" and "No tracking" on the website (`site/src/pages/*.html`, `site/src/llms.txt`), in the App Store listing (`docs/APP_STORE_LISTING.md`), in the app's home screen footer note, and in `CLAUDE.md` v1 scope.
