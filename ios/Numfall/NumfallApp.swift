@@ -11,6 +11,7 @@ struct NumfallApp: App {
                 .environmentObject(app)
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
+                .screenshotChrome()
                 .dynamicTypeSize(...DynamicTypeSize.accessibility3)   // text follows the player's size, up to the largest accessibility sizes
         }
     }

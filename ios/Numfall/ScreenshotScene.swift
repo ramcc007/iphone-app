@@ -1,5 +1,19 @@
 import Foundation
+import SwiftUI
 import NumfallCore
+
+extension View {
+    /// Store screenshots show the app without the status bar (time, signal, battery). Debug builds started by CI only;
+    /// release builds always keep the system status bar.
+    func screenshotChrome() -> some View {
+        #if DEBUG
+        let shooting = ProcessInfo.processInfo.arguments.contains("-NumfallScene")
+        return statusBarHidden(shooting).persistentSystemOverlays(shooting ? .hidden : .automatic)
+        #else
+        self
+        #endif
+    }
+}
 
 #if DEBUG
 /// Test-only helper: lets the CI Mac open the app straight on a given screen with demo progress, so screenshots can be taken
