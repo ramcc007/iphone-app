@@ -6,9 +6,9 @@ name: iOS build
 on:
   push:
     branches: ['claude/**', main]
-    paths: ['ios/**', 'tools/ci/**', '.github/workflows/ios.yml']
+    paths: ['ios/**', 'tools/ci/**', 'tools/appstore/**', '.github/workflows/ios.yml']
   pull_request:
-    paths: ['ios/**', 'tools/ci/**', '.github/workflows/ios.yml']
+    paths: ['ios/**', 'tools/ci/**', 'tools/appstore/**', '.github/workflows/ios.yml']
   workflow_dispatch:
 
 concurrency:
@@ -73,6 +73,21 @@ jobs:
         run: |
           APP=$(find "$RUNNER_TEMP/dd/Build/Products" -name Numfall.app -path '*Debug-iphonesimulator*' | head -1)
           bash tools/ci/screenshots.sh "$APP" "$RUNNER_TEMP/screenshots" pad 2>&1 | tee -a "$RUNNER_TEMP/screenshots.log"
+
+      - name: App Store screenshots with headlines
+        if: always()
+        continue-on-error: true
+        run: |
+          python3 -m venv "$RUNNER_TEMP/pyenv" && "$RUNNER_TEMP/pyenv/bin/pip" install -q pillow
+          "$RUNNER_TEMP/pyenv/bin/python" tools/appstore/frame.py "$RUNNER_TEMP/screenshots" "$RUNNER_TEMP/app-store-screenshots"
+
+      - name: Keep the App Store screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-store-screenshots
+          path: ${{ runner.temp }}/app-store-screenshots
+          if-no-files-found: ignore
 
       - name: Keep the screenshots
         if: always()

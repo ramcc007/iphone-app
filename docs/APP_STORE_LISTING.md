@@ -65,15 +65,16 @@ puzzle,number,logic,brain,grid,timer,gravity,drop,columns,rows,fill,offline,casu
 ## What's New (version 1.0)
 Welcome to NumFall! Three boards, 230 levels and a countdown on every one. Drop the numbers and beat the clock.
 
-## Screenshots (6.9-inch iPhone and 13-inch iPad, required; capture from the real app)
-Order and caption (short, no other brand names):
-1. Board mid-drop with the ghost tile: "Drop it. Watch it fall."
-2. Timer bar and stars: "Beat the clock."
-3. Board picker: "Three boards. All open."
-4. Level map with named groups of levels and the difficulty flames: "230 levels, rising steadily."
-5. Level complete with Sparks and stars: "Earn Sparks, never buy them."
-6. Tutorial step: "Learn it in a minute."
-Notes: use the real game screens only, no device frames needed, show no personal name other than a placeholder such as "Alex", keep text inside the safe area.
+## Screenshots (6.9-inch iPhone and 13-inch iPad, required; from the real app)
+Made automatically by the iOS build: GitHub → Actions → iOS build → **app-store-screenshots** artifact (`tools/appstore/frame.py`).
+Raw screens are taken with the status bar and home indicator hidden (Debug screenshot mode only), then placed under a headline.
+Upload in the numbered order, the same five for iPhone and iPad:
+1. Daily Drop: "Drop it. Watch it fall." / "A fresh Daily Drop every day"
+2. Home: "230 levels, 3 boards" / "From a quick 4×4 to a big 9×9"
+3. Classic level: "Beat the clock" / "Plan your drops before time runs out"
+4. Master level: "Ready for a challenge?" / "100 Master boards for puzzle fans"
+5. Tutorial: "Learn it in a minute" / "A short tutorial shows you how"
+Headlines must stay true to the app (Guideline 2.3) and name no other game. Product page header art: `design/appstore/header-*.png`.
 
 ## Age rating questionnaire (all "None" gives 4+)
 Cartoon or fantasy violence, realistic violence, sexual content or nudity, profanity or crude humour, alcohol, tobacco or drug references, mature or suggestive themes, horror or fear themes, medical information, gambling and contests: **None**.
