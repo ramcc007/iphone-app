@@ -83,19 +83,25 @@ Unrestricted web access: **No**. User-generated content: **No**. Loot boxes or s
 "Data Not Collected." (Game Center scores and achievements go only to Apple's Game Center. Confirm in App Store Connect's privacy questionnaire that using GameKit does not require declaring data as collected by the developer; it normally does not.) The app has no analytics, advertising or third-party code, and the developer receives nothing. The name, progress and sessions stay on the device and in the player's own iCloud (Apple's key-value storage), which is not "collected" by the developer. Tracking: **No**. Re-check this answer if anything below changes.
 
 ## Notes for App Review
-NumFall is a free single-player number puzzle. No account, sign-in or demo login is needed.
+Thank you for reviewing NumFall, a single-player number puzzle with gravity. No account or sign-in is needed.
 
-How to try it: on first launch, type any name (for example "Alex") and tap "Let's play". A three-step tutorial follows, then the home screen shows three boards (Quick, Classic, Master) that are all open. Tap a number in the tray, then tap a column; the number falls to the lowest empty cell. Every level has a countdown by design; when it reaches zero the level restarts. After two failed tries, a "Skip this level" option appears and costs Sparks, an in-game score earned by playing.
+HOW TO TRY IT (about 2 minutes)
+1. On first launch, type any name (for example "Alex") and tap "Let's play".
+2. A short three-level tutorial teaches the move: tap a number in the tray, then tap a column, and the number falls to the lowest empty cell.
+3. The home screen shows three boards (Quick 4x4, Classic 6x6, Master 9x9), all open. The first five levels of each can be played in any order.
+4. The Daily Drop card on the home screen opens today's puzzle.
 
-Data and privacy: Game Center and iCloud are Apple's own services; the app has no server and no third-party SDKs. The first name, progress and session history are stored only on the device and in the user's own iCloud (key-value storage). The app makes no network connections and contains no third-party SDKs, ads or analytics. Settings has "Reset all progress" which deletes this data, and links to the Privacy Policy, Terms and Support pages.
+THINGS THAT WORK AS DESIGNED
+- Every level has a countdown. When it reaches zero, "Time's up!" appears and the level starts again.
+- A wrong drop costs one of three hearts. After two failed tries, "Skip this level" appears.
+- Sparks are an in-game score earned by playing. They pay for hints, undos, an extra heart or a skip. This version has no In-App Purchases.
+- Game Center (achievements and leaderboards) is optional; the game works fully without signing in.
+- The Daily Drop reminder is a local notification. It is off until the player turns it on in Settings.
 
-New in this build: a Daily Drop (a Classic level chosen from the date, with a streak), sound effects (synthesised in code, no audio files), Game Center achievements and leaderboards (optional; the app works without signing in) and an optional daily reminder (a local notification, off until the player turns it on and iOS permission is given).
-Game Center needs the identifiers numfall.stars, numfall.streak and numfall.ach.* (see docs/GAME_CENTER_SETUP.md) to exist in App Store Connect.
+DATA
+The player's first name, progress and play history are stored on the device and in the player's own iCloud (key-value storage). The developer receives none of it. Settings has "Reset all progress", plus links to the Privacy Policy, Terms of Use and Support.
 
-Purchases: there are no In-App Purchases and no ads in this version. Sparks cannot be bought.
-
-Content: all levels, art and sounds are original. The app does not reference any other game or brand.
-
+All levels, artwork and sounds are original.
 Contact: support@numfall.store
 
 ## Other App Store Connect answers (8 October 2026)
