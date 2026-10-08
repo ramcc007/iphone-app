@@ -54,12 +54,28 @@ enum ScreenshotScene {
         }
     }
 
-    /// Called when a game screen appears: optionally picks a number so the ghost tiles show where it would land.
+    /// Called when a game screen appears: plays a few correct drops so the board shows the colourful player tiles (as in a
+    /// real game, not only grey starting numbers), then optionally picks a number so the ghost tiles show where it would land.
     static func afterGameAppears(_ session: GameSession) {
-        guard let value = pickNumber else { return }
+        guard argument("-NumfallScene") != nil, argument("-NumfallScene") != "tutorial" else { return }
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 800_000_000)
-            session.pick(value)
+            let level = session.level
+            for _ in 0..<(level.size + 2) {
+                // The column with the most gaps next, so the drops spread across the board; never fill the last gap.
+                let columns = (0..<level.size).compactMap { c in session.game.landingRow(column: c).map { (c, $0) } }
+                let gaps = session.game.grid.joined().filter { $0 == 0 }.count
+                guard gaps > level.size, let (column, row) = columns.max(by: { $0.1 < $1.1 }) else { break }
+                let value = level.solution[row][column]
+                if session.selected != value { session.pick(value) }
+                session.drop(column: column)
+            }
+            session.selected = nil
+            try? await Task.sleep(nanoseconds: 1_200_000_000)
+            if let value = pickNumber {
+                let available = session.game.remaining(value) > 0 ? value : (1...level.size).first { session.game.remaining($0) > 0 }
+                if let available { session.pick(available) }
+            }
         }
     }
 }

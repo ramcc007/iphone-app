@@ -44,7 +44,7 @@ shoot_device() {   # <label> <udid> <scene list...>
   log "boot $label ($id)"
   limit 60 xcrun simctl boot "$id" 2>&1 || log "boot returned $?"
   limit 240 xcrun simctl bootstatus "$id" -b >/dev/null 2>&1 || { log "boot of $label did not finish, skipping"; limit 60 xcrun simctl shutdown "$id" 2>/dev/null; return; }
-  limit 30 xcrun simctl status_bar "$id" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 2>/dev/null
+  limit 30 xcrun simctl status_bar "$id" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 --operatorName "" 2>/dev/null
   log "install on $label"
   limit 120 xcrun simctl install "$id" "$APP" || { log "install failed on $label"; return; }
   for entry in "$@"; do

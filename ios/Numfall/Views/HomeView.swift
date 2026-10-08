@@ -252,17 +252,15 @@ private struct FlameMeter: View {
     }
 }
 
-/// "Levels 11-20" next to the flame meter. If that does not fit on one line (a narrow phone or large text), the meter drops below.
+/// "Levels 11-20" with the flame meter on the line below.
 private struct RangeAndFlames: View {
     let range: String
     let lit: Int
     var quiet = false
 
     var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 8) { rangeLabel; FlameMeter(lit: lit, quiet: quiet) }
-            VStack(alignment: .leading, spacing: 3) { rangeLabel; FlameMeter(lit: lit, quiet: quiet) }
-        }
+        // Always two lines: side by side, the word "Difficulty" was cut to "Diffi..." on the smallest phones.
+        VStack(alignment: .leading, spacing: 3) { rangeLabel; FlameMeter(lit: lit, quiet: quiet) }
     }
 
     private var rangeLabel: some View {
