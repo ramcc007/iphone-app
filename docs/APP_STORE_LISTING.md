@@ -1,5 +1,6 @@
 # NumFall: App Store listing (v1 draft, 5 October 2026)
 
+Owner's decision (8 October 2026): the listing sells the game and makes no "no ads", "no purchases" or "free" promises, because ads and purchases may come later. App Review notes stay factual about the current build.
 Rules this text follows: no other game, brand or trademark names anywhere (Guidelines 2.3.7 and 5.2), nothing the app does not do (2.3.1), no prices or "free" claims in the name or subtitle (2.3.7), no mention of other platforms. Character limits are Apple's; counts below are checked.
 Fill in or confirm the items marked **[Owner]** in App Store Connect.
 
@@ -18,50 +19,43 @@ Fill in or confirm the items marked **[Owner]** in App Store Connect.
 | Marketing URL | https://www.numfall.store | |
 | Contact email for App Review | support@numfall.store **[Owner: add a phone number too, Apple requires it]** | |
 
-## Promotional text (can change any time without a new build, 170 max, 128 used)
-Pick a number, drop it in a column and watch it fall. Fill the grid before the clock runs out. Three boards, 230 levels, no ads.
+## Promotional text (can change any time without a new build, 170 max)
+Numbers fall. You plan the drop. Race the clock through 230 levels, a fresh Daily Drop every day and three boards from quick to brain-bending.
 
 ## Description (4000 max)
-Drop the numbers. Beat the clock.
+Pick a number. Drop it. Watch it fall into place.
 
-NumFall is a fast, colourful number puzzle. Pick a number from the tray, tap a column, and it falls to the lowest empty cell. Fill the whole grid so that every row, every column and every box holds each number exactly once.
+NumFall is a fast, colourful number puzzle with a twist: gravity. Tap a number, tap a column, and it drops to the lowest empty cell. Fill the grid so every row, every column and every box holds each number exactly once, before the clock runs out.
 
-There is a twist: numbers fall. The order you drop them in is part of the puzzle, so you plan which gap to fill first and which must wait. Every level has exactly one solution you can work out by logic, with no guessing.
+Because numbers fall, the order you drop them in is the puzzle. Fill the wrong gap first and the right number can't land. Think one move ahead, then beat the clock.
 
-THREE BOARDS, ALL OPEN FROM THE START (and the first five levels of each are open to play in any order)
-• Quick, 4×4: 30 short levels for a spare minute
-• Classic, 6×6: 100 levels with a steady climb in difficulty
-• Master, 9×9: 100 big boards with a long clock
+THREE BOARDS, ALL OPEN FROM DAY ONE
+• Quick 4×4: 30 bite-size levels for a coffee break
+• Classic 6×6: 100 levels that build your skill step by step
+• Master 9×9: 100 big boards for real puzzle fans
 
-Every board is split into named groups of ten levels, from "First Drops" to "Grand Finale" and from "Base Camp" to "The Summit". A difficulty meter of one to five flames shows how hard each group is, and a chest waits at the end of every one.
+Every board is split into named groups of ten levels, from "First Drops" to "Grand Finale" and from "Base Camp" to "The Summit". Flames show how hard each group is, and a treasure chest waits at the end of every one.
 
-ALWAYS A CLOCK
-Every level is timed, and early levels are short on purpose, so you are racing from your first drop. Finish with seconds to spare for more stars and more Sparks.
+BEAT THE CLOCK
+Every level is timed. Finish fast with no mistakes for three stars, then go back and chase a better score.
 
-LEARN IN A MINUTE
-A three-level tutorial teaches the whole game: the basic move, why order matters, and how mistakes work. Each real level shows a ghost tile where your number will land.
+A NEW PUZZLE EVERY DAY
+The Daily Drop is the same puzzle for everyone, every day. Clear it, build your streak, and see how long you can keep it going.
 
-DAILY DROP
-A new puzzle every day, the same for everyone. Clear it to earn bonus Sparks and build a streak. An optional reminder is off until you turn it on.
+NEVER THE SAME TWICE
+Restart a level and the numbers change while the challenge stays the same, so you're always solving, never remembering. Every level can be solved by logic alone, with no guessing.
 
-FRESH EVERY TIME
-Restart a level and the numbers change while the difficulty stays exactly the same, so you can never beat it from memory. Every board is solvable by logic alone.
+PLAY YOUR WAY
+• Earn Sparks as you play and use them for hints, undos, an extra heart, or to skip a level that has you stuck
+• Cheers that grow with you, from "Nice start!" all the way to "Hall of fame!"
+• Achievements and leaderboards with Game Center
+• A one-minute tutorial teaches everything
+• Smooth animation, satisfying haptics and crisp sound
 
-CHEERS THAT GROW WITH YOU
-Every cleared level earns a compliment, and the praise grows as you do: from "Nice start!" to "You're a Pro!" and "You're a genius!" all the way to "Hall of fame!".
+ON IPHONE AND IPAD
+Beautiful on every screen, in any orientation. Your progress syncs across your devices with iCloud.
 
-EARN, NEVER BUY
-Collect Sparks by clearing levels, finishing without mistakes, finishing fast and opening chests every ten levels. Spend them on hints, undos, an extra heart, or to skip a level that has you stuck. Sparks cannot be bought, because there are no purchases at all.
-
-MADE TO FEEL GOOD
-• Crisp vector graphics at any size, with a rich dark look
-• Smooth animation, haptics and crisp sound effects, each of which you can switch off
-• Achievements and leaderboards through Game Center (optional)
-• Works on iPhone and iPad, in any orientation
-• Large Text, VoiceOver and Reduce Motion supported
-
-PRIVATE BY DESIGN
-No ads. No tracking. No account. NumFall asks for a first name to greet you and keeps it, your progress and your session history on your device and in your own iCloud. We never receive it.
+Ready to drop? Your first level takes less than a minute.
 
 Questions or ideas? Write to support@numfall.store.
 
