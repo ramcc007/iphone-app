@@ -15,7 +15,7 @@ open Numfall.xcodeproj
 ```
 Then in Xcode:
 1. Select the **NumFall** target → **Signing & Capabilities** → choose your Team.
-2. Change the bundle identifier from `com.example.numfall` to your own (it must match App Store Connect).
+2. The bundle identifier is `store.numfall.app` (permanent; it matches App Store Connect).
 3. Pick an iPhone or iPad simulator and press **Run** (⌘R).
 
 ## Run the rule tests

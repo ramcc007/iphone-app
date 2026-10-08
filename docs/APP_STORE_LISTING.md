@@ -105,7 +105,7 @@ Content: all levels, art and sounds are original. The app does not reference any
 Contact: support@numfall.store
 
 ## Before submitting, confirm
-- [ ] Bundle ID in Xcode matches the one registered in App Store Connect (currently the placeholder `com.example.numfall`).
+- [x] Bundle ID `store.numfall.app` (owner's decision, 8 October 2026). It must match the App ID and the App Store Connect record.
 - [ ] iCloud (key-value storage) capability is enabled for the App ID, because the Privacy answer relies on it.
 - [ ] Screenshots come from a build that matches what is described here (timer, Sparks, three boards).
 - [ ] Phone number added to the App Review contact details.

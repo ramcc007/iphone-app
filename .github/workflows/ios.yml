@@ -1,6 +1,6 @@
 # Builds and tests the NumFall iPhone/iPad app on a GitHub-hosted Mac, so no local Mac is needed.
 # Runs when anything under ios/ changes (macOS minutes cost 10x on private repositories, so it ignores other changes).
-# No code signing and no upload to Apple here: that is added later (TestFlight) once the developer account is active.
+# No code signing and no upload to Apple here: signed uploads to TestFlight are in testflight.yml (started by hand).
 name: iOS build
 
 on:
