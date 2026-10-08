@@ -13,7 +13,7 @@ public enum Achievement: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .firstClear: "First drop"
         case .clear10: "Getting warm"
-        case .clear50: "Half a hundred"
+        case .clear50: "Half century"
         case .clear100: "Centurion"
         case .threeStars10: "Perfectionist"
         case .masterClear: "Big board"

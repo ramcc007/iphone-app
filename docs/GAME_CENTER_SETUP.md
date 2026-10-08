@@ -13,7 +13,7 @@ The app already reports to Game Center when the player is signed in. Create thes
 |---|---|---|
 | First drop | `numfall.ach.firstClear` | Clear your first level. |
 | Getting warm | `numfall.ach.clear10` | Clear 10 levels. |
-| Half a hundred | `numfall.ach.clear50` | Clear 50 levels. |
+| Half century | `numfall.ach.clear50` | Clear 50 levels. |
 | Centurion | `numfall.ach.clear100` | Clear 100 levels. |
 | Perfectionist | `numfall.ach.threeStars10` | Earn three stars on 10 levels. |
 | Big board | `numfall.ach.masterClear` | Clear a Master (9x9) level. |
