@@ -12,7 +12,7 @@ Fill in or confirm the items marked **[Owner]** in App Store Connect.
 | Game subcategory | Puzzle (first), Strategy (second, optional) | |
 | Age rating | 4+ (answer "None" to every content question; see below) | |
 | Price | Free, no In-App Purchases | |
-| Copyright | 2026 Ram C | |
+| Copyright | 2026 Ram Chandra Chaturvedi | |
 | Privacy Policy URL | https://www.numfall.store/privacy | |
 | Support URL | https://www.numfall.store/support | |
 | Marketing URL | https://www.numfall.store | |
@@ -103,6 +103,13 @@ Purchases: there are no In-App Purchases and no ads in this version. Sparks cann
 Content: all levels, art and sounds are original. The app does not reference any other game or brand.
 
 Contact: support@numfall.store
+
+## Other App Store Connect answers (8 October 2026)
+- **App icon:** comes from the uploaded build (the 1024 px master in the app). Nothing to upload separately.
+- **Game Center:** create the 2 leaderboards and 10 achievements in docs/GAME_CENTER_SETUP.md; achievement images are in `design/gamecenter/` (1024 x 1024). Then tick Game Center on the version page and add them.
+- **EU Digital Services Act trader status [Owner]:** must be declared before the app can be offered in the EU. A trader's address, phone and email are shown publicly on the EU App Store. A free app with no ads or purchases can usually be declared "not a trader"; this changes when ads or purchases arrive. This is a legal choice for the owner.
+- **Accessibility Nutrition Labels:** optional. Only claim a feature after testing it on a real device.
+- **Content rights:** the app contains no third-party content.
 
 ## Before submitting, confirm
 - [x] Bundle ID `store.numfall.app` (owner's decision, 8 October 2026). It must match the App ID and the App Store Connect record.
