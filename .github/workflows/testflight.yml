@@ -125,6 +125,15 @@ jobs:
             CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
             2>&1 | tee "$RUNNER_TEMP/archive.log"
 
+      - name: Check the signed app has Game Center and iCloud
+        run: |
+          APP=$(find "$RUNNER_TEMP/NumFall.xcarchive/Products/Applications" -maxdepth 1 -name '*.app' | head -1)
+          codesign -d --entitlements :- "$APP" 2>/dev/null | tee "$RUNNER_TEMP/entitlements.plist"
+          for key in com.apple.developer.game-center com.apple.developer.ubiquity-kvstore-identifier; do
+            grep -q "$key" "$RUNNER_TEMP/entitlements.plist" || { echo "::error::The signed app is missing $key. Check ios/project.yml entitlements and the App ID capabilities."; exit 1; }
+          done
+          echo "Game Center and iCloud entitlements are present."
+
       - name: Upload to App Store Connect
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}

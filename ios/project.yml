@@ -19,6 +19,10 @@ targets:
       - package: NumfallCore
     entitlements:
       path: Numfall/Numfall.entitlements
+      # Listed here because XcodeGen writes this file from these properties (an empty list gave build 7 no Game Center or iCloud).
+      properties:
+        com.apple.developer.game-center: true                  # achievements and leaderboards (optional for the player)
+        com.apple.developer.ubiquity-kvstore-identifier: $(TeamIdentifierPrefix)$(CFBundleIdentifier)   # iCloud key-value progress sync
     info:
       path: Numfall/Info.plist
       properties:
