@@ -205,7 +205,9 @@ struct AnimatedBackground: View {
         ZStack {
             LinearGradient(colors: [Color(hex: 0x1A1A3A), Theme.background, Color(hex: 0x0F1118)],
                            startPoint: .top, endPoint: .bottom)
-            if reduceMotion {
+            if isTakingScreenshots {
+                // Store screenshots: plain gradient, so no drifting tile sits over the app's buttons or text.
+            } else if reduceMotion {
                 drawing(at: 0)
             } else {
                 TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in

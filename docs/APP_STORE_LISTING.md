@@ -68,12 +68,15 @@ Welcome to NumFall! Three boards, 230 levels and a countdown on every one. Drop 
 ## Screenshots (6.9-inch iPhone and 13-inch iPad, required; from the real app)
 Made automatically by the iOS build: GitHub → Actions → iOS build → **app-store-screenshots** artifact (`tools/appstore/frame.py`).
 Raw screens are taken with the status bar and home indicator hidden (Debug screenshot mode only), then placed under a headline.
-Upload in the numbered order, the same five for iPhone and iPad:
-1. Daily Drop: "Drop it. Watch it fall." / "A fresh Daily Drop every day"
-2. Home: "230 levels, 3 boards" / "From a quick 4×4 to a big 9×9"
-3. Classic level: "Beat the clock" / "Plan your drops before time runs out"
-4. Master level: "Ready for a challenge?" / "100 Master boards for puzzle fans"
+Folders: iphone-6.9in (1320x2868), iphone-6.3in (1206x2622), ipad-13in (2064x2752), each with "with-headlines" and "plain".
+Upload in the numbered order (owner's choice, 8 October 2026), the same six for iPhone and iPad:
+1. Daily Drop: "A new puzzle every day" / "Keep your Daily Drop streak going"
+2. Welcome (name typed in, "Let's play" ready): "Simple to start" / "Type your name and play"
+3. Daily Drop with 3 picked: "Drop it. Watch it fall." / "The dashed tile shows where it lands"
+4. Home, Master selected: "230 levels, 3 boards" / "From a quick 4×4 to a big 9×9"
 5. Tutorial: "Learn it in a minute" / "A short tutorial shows you how"
+6. Master level: "Ready for a challenge?" / "100 Master boards for puzzle fans"
+Screenshot mode also hides the drifting background tiles, so none sits over a button.
 Headlines must stay true to the app (Guideline 2.3) and name no other game. Product page header art: `design/appstore/header-*.png`.
 
 ## Age rating questionnaire (all "None" gives 4+)

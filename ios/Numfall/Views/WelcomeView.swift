@@ -6,7 +6,7 @@ import NumfallCore
 /// Both are saved on the device and in the player's own iCloud only. There is no developer server, so nobody else receives them.
 struct WelcomeView: View {
     @EnvironmentObject private var app: AppModel
-    @State private var name = ""
+    @State private var name = isTakingScreenshots ? "Alex" : ""   // store screenshots show a ready "Let's play" button
     @State private var nameTouched = false
     @FocusState private var nameFocused: Bool
 

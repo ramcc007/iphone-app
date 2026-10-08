@@ -2,16 +2,20 @@ import Foundation
 import SwiftUI
 import NumfallCore
 
+/// True only when CI opens the app on a screenshot scene (Debug builds); always false in the App Store build.
+var isTakingScreenshots: Bool {
+    #if DEBUG
+    ProcessInfo.processInfo.arguments.contains("-NumfallScene")
+    #else
+    false
+    #endif
+}
+
 extension View {
     /// Store screenshots show the app without the status bar (time, signal, battery). Debug builds started by CI only;
     /// release builds always keep the system status bar.
     func screenshotChrome() -> some View {
-        #if DEBUG
-        let shooting = ProcessInfo.processInfo.arguments.contains("-NumfallScene")
-        return statusBarHidden(shooting).persistentSystemOverlays(shooting ? .hidden : .automatic)
-        #else
-        self
-        #endif
+        statusBarHidden(isTakingScreenshots).persistentSystemOverlays(isTakingScreenshots ? .hidden : .automatic)
     }
 }
 

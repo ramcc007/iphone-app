@@ -3,8 +3,8 @@
 
   python3 tools/appstore/frame.py <raw screenshots folder> <output folder>
 
-Needs Pillow. Output keeps each device's exact App Store size (iPhone 6.9-inch 1320x2868, iPad 13-inch 2064x2752),
-numbered in upload order. Captions only describe what the app really does (Guideline 2.3) and name no other game.
+Needs Pillow. For each App Store size (iPhone 6.9-inch 1320x2868, iPhone 6.3-inch 1206x2622, iPad 13-inch 2064x2752)
+it writes two sets, numbered in upload order: "with-headlines" and "plain" (the app screen alone, resized). Captions only describe what the app really does (Guideline 2.3) and name no other game.
 """
 import os, sys
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
@@ -13,15 +13,19 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 BOLD = os.path.join(HERE, "fonts", "Fredoka-SemiBold.ttf")
 REG = os.path.join(HERE, "fonts", "Fredoka-Regular.ttf")
 
-# Upload order: (raw scene name, headline, smaller line)
+# Upload order (owner's choice, 8 October 2026): (raw scene name, headline, smaller line)
 SHOTS = [
-    ("daily_pick3", "Drop it. Watch it fall.", "A fresh Daily Drop every day"),
-    ("home-classic", "230 levels, 3 boards", "From a quick 4×4 to a big 9×9"),
-    ("level-classic_pick3", "Beat the clock", "Plan your drops before time runs out"),
-    ("level-master", "Ready for a challenge?", "100 Master boards for puzzle fans"),
+    ("daily", "A new puzzle every day", "Keep your Daily Drop streak going"),
+    ("welcome", "Simple to start", "Type your name and play"),
+    ("daily_pick3", "Drop it. Watch it fall.", "The dashed tile shows where it lands"),
+    ("home-master", "230 levels, 3 boards", "From a quick 4×4 to a big 9×9"),
     ("tutorial", "Learn it in a minute", "A short tutorial shows you how"),
+    ("level-master", "Ready for a challenge?", "100 Master boards for puzzle fans"),
 ]
-DEVICES = {"iphone-pro-max": (1320, 2868), "ipad-pro-13": (2064, 2752)}
+# (output folder, raw screenshot prefix, App Store size)
+SIZES = [("iphone-6.9in", "iphone-pro-max", (1320, 2868)),
+         ("iphone-6.3in", "iphone-pro-max", (1206, 2622)),
+         ("ipad-13in", "ipad-pro-13", (2064, 2752))]
 ACCENT = [(255, 181, 71), (79, 195, 247), (110, 231, 168), (157, 140, 255), (255, 107, 122)]
 
 
@@ -78,19 +82,23 @@ def frame(raw, w, h, title, sub, accent):
 
 
 def main(src, out):
-    os.makedirs(out, exist_ok=True)
     made = 0
-    for device, (w, h) in DEVICES.items():
+    for folder, prefix, (w, h) in SIZES:
+        for style in ("with-headlines", "plain"):
+            os.makedirs(os.path.join(out, folder, style), exist_ok=True)
         for i, (scene, title, sub) in enumerate(SHOTS, 1):
-            path = os.path.join(src, f"{device}_{scene}.png")
+            path = os.path.join(src, f"{prefix}_{scene}.png")
             if not os.path.exists(path):
                 print(f"missing {path}, skipped")
                 continue
-            img = frame(Image.open(path), w, h, title, sub, ACCENT[(i - 1) % len(ACCENT)])
-            dest = os.path.join(out, f"{device}_{i}_{scene}.png")
-            img.save(dest, optimize=True)
-            print(f"{dest} {img.size}")
-            made += 1
+            raw = Image.open(path).convert("RGB")
+            framed = frame(raw, w, h, title, sub, ACCENT[(i - 1) % len(ACCENT)])
+            plain = raw if raw.size == (w, h) else raw.resize((w, h), Image.LANCZOS)
+            for style, img in (("with-headlines", framed), ("plain", plain)):
+                dest = os.path.join(out, folder, style, f"{i}_{scene}.png")
+                img.save(dest, optimize=True)
+                print(f"{dest} {img.size}")
+                made += 1
     if not made:
         sys.exit("no screenshots found")
 
