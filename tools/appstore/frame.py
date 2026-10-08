@@ -17,10 +17,9 @@ REG = os.path.join(HERE, "fonts", "Fredoka-Regular.ttf")
 SHOTS = [
     ("daily", "A new puzzle every day", "Keep your Daily Drop streak going"),
     ("welcome", "Simple to start", "Type your name and play"),
-    ("daily_pick3", "Drop it. Watch it fall.", "The dashed tile shows where it lands"),
+    ("level-master", "Ready for a challenge?", "100 Master boards for puzzle fans"),
     ("home-master", "230 levels, 3 boards", "From a quick 4×4 to a big 9×9"),
     ("tutorial", "Learn it in a minute", "A short tutorial shows you how"),
-    ("level-master", "Ready for a challenge?", "100 Master boards for puzzle fans"),
 ]
 # (output folder, raw screenshot prefix, App Store size)
 SIZES = [("iphone-6.9in", "iphone-pro-max", (1320, 2868)),
