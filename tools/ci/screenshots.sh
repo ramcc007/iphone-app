@@ -10,9 +10,11 @@ log() { echo "[$(date +%H:%M:%S)] $*"; }
 limit() { local secs="$1"; shift; perl -e 'alarm shift; exec @ARGV' "$secs" "$@"; }
 
 udid() { xcrun simctl list devices available | grep -E "$1" | tail -1 | sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/'; }
+# Every matching simulator, newest runtime first: if one hangs while booting, the next is tried.
+udids() { xcrun simctl list devices available | grep -E "$1" | sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/' | sed '1!G;h;$!d'; }
 
-PHONE=$(udid 'iPhone [0-9]+ Pro Max')
-[ -z "$PHONE" ] && PHONE=$(udid 'iPhone .*Pro Max')
+PHONE=$(udids 'iPhone [0-9]+ Pro Max' | head -3 | tr '\n' ' ')
+[ -z "${PHONE// /}" ] && PHONE=$(udids 'iPhone .*Pro Max' | head -3 | tr '\n' ' ')
 SMALL=$(udid 'iPhone SE')
 SMALL_LABEL=iphone-se
 if [ -z "$SMALL" ] && [ "$WHICH" = small ]; then
@@ -38,12 +40,17 @@ PAD=$(udid 'iPad Pro 13-inch')
 echo "phone=$PHONE small=$SMALL pad=$PAD"
 xcrun simctl list devices available | grep -E "iPhone|iPad" | head -40
 
-shoot_device() {   # <label> <udid> <scene list...>
-  local label="$1" id="$2"; shift 2
-  [ -z "$id" ] && { echo "no simulator for $label, skipping"; return; }
-  log "boot $label ($id)"
-  limit 60 xcrun simctl boot "$id" 2>&1 || log "boot returned $?"
-  limit 240 xcrun simctl bootstatus "$id" -b >/dev/null 2>&1 || { log "boot of $label did not finish, skipping"; limit 60 xcrun simctl shutdown "$id" 2>/dev/null; return; }
+shoot_device() {   # <label> <"udid [udid...]"> <scene list...>: the first simulator that boots is used
+  local label="$1" candidates="$2" id=""; shift 2
+  [ -z "${candidates// /}" ] && { echo "no simulator for $label, skipping"; return; }
+  for c in $candidates; do
+    log "boot $label ($c)"
+    limit 60 xcrun simctl boot "$c" 2>&1 || log "boot returned $?"
+    if limit 300 xcrun simctl bootstatus "$c" -b >/dev/null 2>&1; then id="$c"; break; fi
+    log "boot of $label ($c) did not finish, trying the next simulator"
+    limit 60 xcrun simctl shutdown "$c" 2>/dev/null
+  done
+  [ -z "$id" ] && { log "no $label simulator would boot, skipping"; return; }
   limit 30 xcrun simctl status_bar "$id" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 --operatorName "" 2>/dev/null
   log "install on $label"
   limit 120 xcrun simctl install "$id" "$APP" || { log "install failed on $label"; return; }

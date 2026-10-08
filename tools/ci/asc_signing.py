@@ -4,13 +4,15 @@
   asc_signing.py setup   <workdir>   creates an Apple Distribution certificate (from a fresh private key) and an
                                      App Store provisioning profile for BUNDLE_ID, writes them into <workdir>, and
                                      prints KEY=VALUE lines for $GITHUB_ENV (CERT_ID, PROFILE_ID, PROFILE_NAME, PROFILE_UUID)
-  asc_signing.py cleanup <workdir>   deletes that profile and revokes that certificate (safe to run twice)
+  Before creating, it removes CI profiles and certificates left by earlier runs that are older than PRUNE_MINUTES
+  (default 45). They are not removed at the end of a run: Apple checks the signature while it processes the upload,
+  and revoking the certificate too early makes that build fail with "90035 Invalid Signature".
 
 Environment: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH (the .p8 file), BUNDLE_ID, RUN_TAG (makes names unique).
-Only the Python standard library and the openssl command are used. Revoking a distribution certificate after the
-upload is safe: builds already uploaded to App Store Connect are not affected.
+Only the Python standard library and the openssl command are used. Only profiles named "NumFall CI ..." and the
+certificates they hold are ever removed, never anything else in the account.
 """
-import base64, json, os, subprocess, sys, time, urllib.error, urllib.request
+import base64, calendar, json, os, subprocess, sys, time, urllib.error, urllib.request
 
 API = "https://api.appstoreconnect.apple.com/v1"
 
@@ -58,8 +60,31 @@ def call(method, path, body=None, ok_missing=False):
         sys.exit(f"App Store Connect API {method} {path} failed ({error.code}): {detail}")
 
 
+def prune(min_age_minutes):
+    """Removes earlier runs' CI profiles (and their certificates) once processing of those builds is long finished."""
+    found = call("GET", "/profiles?filter[profileType]=IOS_APP_STORE&include=certificates&limit=200")
+    cutoff = time.time() - min_age_minutes * 60
+    for profile in found.get("data", []):
+        attrs = profile.get("attributes", {})
+        if not attrs.get("name", "").startswith("NumFall CI "):
+            continue
+        created = attrs.get("createdDate") or ""
+        try:
+            created_at = calendar.timegm(time.strptime(created[:19], "%Y-%m-%dT%H:%M:%S"))
+        except ValueError:
+            continue
+        if created_at > cutoff:
+            continue
+        certs = profile.get("relationships", {}).get("certificates", {}).get("data", [])
+        call("DELETE", "/profiles/" + profile["id"], ok_missing=True)
+        for cert in certs:
+            call("DELETE", "/certificates/" + cert["id"], ok_missing=True)
+        print(f"# removed old CI profile {attrs.get('name')} and {len(certs)} certificate(s)", file=sys.stderr)
+
+
 def setup(workdir):
     os.makedirs(workdir, exist_ok=True)
+    prune(int(os.environ.get("PRUNE_MINUTES", "45")))
     key, csr = os.path.join(workdir, "dist.key"), os.path.join(workdir, "dist.csr")
     subprocess.run(["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes", "-keyout", key, "-out", csr,
                     "-subj", "/CN=NumFall CI " + os.environ.get("RUN_TAG", "") + "/C=US"], check=True, capture_output=True)
@@ -92,16 +117,7 @@ def setup(workdir):
     print(f"PROFILE_UUID={profile['attributes']['uuid']}")
 
 
-def cleanup():
-    if os.environ.get("PROFILE_ID"):
-        call("DELETE", "/profiles/" + os.environ["PROFILE_ID"], ok_missing=True)
-        print("Deleted the CI provisioning profile.")
-    if os.environ.get("CERT_ID"):
-        call("DELETE", "/certificates/" + os.environ["CERT_ID"], ok_missing=True)
-        print("Revoked the CI distribution certificate.")
-
-
 if __name__ == "__main__":
-    if len(sys.argv) != 3 or sys.argv[1] not in ("setup", "cleanup"):
+    if len(sys.argv) != 3 or sys.argv[1] != "setup":
         sys.exit(__doc__)
-    setup(sys.argv[2]) if sys.argv[1] == "setup" else cleanup()
+    setup(sys.argv[2])

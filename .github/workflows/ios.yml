@@ -55,7 +55,7 @@ jobs:
 
       - name: Screenshots, iPhone 6.9-inch
         continue-on-error: true
-        timeout-minutes: 12
+        timeout-minutes: 25
         run: |
           APP=$(find "$RUNNER_TEMP/dd/Build/Products" -name Numfall.app -path '*Debug-iphonesimulator*' | head -1)
           bash tools/ci/screenshots.sh "$APP" "$RUNNER_TEMP/screenshots" phone 2>&1 | tee -a "$RUNNER_TEMP/screenshots.log"

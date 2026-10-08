@@ -1,7 +1,7 @@
 # Builds a signed NumFall release and uploads it to App Store Connect (TestFlight), from a GitHub-hosted Mac.
 # Runs only when started by hand: GitHub → Actions → "TestFlight upload" → Run workflow.
 # Signing: each run uses the App Store Connect API key to create a short-lived Apple Distribution certificate and
-# App Store profile (tools/ci/asc_signing.py), signs with them, and removes them at the end. No certificate files are stored.
+# App Store profile (tools/ci/asc_signing.py) and signs with them; a later run removes them once Apple has processed the build.
 #
 # Needs these repository secrets (GitHub → Settings → Secrets and variables → Actions):
 #   ASC_KEY_ID       App Store Connect API key ID (10 characters)
@@ -156,13 +156,11 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/upload.log"
           echo "Uploaded NumFall ${{ inputs.version }} (build $BUILD_NUMBER). It appears in App Store Connect → TestFlight after Apple finishes processing (usually 10 to 30 minutes)."
 
-      - name: Remove the signing certificate, profile and keychain
+      # The certificate and profile stay in the account for now: Apple checks the signature while it processes the
+      # upload, so revoking them here made build 6 fail ("90035 Invalid Signature"). The next run removes them.
+      - name: Remove the keychain and key from this Mac
         if: always()
-        env:
-          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
-          if [ -n "$ASC_KEY_PATH" ] && [ -f "$ASC_KEY_PATH" ]; then python3 tools/ci/asc_signing.py cleanup "$RUNNER_TEMP/signing" || true; fi
           [ -n "$CI_KEYCHAIN" ] && security delete-keychain "$CI_KEYCHAIN" || true
           rm -rf "$RUNNER_TEMP/keys" "$RUNNER_TEMP/signing"
 
