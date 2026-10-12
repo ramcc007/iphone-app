@@ -1,0 +1,26 @@
+# {{APP_NAME}}: project rules for Claude
+
+An original iPhone + iPad game built with the `ios-game-studio` skill (from the app-factory repo). Concept and decisions: `docs/GAME_PLAN.md`.
+It **will be published on the Apple App Store**, with its website on https://{{DOMAIN_WWW}}.
+
+## v1 scope (owner's decisions)
+- Universal app: iPhone first, real iPad layouts (all orientations, resizable windows). Vector or code-drawn graphics only; the app icon master is the only raster.
+- No ads, no In-App Purchases, no third-party SDKs in v1, so the privacy label is "Data Not Collected". Listing text must not promise "no ads" or "free" (monetisation may come later).
+- Data stays on the device and in the player's own iCloud; never a developer server.
+- Default features: tutorial, daily challenge + streak, Game Center, iCloud sync, opt-in reminder, haptics and sound.
+
+## Before any change ships
+- Level validation, JS engine/game/tutorial tests, web e2e tests, and the Swift package tests must pass.
+- The rules in `ios/{{TARGET}}Core` must stay identical to `prototype/web/engine.js`. Change both together, with their tests.
+- The iOS workflow must be green before running the TestFlight workflow.
+
+## Always
+- Never use another game's, brand's or trademark's name in anything users or App Review can see (app, store texts, screenshots, website, share text). Describe the rule instead. Banned list: `site/site.config.json` → `bannedWords`.
+- App Store compliance first (App Review Guidelines, HIG). If a request would break a guideline, say so and propose a compliant alternative.
+- HIG: native controls, safe areas, Dynamic Type, VoiceOver, Reduce Motion, 44 pt targets, text never under 11 pt, no truncated labels on the smallest iPhone.
+- Entitlements are listed as properties in `ios/project.yml` (never only a path).
+- Any new data use updates the privacy policy, App Privacy label and `PrivacyInfo.xcprivacy` in the same change.
+- Purchases (later) only through StoreKit 2 with Restore Purchases; no fake urgency; no loot boxes without odds.
+- Only original or properly licensed art, sound, fonts and code.
+- Never ask for or print secrets; they live in GitHub repository secrets.
+- Planning documents live in `docs/`.

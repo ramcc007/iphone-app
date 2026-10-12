@@ -1,0 +1,21 @@
+# {{appName}}
+
+> {{appName}} is an original, timed number puzzle game for iPhone and iPad. The player picks a number, taps a column, and the number falls to the lowest empty cell. Every row, column and box must hold each number exactly once, and the grid must be filled before the countdown reaches zero. Tagline: "{{tagline}}"
+
+Key facts:
+
+- Platforms: iPhone and iPad (also runs on Apple silicon Macs and Apple Vision Pro as an iPad app). Status: {{storeStatus}}
+- Three boards, all open from the start: Quick 4×4 (30 levels), Classic 6×6 (100 levels) and Master 9×9 (100 levels). Every level has a countdown; when it runs out, the level starts again.
+- Levels come in named groups of ten, each with a difficulty meter of one to five flames.
+- Daily Drop: one new puzzle per day, the same for every player, with a streak.
+- Sparks are earned by playing and spent on hints, undos, an extra heart or skipping a level. They cannot be bought.
+- No ads, no in-app purchases, no accounts and no tracking. The App Store privacy label is "Data Not Collected". The player's name and progress stay on their device and in their own iCloud.
+- Accessibility: Dynamic Type, VoiceOver and Reduce Motion.
+- Website: {{siteUrl}} · Support email: {{supportEmail}}
+
+## Pages
+
+- [Home]({{siteUrl}}/): what the game is, how it works, the three boards and the FAQ
+- [Support]({{siteUrl}}/support): how to play, timers, stars, Sparks, iCloud sync, Game Center, reminders and contact details
+- [Privacy Policy]({{siteUrl}}/privacy): what the app stores, where it stays and how to delete it
+- [Terms of Use]({{siteUrl}}/terms): the terms for using the app and the web preview

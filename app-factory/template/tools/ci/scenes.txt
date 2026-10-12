@@ -1,0 +1,8 @@
+# One scene per line. Each must be handled by ios/{{TARGET}}/ScreenshotScene.swift.
+# "name+3" launches with -ScreenshotPick 3 (e.g. a pre-selected piece) and saves as name_pick3.png.
+welcome
+home
+play
+play+1
+tutorial
+daily

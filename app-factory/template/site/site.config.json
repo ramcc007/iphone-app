@@ -1,0 +1,18 @@
+{
+  "appName": "{{APP_NAME}}",
+  "tagline": "{{TAGLINE}}",
+  "legalName": "[YOUR LEGAL NAME]",
+  "supportEmail": "support@{{DOMAIN}}",
+  "siteUrl": "https://{{DOMAIN_WWW}}",
+  "governingLaw": "[YOUR COUNTRY OR STATE]",
+  "effectiveDate": "[DATE]",
+  "appStoreUrl": "",
+  "gameGenre": "{{GENRE}}",
+  "bannedWords": [
+    "sudoku",
+    "tetris",
+    "candy crush",
+    "wordle",
+    "2048"
+  ]
+}

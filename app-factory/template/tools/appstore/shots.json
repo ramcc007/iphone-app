@@ -1,0 +1,27 @@
+[
+  {
+    "scene": "play_pick1",
+    "title": "[Headline 1: the core mechanic]",
+    "subtitle": "[one true, concrete line]"
+  },
+  {
+    "scene": "home",
+    "title": "[Headline 2: amount of content]",
+    "subtitle": "[one true line]"
+  },
+  {
+    "scene": "daily",
+    "title": "[Headline 3: daily reason to return]",
+    "subtitle": "[one true line]"
+  },
+  {
+    "scene": "play",
+    "title": "[Headline 4: depth / challenge]",
+    "subtitle": "[one true line]"
+  },
+  {
+    "scene": "tutorial",
+    "title": "Learn it in a minute",
+    "subtitle": "A short tutorial shows you how"
+  }
+]
