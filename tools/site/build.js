@@ -41,7 +41,7 @@ for (const f of pages) {
   if (!meta) throw new Error(f + ': missing "<!-- title: ... | description: ... -->" first line');
   body = body.slice(meta[0].length);
   const storeLine = cfg.appStoreUrl ? '<a href="' + esc(cfg.appStoreUrl) + '">Download on the App Store</a>' : 'Coming soon to the App Store for iPhone and iPad.';
-  const storeButton = cfg.appStoreUrl ? 'Download on the App Store' : 'Coming soon to the App Store';
+  const storeButton = cfg.appStoreUrl ? '<a class="btn" href="' + esc(cfg.appStoreUrl) + '">Download on the App Store</a>' : '<span class="btn" aria-disabled="true">Coming soon to the App Store</span>';
   const emailLink = '<a href="mailto:' + esc(cfg.supportEmail) + '">' + val('supportEmail') + '</a>';
   const content = fill(body, { storeLine, storeButton, emailLink });
   const plain = (s) => fill(s).replace(/<[^>]+>/g, '');
