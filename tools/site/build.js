@@ -41,7 +41,8 @@ for (const f of pages) {
   if (!meta) throw new Error(f + ': missing "<!-- title: ... | description: ... -->" first line');
   body = body.slice(meta[0].length);
   const storeLine = cfg.appStoreUrl ? '<a href="' + esc(cfg.appStoreUrl) + '" target="_blank" rel="noopener">Download on the App Store</a>' : 'Coming soon to the App Store for iPhone and iPad.';
-  const storeButton = cfg.appStoreUrl ? '<a class="btn" href="' + esc(cfg.appStoreUrl) + '" target="_blank" rel="noopener">Download on the App Store</a>' : '<span class="btn" aria-disabled="true">Coming soon to the App Store</span>';
+  // Apple's official black badge, unmodified (developer.apple.com/app-store/marketing/guidelines): at least 40 px tall, with clear space around it.
+  const storeButton = cfg.appStoreUrl ? '<a class="store-badge" href="' + esc(cfg.appStoreUrl) + '" target="_blank" rel="noopener"><img src="/app-store-badge.svg" alt="Download on the App Store" width="168" height="56"></a>' : '<span class="btn" aria-disabled="true">Coming soon to the App Store</span>';
   const emailLink = '<a href="mailto:' + esc(cfg.supportEmail) + '">' + val('supportEmail') + '</a>';
   const content = fill(body, { storeLine, storeButton, emailLink });
   const plain = (s) => fill(s).replace(/<[^>]+>/g, '');

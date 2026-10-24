@@ -31,6 +31,8 @@ a { color:var(--accent-soft); } a:focus-visible, button:focus-visible, summary:f
 .hero h1 span { background:linear-gradient(90deg,#FF97A2,#FFCF85,#A0F2C6,#8ADAFB,#BDB2FF); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .hero p.lead { font-size:clamp(18px,2.4vw,22px); color:var(--soft); margin:0 0 24px; max-width:34em; }
 .cta { display:flex; flex-wrap:wrap; gap:14px; align-items:center; }
+.store-badge { display:inline-block; line-height:0; padding:4px; border-radius:12px; } .store-badge img { display:block; height:56px; width:auto; } .store-badge:focus-visible { outline:3px solid var(--accent, #6B5CF0); outline-offset:3px; }
+.only-ios { margin:18px 0 0; font-size:16px; color:var(--soft); } .only-ios svg { vertical-align:-2px; margin-right:6px; } .only-ios strong { color:var(--fg); }
 .btn { display:inline-flex; align-items:center; justify-content:center; min-height:54px; padding:0 28px; border-radius:30px; background:var(--accent); color:#fff; font-weight:700; font-size:18px; text-decoration:none; box-shadow:0 5px 0 var(--accent-edge); transition:transform .12s, box-shadow .12s; }
 .btn:hover { transform:translateY(-1px); } .btn:active { transform:translateY(4px); box-shadow:0 1px 0 var(--accent-edge); }
 .btn.ghost { background:transparent; color:var(--fg); box-shadow:inset 0 0 0 2px var(--line); } .btn.ghost:active { box-shadow:inset 0 0 0 2px var(--line); }
