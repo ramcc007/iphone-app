@@ -10,7 +10,8 @@ Listing text: `docs/APP_STORE_LISTING_1.1.md` (generated and limit-checked by `t
   "brain games" 61, "logic puzzles" 52, "number games" 49, "number puzzle" 38, "daily puzzle" 5 (too rare to target).
   All four big ones are hard to rank for (difficulty 70-84), so the plan puts the exact phrases in the **name and subtitle**,
   where Apple weighs words most, and spreads related words over the keyword field. App Store autocomplete also shows
-  "logic puzzles for adults", "brain games for adults" and "number puzzle game" as common searches, so "Adults" and "Game" are in the en-US name and subtitle.
+  "number puzzle game" as a common search, so "Game" is in the name. The subtitle "Brain Games & Logic Puzzles" holds two more exact phrases.
+  It doesn't say "for adults": the game is for every age (owner, 24 October 2026).
 - **Name change:** "NumFall" alone matches no search. "NumFall: Number Puzzle Game" keeps the brand and adds the phrase players type.
 - **A second English listing = more search space.** Apple indexes more than one language per country. Third-party testing
   (AppFollow, AppTweak, MobileAction) reports that the US store also reads Spanish (Mexico), and that the India store reads Hindi and English (U.K.).

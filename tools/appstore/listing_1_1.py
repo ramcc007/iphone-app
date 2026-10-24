@@ -22,8 +22,8 @@ L = [
     # ---- English (U.S.): primary. Indexed in the US and many other storefronts.
     dict(code="en-US", label="English (U.S.)",
          name="NumFall: Number Puzzle Game",
-         subtitle="Logic & Brain Games for Adults",
-         keywords="puzzles,math,numbers,grid,gravity,drop,daily,challenge,timer,mind,iq,train,offline,teaser,smart",
+         subtitle="Brain Games & Logic Puzzles",
+         keywords="math,numbers,grid,gravity,drop,daily,challenge,timer,mind,iq,train,offline,teaser,smart,family",
          promo="A fresh Daily Drop every day. Keep your streak alive and race the clock through 230 levels on three boards, from a quick 4×4 to a big 9×9.",
          whatsnew="Small improvements and polish. Thank you for playing NumFall! If you enjoy it, a rating on the App Store helps a lot.",
          description=EN_DESCRIPTION),

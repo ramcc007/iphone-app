@@ -7,7 +7,7 @@ Screenshots: use the same English screenshots for every language (App Store Conn
 
 | Language | Name | Subtitle | Keywords used |
 |---|---|---|---|
-| English (U.S.) | 27/30 | 30/30 | 95/100 |
+| English (U.S.) | 27/30 | 27/30 | 94/100 |
 | English (U.K.) | 27/30 | 26/30 | 92/100 |
 
 ## English (U.S.) (`en-US`)
@@ -16,13 +16,13 @@ Screenshots: use the same English screenshots for every language (App Store Conn
 ```
 NumFall: Number Puzzle Game
 ```
-**Subtitle** (30/30)
+**Subtitle** (27/30)
 ```
-Logic & Brain Games for Adults
+Brain Games & Logic Puzzles
 ```
-**Keywords** (95/100)
+**Keywords** (94/100)
 ```
-puzzles,math,numbers,grid,gravity,drop,daily,challenge,timer,mind,iq,train,offline,teaser,smart
+math,numbers,grid,gravity,drop,daily,challenge,timer,mind,iq,train,offline,teaser,smart,family
 ```
 **Promotional text** (138/170)
 ```
