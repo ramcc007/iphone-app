@@ -1,5 +1,6 @@
 // App Store product page header art for NumFall (run from the repo root: FONT=path/to/fredoka.woff2 node tools/appstore/header.js).
-// Writes design/appstore/header-3840x1646.png and header-5244x2950.png.
+// Writes design/appstore/header-3840x1646.png and header-5244x2950.png, plus the In-App Event card (16:9) and details (9:16) art.
+// Event art has no text: the App Store prints the event name and description over it.
 const { chromium } = require('playwright'); const fs = require('fs');
 const font = fs.readFileSync(process.env.FONT /* Fredoka (OFL) woff2, Latin subset */).toString('base64');
 const COL = {1:['#FF6B7A','#FF97A2','#C94656'],2:['#FFB547','#FFCF85','#C9862A'],3:['#F5E663','#FAF29A','#BFB244'],
@@ -38,16 +39,18 @@ function scene(w, h, o) {
   body{margin:0;width:${w}px;height:${h}px;overflow:hidden;font-family:F;position:relative;
   background:radial-gradient(${w*0.42}px ${h*0.85}px at ${(bx+W/2)/w*100}% 55%,#302B72 0%,transparent 72%),radial-gradient(${w*0.4}px ${h*0.8}px at 18% 25%,#232A4D 0%,transparent 70%),linear-gradient(160deg,#181B2C,#0E1018)}</style></head>
   <body>
-  <div style="position:absolute;left:${tx}px;top:${ty}px;color:#fff">
+  ${o.noText ? '' : `<div style="position:absolute;left:${tx}px;top:${ty}px;color:#fff">
     <div style="display:flex;align-items:center;gap:${title*0.22}px">${mark}<div style="font-size:${title}px;font-weight:600;letter-spacing:-0.01em;line-height:1">NumFall</div></div>
     <div style="font-size:${sub}px;color:#BAC0D8;margin-top:${sub*0.8}px">Drop the numbers. Beat the clock.</div>
-  </div>${out}</body></html>`;
+  </div>`}${out}</body></html>`;
 }
 (async () => {
   const b = await chromium.launch();
   const jobs = [
     { name: 'header-3840x1646', w: 1920, h: 823, o: { s: 74, bx: 1060, by: 225, tx: 300, ty: 300, title: 128, sub: 42 } },
     { name: 'header-5244x2950', w: 2622, h: 1475, o: { s: 128, bx: 1420, by: 360, tx: 330, ty: 560, title: 180, sub: 58 } },
+    { name: 'event-card-1920x1080', w: 960, h: 540, o: { s: 44, bx: 325, by: 120, tx: 0, ty: 0, title: 80, sub: 30, noText: true } },
+    { name: 'event-details-1080x1920', w: 540, h: 960, o: { s: 56, bx: 72, by: 380, tx: 0, ty: 0, title: 80, sub: 30, noText: true } },
   ];
   for (const j of jobs) {
     const pg = await (await b.newContext({ viewport: { width: j.w, height: j.h }, deviceScaleFactor: 2 })).newPage();
