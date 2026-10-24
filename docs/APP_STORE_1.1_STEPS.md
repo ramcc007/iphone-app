@@ -1,7 +1,8 @@
 # NumFall 1.1: store page growth plan (24 October 2026)
 
 Goal: more installs from App Store search and featuring, at no cost.
-Listing text for all 12 languages: `docs/APP_STORE_LISTING_1.1.md` (generated and limit-checked by `tools/appstore/listing_1_1.py`).
+Owner's decision (24 October 2026): **English only for now**, as English (U.S.) and English (U.K.). The other 11 translations are kept unused in `tools/appstore/listing_1_1.py` (`LATER`).
+Listing text: `docs/APP_STORE_LISTING_1.1.md` (generated and limit-checked by `tools/appstore/listing_1_1.py`).
 
 ## What the research says
 
@@ -11,9 +12,9 @@ Listing text for all 12 languages: `docs/APP_STORE_LISTING_1.1.md` (generated an
   where Apple weighs words most, and spreads related words over the keyword field. App Store autocomplete also shows
   "logic puzzles for adults", "brain games for adults" and "number puzzle game" as common searches, so "Adults" and "Game" are in the en-US name and subtitle.
 - **Name change:** "NumFall" alone matches no search. "NumFall: Number Puzzle Game" keeps the brand and adds the phrase players type.
-- **More languages = more search space.** Apple indexes more than one language per country. Third-party testing
+- **A second English listing = more search space.** Apple indexes more than one language per country. Third-party testing
   (AppFollow, AppTweak, MobileAction) reports that the US store also reads Spanish (Mexico), and that the India store reads Hindi and English (U.K.).
-  Apple doesn't publish this list, so treat it as likely, not guaranteed. Words only combine inside one language, so each language has its own full keyword set.
+  Apple doesn't publish this list, so treat it as likely, not guaranteed. Words only combine inside one language, so English (U.K.) gets 100 extra keyword characters with different words, at no translation cost.
 - **In-App Events** (Apple docs): appear on the product page, in search results and in editorial picks. Name 30, short description 50,
   long description 120 characters. Card art 16:9 (1920x1080 to 3840x2160), details art 9:16. An event can last up to 31 days and can be shown up to 14 days before it starts.
   Badge "Challenge" = "achieve a goal before the event ends".
@@ -36,21 +37,18 @@ It goes live in minutes, without a review.
 What changed in the app: after a 3-star first-time win (once 6+ levels are cleared) or after a Daily Drop with a 3+ day streak,
 Apple's standard "Enjoying NumFall?" rating card can appear, at most once per app version. Nothing else changed.
 
-### Step 3. Create version 1.1 and add the languages
+### Step 3. Create version 1.1 and add English (U.K.)
 1. App Store Connect → NumFall → Distribution → next to **iOS App**, click **+** → version `1.1` → Create.
 2. The language menu at the top right shows **English (U.S.)**; start there.
 3. On the 1.1 page (English U.S.): paste **Promotional text, Description, Keywords, What's New** from the file. Support and Marketing URLs stay the same.
 4. **App Information** (sidebar) → paste the en-US **Name** and **Subtitle**. These are saved with version 1.1 and go live when 1.1 is approved.
-5. Add each language: **App Information** → language menu (top right) → **Add language** →
-   English (U.K.), Spanish (Mexico), Spanish (Spain), Portuguese (Brazil), French, German, Italian, Japanese, Korean, Hindi, Indonesian, Turkish.
-   For each language paste **Name** and **Subtitle** there, then switch to the **1.1** version page in the same language and paste
+5. Add English (U.K.): **App Information** → language menu (top right) → **Add language** → English (U.K.).
+   Paste its **Name** and **Subtitle** there, then switch to the **1.1** version page in English (U.K.) and paste
    **Promotional text, Description, Keywords, What's New**.
-   - Screenshots: leave empty in other languages. The English screenshots are used everywhere.
-   - If Hindi is not in Apple's language list, skip it; the English (U.K.) locale still covers India.
+   - Screenshots: leave them empty in English (U.K.). The U.S. screenshots are used.
 6. Build: click **+** under Build → choose the 1.1 build → encryption question: "None of the algorithms mentioned above".
 7. **Add for Review** → **Submit**. Keep **Manually release** or switch to automatic, your choice.
 
-Honest note in every translation: "The game is in English, but you only need numbers to play." Without it, players who don't read English could feel misled (guideline 2.3).
 
 ### Step 4. In-App Event: "The 30-Day Daily Drop"
 App Store Connect → NumFall → **In-App Events** (sidebar) → **+** (or Create).
@@ -82,7 +80,7 @@ App Store Connect → NumFall → **Featuring → Nominations** → **+ → Crea
 - **Nomination name:** NumFall 30-Day Daily Drop and 1.1
 - **Type:** New Content
 - **Description:**
-  > NumFall is an original number puzzle with gravity, made by an independent developer. Players tap a number and a column, and the number falls to the lowest empty cell; the order of drops is the puzzle. Every row, column and box must hold each number once, against the clock. 230 levels on three boards (4x4, 6x6, 9x9), all solvable without guessing. From 15 November to 14 December we run "The 30-Day Daily Drop": one shared puzzle a day, streaks and a Game Center leaderboard. Version 1.1 adds 12 store languages. No ads, no in-app purchases, no tracking, no account, and "Data Not Collected" privacy. Built for iPhone and iPad with SwiftUI, Dynamic Type, VoiceOver labels and Reduce Motion support.
+  > NumFall is an original number puzzle with gravity, made by an independent developer. Players tap a number and a column, and the number falls to the lowest empty cell; the order of drops is the puzzle. Every row, column and box must hold each number once, against the clock. 230 levels on three boards (4x4, 6x6, 9x9), all solvable without guessing. From 15 November to 14 December we run "The 30-Day Daily Drop": one shared puzzle a day, streaks and a Game Center leaderboard. No ads, no in-app purchases, no tracking, no account, and "Data Not Collected" privacy. Built for iPhone and iPad with SwiftUI, Dynamic Type, VoiceOver labels and Reduce Motion support.
 - **Publish date:** custom range 15 November - 14 December 2026.
 - **Platforms:** iOS (iPhone and iPad). **Countries / localizations:** keep all.
 - **In-App Events:** attach "The 30-Day Daily Drop" once it's approved (you can update a submitted nomination).
