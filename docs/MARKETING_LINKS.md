@@ -21,4 +21,4 @@ Apple shows campaign data only once a campaign has enough installs, so small num
 | linkedin | LinkedIn posts | `https://apps.apple.com/app/apple-store/id6820579220?pt=129582636&mt=8&ct=linkedin` |
 | discord | Discord servers | `https://apps.apple.com/app/apple-store/id6820579220?pt=129582636&mt=8&ct=discord` |
 | press | Emails to game websites and bloggers | `https://apps.apple.com/app/apple-store/id6820579220?pt=129582636&mt=8&ct=press` |
-| toucharcade | TouchArcade forum | `https://apps.apple.com/app/apple-store/id6820579220?pt=129582636&mt=8&ct=toucharcade` |
+| toucharcade | (TouchArcade closed in 2024; spare link) | `https://apps.apple.com/app/apple-store/id6820579220?pt=129582636&mt=8&ct=toucharcade` |

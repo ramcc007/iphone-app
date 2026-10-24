@@ -12,10 +12,10 @@ Expect slow, steady growth: research and indie reports say free efforts usually 
 | 2 | Featuring + In-App Event | Done, waiting | Free placement in search, Today and Games tabs. Event starts 15 Nov |
 | 3 | Short videos (TikTok, Reels, Shorts) | 20 min/day | Algorithms show clips to non-followers. Puzzle games explain themselves in 10 seconds |
 | 4 | Reddit | 1 post/week | r/iosgaming allows developer posts only on "Developer Saturday" with [DEV] in the title |
-| 5 | iOS game press | 1 hour, once | TouchArcade, Pocket Gamer and others read every email but cover only some games |
+| 5 | iOS game press | 1 hour, once | Pocket Gamer, Thinky Games and others read every email but cover only some games (list: `docs/OUTREACH_LISTS.md`) |
 | 6 | Small creators | 30 min, once a week | Indie devs report creators' videos bring more views than their own account |
-| 7 | Friends, family, colleagues | 30 min, once | First ratings and installs; ratings lift App Store ranking |
-| 8 | Communities (TouchArcade forum, Discord, Facebook groups) | 30 min/week | Puzzle fans who try new games |
+| 7 | Your own network (LinkedIn, colleagues) | 30 min, once | First ratings and installs (owner: no family outreach) |
+| 8 | Communities (puzzle subreddits, Discord, Lemmy, Mastodon) | 30 min/week | Puzzle fans who try new games (list: `docs/OUTREACH_LISTS.md`) |
 | 9 | Launch sites (Product Hunt, Indie Hackers) | 2 hours, once | Small bump; median launch gets few votes, so treat it as a bonus |
 | 10 | Shareable Daily Drop result (app feature) | Next update | Daily puzzles spread when players paste a spoiler-free result to friends |
 
@@ -62,11 +62,11 @@ Posting: 1 video a day for 2 weeks, then keep what works (watch "average watch t
 
 ## 4. Reddit
 
-**r/iosgaming, Developer Saturday only** (Saturday 00:00 to Sunday 02:00 US Eastern; one post per Saturday; use the developer flair; check the pinned rules first). Link: ct=reddit.
+**r/iosgaming, Developer Saturday only**: comment in the pinned "Developer Saturday Showcase" megathread (standalone developer posts are removed). Check the pinned rules first. Link: ct=reddit.
 
-Title: `[DEV] NumFall – a number puzzle with gravity: numbers fall into columns, so the order you drop them is the puzzle`
+First line of your megathread comment: `[DEV] NumFall – a number puzzle with gravity: numbers fall into columns, so the order you drop them is the puzzle`
 
-Body:
+Rest of the comment:
 ```
 Hi r/iosgaming! I'm a solo developer and NumFall is my first iOS game.
 
@@ -92,7 +92,7 @@ Before posting, spend a week commenting helpfully in these subreddits: many remo
 ## 5. Press: email template
 
 Send one by one (no mass CC), from support@numfall.store. Subject lines short. Put the App Store link first. No attachments (link to images instead).
-Targets: TouchArcade (staff email at the bottom of their forum pages, or their Discord), Pocket Gamer (reviews@pocketgamer.co.uk), Gamezebo, AppAdvice, 148Apps, Pocket Gamer's sister sites, iPhone-focused bloggers and newsletters. Check each site's current contact page first.
+Targets and addresses: `docs/OUTREACH_LISTS.md` section A. TouchArcade (closed 2024) and AppAdvice (closed 2026) are gone.
 
 ```
 Subject: NumFall, a number puzzle with gravity (new iOS indie, free)
@@ -155,7 +155,7 @@ If you like puzzles, give it a try and tell me what you think: <linkedin link>
 
 ## 8. Communities
 
-- **TouchArcade forum** → "iPhone and iPad Games → Released Games": a thread titled `[Universal] NumFall – number puzzle with gravity (free, no ads)`. Use the Reddit body above. Reply to every post; active threads get noticed by TouchArcade staff.
+- **r/puzzles "Promo Weekly"** and **r/playmygame** (flair "[Mobile] (iOS)"): see `docs/OUTREACH_LISTS.md` section C for all 30 places and their rules.
 - **Discord**: indie game servers with a #self-promo or #showcase channel. One post per server, the short version of the Reddit body, with V2 attached.
 - **Facebook puzzle and brain-game groups**: only where promotion is allowed. Post V1 with a question ("Which number goes last?"), the link in the first comment.
 
@@ -194,7 +194,7 @@ No personal data, nothing sent to us, uses Apple's share sheet. Needs a privacy 
 | Mon | WhatsApp + LinkedIn posts (7). Post V1 |
 | Tue | Email 3 press sites (5). Post V2 |
 | Wed | Message 3 creators (6). Post V4 |
-| Thu | TouchArcade forum thread (8). Post V5 |
+| Thu | r/puzzles Promo Weekly comment and r/playmygame post (8). Post V5 |
 | Fri | Comment helpfully in r/iosgaming and r/indiegames. Post V1 variant with another level |
 | Sat | r/iosgaming [DEV] post (4). Post V2 variant |
 | Sun | Check App Store Connect → Campaigns and Impressions. Write down numbers |
