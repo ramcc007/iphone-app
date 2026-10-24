@@ -4,7 +4,14 @@ Files (GitHub → branch claude/happy-ride-mm490y → design/marketing):
 - Banner: `youtube-banner-2560x1440.png` (text inside YouTube's safe area for phones)
 - Profile picture: `site/src/static/press-icon-1024.png`
 - Videos: `short-*.mp4` (1080x1920, voice + music)
-- Covers / thumbnails: `covers/cover-*.jpg` (1080x1920)
+- Thumbnails with excited 3D cartoon characters (made in the owner's Canva; open the link, then Download):
+  - Day 1 (it humbled me): https://www.canva.com/M/MAHY8tcpOoM
+  - Day 2 (only 1 fits): https://www.canva.com/M/MAHY8lNv9uk
+  - Day 3 (one more level, 2 AM): https://www.canva.com/M/MAHY8hTTrUg  ⚠ its tiles show 16 and 32 (looks like another game); regenerate when Canva credits reset
+  - Day 4 (1 second left): https://www.canva.com/M/MAHY8gMXnMk
+  - Day 5 (shocked character, add "SOUND ON" in Canva): https://www.canva.com/M/MAHY8hI-Zbk
+  The characters are clearly cartoons, not real people. Disclose AI where a platform asks.
+- Plain covers (game frame + headline, backup): `covers/cover-*.jpg` (1080x1920)
 
 ## 1. Set up the channel (once, on a computer)
 1. youtube.com → sign in → profile picture → **Create a channel** → name **NumFall** → handle **@numfallgame**.
