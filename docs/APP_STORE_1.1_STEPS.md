@@ -57,7 +57,7 @@ App Store Connect → NumFall → **In-App Events** (sidebar) → **+** (or Crea
 |---|---|
 | Reference name | 30-Day Daily Drop Nov 2026 |
 | Event badge | Challenge |
-| Deep link | leave empty (opens the app) |
+| Deep link | `numfall://daily` (opens today's Daily Drop; works from version 1.1) |
 | Event purpose | Appropriate for all users |
 | Priority | Normal |
 | Start | 15 November 2026, 00:00 |
@@ -71,7 +71,8 @@ App Store Connect → NumFall → **In-App Events** (sidebar) → **+** (or Crea
 | Event details image (9:16) | `design/appstore/event-details-1080x1920.png` |
 
 The images have no text on purpose: the App Store prints the event name and description over them.
-Then **Submit for Review** (events are reviewed separately from app versions).
+Apple requires a deep link. `numfall://daily` only works in version 1.1, so **save the event as a draft now and submit it after 1.1 is approved**,
+or submit it together with 1.1. Events are reviewed separately from app versions.
 Everything it promises already exists: the daily puzzle, streaks and the "Longest daily streak" Game Center leaderboard.
 
 ### Step 5. Featuring nomination

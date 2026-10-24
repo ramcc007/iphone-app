@@ -12,6 +12,7 @@ struct NumfallApp: App {
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
                 .screenshotChrome()
+                .onOpenURL { app.open($0) }   // numfall://daily from the App Store event card
                 .dynamicTypeSize(...DynamicTypeSize.accessibility3)   // text follows the player's size, up to the largest accessibility sizes
         }
     }

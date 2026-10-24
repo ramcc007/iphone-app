@@ -134,6 +134,16 @@ final class AppModel: ObservableObject {
         route = .daily(day: day, levelIndex: DailyDrop.levelIndex(for: day, classicCount: classic.count))
     }
 
+    /// Handles numfall:// links, used by the App Store In-App Event ("numfall://daily" opens today's Daily Drop).
+    /// A new player still sees the Welcome screen and tutorial first.
+    func open(_ url: URL) {
+        guard url.scheme?.lowercased() == "numfall", progress.profile != nil, progress.tutorialDone else { return }
+        switch url.host?.lowercased() {
+        case "daily": playDaily()
+        default: goHome()
+        }
+    }
+
     func startTutorial() {
         route = .tutorial(lesson: 0)
     }

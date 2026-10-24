@@ -31,6 +31,9 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.puzzle-games
         ITSAppUsesNonExemptEncryption: false
+        CFBundleURLTypes:                              # numfall://daily opens today's Daily Drop (In-App Event deep link)
+          - CFBundleURLName: store.numfall.app
+            CFBundleURLSchemes: [numfall]
         UILaunchScreen:
           UIColorName: LaunchBackground
         UIApplicationSceneManifest:
