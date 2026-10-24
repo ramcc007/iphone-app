@@ -49,7 +49,10 @@ for (const f of pages) {
   const fullTitle = title.includes(cfg.appName) ? title : title + ' | ' + cfg.appName;
   const urlPath = f === 'index.html' ? '/' : '/' + f.replace('.html', '');
   const jsonLd = f === 'index.html' ? '<script type="application/ld+json">' + JSON.stringify(structuredData(description)).replace(/</g, '\\u003c') + '</script>' : '';
-  out[f] = fill(layout, { fullTitle: esc(fullTitle), description: esc(description), canonical: esc(cfg.siteUrl + urlPath), robots: notFound ? 'noindex' : 'index, follow', jsonLd, content, year: String(new Date().getFullYear()) });
+  // Smart App Banner: Safari on iPhone and iPad shows Apple's "Get" bar at the top of every page.
+  const appId = (cfg.appStoreUrl.match(/id(\d+)/) || [])[1];
+  const appBanner = appId ? '<meta name="apple-itunes-app" content="app-id=' + appId + '">' : '';
+  out[f] = fill(layout, { fullTitle: esc(fullTitle), description: esc(description), canonical: esc(cfg.siteUrl + urlPath), robots: notFound ? 'noindex' : 'index, follow', jsonLd, appBanner, content, year: String(new Date().getFullYear()) });
   // SEO checks: a broken page fails the build (and so the Vercel deploy) instead of going live.
   const problems = [];
   if (fullTitle.length > 65) problems.push('title is ' + fullTitle.length + ' characters (keep it to 65 so search results do not cut it off)');
