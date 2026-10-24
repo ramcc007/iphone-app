@@ -50,10 +50,21 @@ for (const f of pages) {
   const fullTitle = title.includes(cfg.appName) ? title : title + ' | ' + cfg.appName;
   const urlPath = f === 'index.html' ? '/' : '/' + f.replace('.html', '');
   const jsonLd = f === 'index.html' ? '<script type="application/ld+json">' + JSON.stringify(structuredData(description)).replace(/</g, '\\u003c') + '</script>' : '';
+  // Website analytics (Google Analytics 4), only after the visitor taps Accept. Declining loads nothing from Google.
+  // The app itself collects nothing; this covers numfall.store only (see the privacy policy's "This website" section).
+  const ga = cfg.gaMeasurementId;
+  const analytics = ga ? `<div id="consent" class="consent" role="dialog" aria-live="polite" aria-label="Cookie choice" hidden><p>We use Google Analytics cookies to count visits to this website (not the app). OK? <a href="/privacy#website">Details</a></p><div><button type="button" class="btn small" data-c="yes">Accept</button><button type="button" class="btn ghost small" data-c="no">No thanks</button></div></div>
+<script>(function(){var id='${ga}',k='nf-consent',b=document.getElementById('consent');
+function load(){if(window.gtag)return;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+id;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};gtag('js',new Date());gtag('config',id);}
+function get(){try{return localStorage.getItem(k);}catch(e){return null;}}
+function set(v){try{localStorage.setItem(k,v);}catch(e){}}
+var c=get();if(c==='yes')load();else if(c!=='no')b.hidden=false;
+b.addEventListener('click',function(e){var v=e.target.getAttribute('data-c');if(!v)return;set(v);b.hidden=true;if(v==='yes')load();else location.reload();});
+var r=document.getElementById('cookie-settings');if(r)r.addEventListener('click',function(e){e.preventDefault();try{localStorage.removeItem(k);}catch(x){}b.hidden=false;});})();</script>` : '';
   // Smart App Banner: Safari on iPhone and iPad shows Apple's "Get" bar at the top of every page.
   const appId = (cfg.appStoreUrl.match(/id(\d+)/) || [])[1];
   const appBanner = appId ? '<meta name="apple-itunes-app" content="app-id=' + appId + '">' : '';
-  out[f] = fill(layout, { fullTitle: esc(fullTitle), description: esc(description), canonical: esc(cfg.siteUrl + urlPath), robots: notFound ? 'noindex' : 'index, follow', jsonLd, appBanner, content, year: String(new Date().getFullYear()) });
+  out[f] = fill(layout, { fullTitle: esc(fullTitle), description: esc(description), canonical: esc(cfg.siteUrl + urlPath), robots: notFound ? 'noindex' : 'index, follow', jsonLd, appBanner, analytics, content, year: String(new Date().getFullYear()) });
   // SEO checks: a broken page fails the build (and so the Vercel deploy) instead of going live.
   const problems = [];
   if (fullTitle.length > 65) problems.push('title is ' + fullTitle.length + ' characters (keep it to 65 so search results do not cut it off)');
