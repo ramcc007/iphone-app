@@ -57,7 +57,7 @@ Post one a day, in the order below. Best times for a US + UK audience: **6:30-8:
 
   #puzzlegame #braingames #iphonegames #mobilegames #numfall
   ```
-- **Tags**: `puzzle game, number puzzle, brain games, logic puzzle, iphone games, mobile games, puzzle fail, satisfying puzzle, indie game, numfall`
+- **Tags**: `hard puzzle, puzzle fail, gaming fail, brain test, iq test, puzzle games, puzzle game, brain games, logic puzzles, number puzzle, number games, brain teaser, puzzle games for adults, brain games for adults, puzzle games no ads, offline games, games without wifi, iphone games, mobile games, ios games, numfall`
 - **Pinned comment**: `Be honest: how many hearts would you lose? 😅`
 
 ## Day 2: short-guess-the-number.mp4
@@ -73,7 +73,7 @@ Post one a day, in the order below. Best times for a US + UK audience: **6:30-8:
 
   #brainteaser #puzzle #logicpuzzle #iqtest #numfall
   ```
-- **Tags**: `brain teaser, guess the number, logic puzzle, iq test, number puzzle, puzzle challenge, brain games, iphone games, numfall`
+- **Tags**: `guess the number, iq test, brain test, riddles, can you solve this, puzzle games, puzzle game, brain games, logic puzzles, number puzzle, number games, brain teaser, puzzle games for adults, brain games for adults, puzzle games no ads, offline games, games without wifi, iphone games, mobile games, ios games, numfall`
 - **Pinned comment**: `What number did you guess? 👇 No cheating 👀`
 
 ## Day 3: short-one-more-level.mp4
@@ -90,7 +90,7 @@ Post one a day, in the order below. Best times for a US + UK audience: **6:30-8:
 
   #relatable #puzzlegame #onemorelevel #iphonegames #numfall
   ```
-- **Tags**: `one more level, relatable gaming, puzzle game, addictive game, number puzzle, brain games, iphone games, mobile games, numfall`
+- **Tags**: `addictive games, relatable, one more level, games to play when bored, best puzzle games, puzzle games, puzzle game, brain games, logic puzzles, number puzzle, number games, brain teaser, puzzle games for adults, brain games for adults, puzzle games no ads, offline games, games without wifi, iphone games, mobile games, ios games, numfall`
 - **Pinned comment**: `What level are you on right now? 👀`
 
 ## Day 4: short-clutch.mp4
@@ -106,7 +106,7 @@ Post one a day, in the order below. Best times for a US + UK audience: **6:30-8:
 
   #clutch #puzzlegame #satisfying #iphonegames #numfall
   ```
-- **Tags**: `clutch, last second, puzzle game, timed puzzle, satisfying, brain games, number puzzle, iphone games, numfall`
+- **Tags**: `clutch, last second, timed puzzle, satisfying games, close call, puzzle games, puzzle game, brain games, logic puzzles, number puzzle, number games, brain teaser, puzzle games for adults, brain games for adults, puzzle games no ads, offline games, games without wifi, iphone games, mobile games, ios games, numfall`
 - **Pinned comment**: `Would you have made it? ⏱️`
 
 ## Day 5: short-satisfying-sound.mp4
@@ -122,7 +122,7 @@ Post one a day, in the order below. Best times for a US + UK audience: **6:30-8:
 
   #satisfying #oddlysatisfying #asmr #puzzlegame #numfall
   ```
-- **Tags**: `satisfying, oddly satisfying, asmr, satisfying sounds, puzzle game, relaxing game, number puzzle, iphone games, numfall`
+- **Tags**: `satisfying, oddly satisfying, asmr, satisfying games, relaxing games, puzzle games, puzzle game, brain games, logic puzzles, number puzzle, number games, brain teaser, puzzle games for adults, brain games for adults, puzzle games no ads, offline games, games without wifi, iphone games, mobile games, ios games, numfall`
 - **Pinned comment**: `4×4, 6×6 or 9×9: which would you play? 🧩`
 
 ## Day 6-7
@@ -132,6 +132,9 @@ Repost the best-performing video (Studio → Analytics → highest "Viewed vs sw
 ## Same videos on TikTok and Instagram
 Use the **Title** as the caption, add the hashtags, and turn on TikTok's **AI-generated content** label (More options) for the voiced videos.
 Instagram Reels: **Edit cover → Add from camera roll** → the matching cover. TikTok: **Cover** → choose the frame time listed above.
+
+## Why these tags
+Built from App Store search popularity (Apple Search Popularity via Sonar, 24 Oct 2026: brain games 61, logic puzzles 52, number games 49, number puzzle 38), App Store autocomplete (puzzle games for adults, puzzle games no ads, brain games for adults, offline games, games without wifi, satisfying games, brain teaser) and YouTube's top searches (asmr, satisfying). Tags matter less than the title, thumbnail and first line of the description, so those carry the main keywords too.
 
 ## Rules
 - Reply to comments within the first hour.
