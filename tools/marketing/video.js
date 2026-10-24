@@ -66,7 +66,7 @@ function boardsVideo() {
   let t = 0;
   const part = (id, label, keep, gap) => {
     const L = LEVELS[id], all = solveOrder(L), pre = all.slice(0, all.length - keep).map(m => [m[0], m[1]]), moves = all.slice(all.length - keep);
-    s.push({ at: t, level: id, prefill: pre, timer: null }, { at: t, label, caption: null });
+    s.push({ at: t, level: id, prefill: pre, timer: null }, { at: t, label });
     t += 0.5;
     for (const m of moves) { s.push({ at: t, drop: [m[1], m[2]] }); t += gap; }
     t += 0.35; s.push({ at: t, stars: 3 }); t += 0.9;
@@ -146,7 +146,7 @@ function frame(arg) {
   const cx = c => bx + pad + c * (s + g) + Math.floor(c / bc) * bg, cy = r => by + pad + r * (s + g) + Math.floor(r / br) * bg;
   const tile = (v, x, y, kind, extra = '') => {
     const rad = s * 0.27;
-    const box = `left:${x}px;top:${y}px;width:${s}px;height:${s}px;border-radius:${rad}px;font-size:${s * 0.56}px;${extra}`;
+    const box = `left:${x}px;top:${y}px;width:${s}px;height:${s}px;border-radius:${rad}px;font-size:${s * 0.56}px;${extra};`;
     if (kind === 'empty') return `<div class="t" style="${box}border:1.5px dashed rgba(255,255,255,.13);background:#1D2131"></div>`;
     if (kind === 'ghost') return `<div class="t" style="${box}border:${Math.max(2, s * .04)}px dashed #F5E663;color:#F5E663;font-weight:600">?</div>`;
     const [c0, l, e] = COL[kind === 'given' ? 'G' : kind === 'wrong' ? 'R' : v];
@@ -175,7 +175,7 @@ function frame(arg) {
       html += tile(f.v, cx(f.c), y, 'player');
     } else {
       const k2 = (t - f.at - f.dur) / 0.9, shake = Math.sin(k2 * 40) * Math.max(0, 0.6 - k2) * s * 0.2;
-      html += tile(f.v, cx(f.c) + shake, y1, 'wrong', `opacity:${1 - Math.max(0, k2 - 0.7) / 0.3};box-shadow:0 0 ${s * .5}px rgba(255,107,122,.8)`);
+      html += tile(f.v, cx(f.c) + shake, y1, 'wrong', `opacity:${1 - Math.max(0, k2 - 0.7) / 0.3};outline:${s * .06}px solid #FFFFFF;outline-offset:${s * .05}px;filter:drop-shadow(0 0 ${s * .25}px #FF6B7A)`);
     }
   }
   document.getElementById('board').style.cssText = `left:${bx}px;top:${by}px;width:${bw}px;height:${bh}px`;
@@ -222,6 +222,12 @@ function frame(arg) {
   const browser = await chromium.launch();
   const page = await (await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 2 })).newPage();
   await page.setContent(PAGE); await page.evaluate(() => document.fonts.ready);
+  if (process.env.FRAME) {   // debug: one still frame, e.g. FRAME=4.6 node video.js gravity
+    const video = VIDEOS[which[0]]();
+    await page.evaluate(frame, { t: Number(process.env.FRAME), video, levels: LEVELS });
+    await page.screenshot({ path: `design/marketing/frame-${which[0]}-${process.env.FRAME}.png` });
+    await browser.close(); return;
+  }
   for (const name of which) {
     const video = VIDEOS[name]();
     const out = `design/marketing/video-${name}.mp4`;
