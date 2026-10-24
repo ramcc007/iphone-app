@@ -10,7 +10,7 @@ const SOL = [[1,2,3,4,5,6],[4,5,6,1,2,3],[2,3,1,5,6,4],[5,6,4,2,3,1],[3,1,2,6,4,
 const H = [4,5,3,6,4,5];                                   // filled cells per column, from the bottom (gravity)
 const PLAYER = new Set(['2,0','1,1','4,3','2,4','5,5','0,3','1,5','3,4','3,2','5,1']);
 const tile = (v, x, y, s, kind, extra = '') => {
-  const r = s * 0.27, box = `position:absolute;left:${x}px;top:${y}px;width:${s}px;height:${s}px;border-radius:${r}px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:${s*0.56}px;line-height:1;${extra}`;
+  const r = s * 0.27, box = `position:absolute;left:${x}px;top:${y}px;width:${s}px;height:${s}px;border-radius:${r}px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:${s*0.56}px;line-height:1;${extra};`;
   if (kind === 'empty') return `<div style="${box}border:${Math.max(1.5,s*0.025)}px dashed rgba(255,255,255,.13);background:#1D2131"></div>`;
   if (kind === 'ghost') return `<div style="${box}border:${s*0.035}px dashed #F5E663;color:#D4CB6E;font-weight:600">${v}</div>`;
   const [c, l, e] = kind === 'given' ? COL.G : COL[kind] || COL[v];
@@ -31,6 +31,18 @@ function scene(w, h, o) {
   out += fall(0, 4, by - s*1.15) + fall(4, 2, by - s*2.1);
   const deco = [[.03,.1,3],[.42,.07,6],[.47,.8,1],[.97,.12,5],[.96,.78,2],[.06,.82,6],[.6,.04,4]]
     .map(([fx,fy,v]) => tile(v, fx*w - s*0.3, fy*h, s*0.6, 'player', 'opacity:.18;filter:blur(2px);transform:rotate(-9deg)')).join('');
+  // Optional bright falling tiles around the edges, kept out of the safe area (o.safe = [x0, y0, x1, y1] in CSS px).
+  let rain = '';
+  if (o.safe) {
+    const R = i => { const x = Math.sin(i * 91.7 + 13.1) * 43758.5; return x - Math.floor(x); };
+    for (let i = 0, placed = 0; i < 400 && placed < o.rain; i++) {
+      const sz = s * (0.7 + R(i + 99) * 0.9), x = R(i) * (w - sz), y = R(i + 50) * (h - sz), v = 1 + (i % 6);
+      const [x0, y0, x1, y1] = o.safe;
+      if (x + sz > x0 - 20 && x < x1 + 20 && y + sz > y0 - 20 && y < y1 + 20) continue;
+      rain += `<div style="position:absolute;left:${x + sz*.22}px;top:${y - sz*1.25}px;width:${sz*.56}px;height:${sz*1.3}px;border-radius:${sz*.28}px;background:linear-gradient(180deg,transparent,${COL[v][0]}55)"></div>` + tile(v, x, y, sz, 'player', `transform:rotate(${(R(i + 7) - .5) * 26}deg)`);
+      placed++;
+    }
+  }
   const m = title*0.42, mg = m*0.17;
   const mark = `<div style="position:relative;width:${2*m+mg}px;height:${2*m+mg}px;flex:none">`
     + tile('', m+mg, 0, m, 'O') + tile('', 0, m+mg, m, 'B')
@@ -42,13 +54,17 @@ function scene(w, h, o) {
   ${o.noText ? '' : `<div style="position:absolute;left:${tx}px;top:${ty}px;color:#fff">
     <div style="display:flex;align-items:center;gap:${title*0.22}px">${mark}<div style="font-size:${title}px;font-weight:600;letter-spacing:-0.01em;line-height:1">NumFall</div></div>
     <div style="font-size:${sub}px;color:#BAC0D8;margin-top:${sub*0.8}px">Drop the numbers. Beat the clock.</div>
-  </div>`}${out}</body></html>`;
+  </div>`}${out}${rain}</body></html>`;
 }
 (async () => {
   const b = await chromium.launch();
   const jobs = [
     { name: 'header-3840x1646', w: 1920, h: 823, o: { s: 74, bx: 1060, by: 225, tx: 300, ty: 300, title: 128, sub: 42 } },
     { name: 'header-5244x2950', w: 2622, h: 1475, o: { s: 128, bx: 1420, by: 360, tx: 330, ty: 560, title: 180, sub: 58 } },
+    // Centred versions: logo, name and board inside Apple's template safe areas (search 2168x1030 of 3840x2560, header 1646x661 of 3840x1646),
+    // because the live App Store crops these images more than the App Store Connect preview does.
+    { name: 'search-results-3840x2560', w: 1920, h: 1280, o: { s: 60, bx: 430, by: 427, tx: 885, ty: 520, title: 118, sub: 38, safe: [418, 382, 1502, 897], rain: 26 } },
+    { name: 'header-centred-3840x1646', w: 1920, h: 823, o: { s: 44, bx: 556, by: 254, tx: 900, ty: 320, title: 92, sub: 30, safe: [548, 246, 1371, 577], rain: 22 } },
     { name: 'event-card-1920x1080', w: 960, h: 540, o: { s: 44, bx: 325, by: 120, tx: 0, ty: 0, title: 80, sub: 30, noText: true } },
     { name: 'event-details-1080x1920', w: 540, h: 960, o: { s: 56, bx: 72, by: 380, tx: 0, ty: 0, title: 80, sub: 30, noText: true } },
   ];
