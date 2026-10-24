@@ -46,7 +46,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: store.numfall.app    # permanent: registered in the Apple Developer account and App Store Connect
-        MARKETING_VERSION: "1.0"
+        MARKETING_VERSION: "1.1"
         CURRENT_PROJECT_VERSION: "1"
         TARGETED_DEVICE_FAMILY: "1,2"                  # iPhone and iPad
         SWIFT_VERSION: "5.0"

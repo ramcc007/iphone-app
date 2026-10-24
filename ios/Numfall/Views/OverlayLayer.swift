@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 import NumfallCore
 
 /// Pause, win, time's up, out of hearts, skipped and tutorial results.
@@ -8,6 +9,7 @@ struct OverlayLayer: View {
     @ObservedObject var session: GameSession
     let wide: Bool
     @Binding var showRules: Bool
+    @Environment(\.requestReview) private var requestReview
 
     var body: some View {
         if session.overlay != nil || session.paused {
@@ -25,6 +27,14 @@ struct OverlayLayer: View {
             }
             .foregroundStyle(Theme.text)
             .transition(.opacity)
+            .task(id: session.overlay) {
+                // Ask for a rating after a perfect win or a Daily Drop streak, once per version.
+                guard ReviewPrompt.shouldAsk(after: session.overlay, levelsCleared: app.progress.bestStars.count) else { return }
+                try? await Task.sleep(for: .seconds(1.5))
+                guard !Task.isCancelled else { return }
+                ReviewPrompt.markAsked()
+                requestReview()
+            }
         }
     }
 
