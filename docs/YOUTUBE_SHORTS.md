@@ -49,13 +49,13 @@ Post one a day, in the order below. Best times for a US + UK audience: **6:30-8:
 - **Cover**: `cover-i-thought-this-was-easy.jpg` (frame at 1.1 s)
 - **Description**:
   ```
-  It was not easy. Three wrong drops, zero hearts… then round two 😤
+  I thought this puzzle game was easy… it was NOT 💀 Three wrong drops, zero hearts, then round two 😤
 
-  NumFall is a number puzzle with gravity: tap a number, tap a column, and it falls to the lowest gap. Every row, column and box needs each number once. Think one move ahead!
+  NumFall is a number puzzle game with gravity: tap a number, tap a column, and it falls to the lowest gap. Every row, column and box needs each number once, before the clock runs out. One of the best brain games and logic puzzles for adults: no ads, works offline (no wifi needed).
 
-  🧩 Search "NumFall" on the App Store (iPhone & iPad only, no ads)
+  🧩 Get NumFall on the App Store (iPhone & iPad only): https://apps.apple.com/app/apple-store/id6820579220?pt=129582636&mt=8&ct=youtube
 
-  #puzzlegame #braingames #iphonegames #mobilegames #numfall
+  #puzzlegames #braingames #brainteaser #logicpuzzles #numberpuzzle #iqtest #iphonegames #numfall
   ```
 - **Tags**: `hard puzzle, puzzle fail, gaming fail, brain test, iq test, puzzle games, puzzle game, brain games, logic puzzles, number puzzle, number games, brain teaser, puzzle games for adults, brain games for adults, puzzle games no ads, offline games, games without wifi, iphone games, mobile games, ios games, numfall`
 - **Pinned comment**: `Be honest: how many hearts would you lose? 😅`
@@ -65,13 +65,13 @@ Post one a day, in the order below. Best times for a US + UK audience: **6:30-8:
 - **Cover**: `cover-guess-the-number.jpg` (frame at 3.0 s)
 - **Description**:
   ```
-  Pause before the countdown ends and guess! 👇
-  Every row, column and box needs each number once, and numbers fall to the lowest gap.
+  Only ONE number fits here. Can you see it before the countdown ends? 🧠 Comment your guess 👇
 
-  🧩 NumFall: 230 levels from 4×4 to 9×9, plus a new Daily Drop every day.
-  Search "NumFall" on the App Store (iPhone & iPad only, no ads)
+  Brain teaser rules: every row, column and box holds each number once, and numbers fall to the lowest gap. NumFall is a number puzzle game with 230 levels from 4×4 to 9×9 and a new daily puzzle every day. Logic puzzles for adults, no ads, play offline.
 
-  #brainteaser #puzzle #logicpuzzle #iqtest #numfall
+  🧩 Get NumFall on the App Store (iPhone & iPad only): https://apps.apple.com/app/apple-store/id6820579220?pt=129582636&mt=8&ct=youtube
+
+  #brainteaser #iqtest #puzzlegames #braingames #logicpuzzles #numberpuzzle #riddles #numfall
   ```
 - **Tags**: `guess the number, iq test, brain test, riddles, can you solve this, puzzle games, puzzle game, brain games, logic puzzles, number puzzle, number games, brain teaser, puzzle games for adults, brain games for adults, puzzle games no ads, offline games, games without wifi, iphone games, mobile games, ios games, numfall`
 - **Pinned comment**: `What number did you guess? 👇 No cheating 👀`
@@ -81,14 +81,13 @@ Post one a day, in the order below. Best times for a US + UK audience: **6:30-8:
 - **Cover**: `cover-one-more-level.jpg` (frame at 8.0 s)
 - **Description**:
   ```
-  11:58 PM: one more level.
-  2:04 AM: …one more level. 🫠
+  POV: you said "one more level"… and now it's 2 AM 🫠 The most addictive puzzle game on my phone.
 
-  NumFall is a number puzzle with gravity: drop numbers, fill the grid, beat the clock. Quick 4×4, Classic 6×6 and Master 9×9.
+  NumFall is a number puzzle with gravity: drop numbers into columns, fill the grid, beat the clock. Quick 4×4, Classic 6×6 and Master 9×9. Perfect brain games to play when bored: no ads, no wifi needed.
 
-  🧩 Search "NumFall" on the App Store (iPhone & iPad only, no ads)
+  🧩 Get NumFall on the App Store (iPhone & iPad only): https://apps.apple.com/app/apple-store/id6820579220?pt=129582636&mt=8&ct=youtube
 
-  #relatable #puzzlegame #onemorelevel #iphonegames #numfall
+  #puzzlegames #addictivegames #relatable #braingames #numberpuzzle #offlinegames #iphonegames #numfall
   ```
 - **Tags**: `addictive games, relatable, one more level, games to play when bored, best puzzle games, puzzle games, puzzle game, brain games, logic puzzles, number puzzle, number games, brain teaser, puzzle games for adults, brain games for adults, puzzle games no ads, offline games, games without wifi, iphone games, mobile games, ios games, numfall`
 - **Pinned comment**: `What level are you on right now? 👀`
@@ -98,13 +97,13 @@ Post one a day, in the order below. Best times for a US + UK audience: **6:30-8:
 - **Cover**: `cover-clutch.jpg` (frame at 6.0 s)
 - **Description**:
   ```
-  Last drop at 0:01. My heart can't take this 😮‍💨
+  3 gaps. 7 seconds. Last drop at 0:01 😮‍💨 Clutch or crash?
 
-  NumFall: a number puzzle with gravity and a clock on every level. Fill the grid before time runs out.
+  NumFall is a timed number puzzle game with gravity: every level has a clock, every drop counts. Satisfying logic puzzles and brain games for adults, no ads, works offline.
 
-  🧩 Search "NumFall" on the App Store (iPhone & iPad only, no ads)
+  🧩 Get NumFall on the App Store (iPhone & iPad only): https://apps.apple.com/app/apple-store/id6820579220?pt=129582636&mt=8&ct=youtube
 
-  #clutch #puzzlegame #satisfying #iphonegames #numfall
+  #clutch #satisfying #puzzlegames #braingames #numberpuzzle #logicpuzzles #mobilegames #numfall
   ```
 - **Tags**: `clutch, last second, timed puzzle, satisfying games, close call, puzzle games, puzzle game, brain games, logic puzzles, number puzzle, number games, brain teaser, puzzle games for adults, brain games for adults, puzzle games no ads, offline games, games without wifi, iphone games, mobile games, ios games, numfall`
 - **Pinned comment**: `Would you have made it? ⏱️`
@@ -114,13 +113,13 @@ Post one a day, in the order below. Best times for a US + UK audience: **6:30-8:
 - **Cover**: `cover-satisfying-sound.jpg` (frame at 9.8 s)
 - **Description**:
   ```
-  Sound ON 🔊 Every correct drop climbs the scale.
+  Sound ON 🔊 The most satisfying puzzle sound? Every correct drop climbs the scale until the 9×9 board is full.
 
-  NumFall: drop numbers into columns, fill the 9×9 grid, hear it sing.
+  NumFall is a relaxing number puzzle game with gravity: oddly satisfying drops, calm brain games, no ads and no wifi needed.
 
-  🧩 Search "NumFall" on the App Store (iPhone & iPad only, no ads)
+  🧩 Get NumFall on the App Store (iPhone & iPad only): https://apps.apple.com/app/apple-store/id6820579220?pt=129582636&mt=8&ct=youtube
 
-  #satisfying #oddlysatisfying #asmr #puzzlegame #numfall
+  #satisfying #oddlysatisfying #asmr #puzzlegames #satisfyinggames #relaxinggames #braingames #numfall
   ```
 - **Tags**: `satisfying, oddly satisfying, asmr, satisfying games, relaxing games, puzzle games, puzzle game, brain games, logic puzzles, number puzzle, number games, brain teaser, puzzle games for adults, brain games for adults, puzzle games no ads, offline games, games without wifi, iphone games, mobile games, ios games, numfall`
 - **Pinned comment**: `4×4, 6×6 or 9×9: which would you play? 🧩`
