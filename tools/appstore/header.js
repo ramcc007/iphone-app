@@ -39,6 +39,8 @@ function scene(w, h, o) {
       const sz = s * (0.7 + R(i + 99) * 0.9), x = R(i) * (w - sz), y = R(i + 50) * (h - sz), v = 1 + (i % 6);
       const [x0, y0, x1, y1] = o.safe;
       if (x + sz > x0 - 20 && x < x1 + 20 && y + sz > y0 - 20 && y < y1 + 20) continue;
+      if (o.spread && (o._boxes = o._boxes || []).some(([bx2, by2, bs]) => x < bx2 + bs + 14 && x + sz + 14 > bx2 && y < by2 + bs * 2.4 && y + sz * 2.4 > by2)) continue;
+      if (o.spread) o._boxes.push([x, y, sz]);
       rain += `<div style="position:absolute;left:${x + sz*.22}px;top:${y - sz*1.25}px;width:${sz*.56}px;height:${sz*1.3}px;border-radius:${sz*.28}px;background:linear-gradient(180deg,transparent,${COL[v][0]}55)"></div>` + tile(v, x, y, sz, 'player', `transform:rotate(${(R(i + 7) - .5) * 26}deg)`);
       placed++;
     }
@@ -53,10 +55,11 @@ function scene(w, h, o) {
   <body>
   ${o.noText ? '' : `<div style="position:absolute;left:${tx}px;top:${ty}px;color:#fff">
     <div style="display:flex;align-items:center;gap:${title*0.22}px">${mark}<div style="font-size:${title}px;font-weight:600;letter-spacing:-0.01em;line-height:1">NumFall</div></div>
-    <div style="font-size:${sub}px;color:#BAC0D8;margin-top:${sub*0.8}px">Drop the numbers. Beat the clock.</div>
+    <div style="font-size:${sub}px;color:#BAC0D8;margin-top:${sub*0.8}px">${o.subText || 'Drop the numbers. Beat the clock.'}</div>
   </div>`}${out}${rain}</body></html>`;
 }
-(async () => {
+module.exports = { scene };
+if (require.main === module) (async () => {
   const b = await chromium.launch();
   const jobs = [
     { name: 'header-3840x1646', w: 1920, h: 823, o: { s: 74, bx: 1060, by: 225, tx: 300, ty: 300, title: 128, sub: 42 } },
