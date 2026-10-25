@@ -139,3 +139,43 @@ Built from App Store search popularity (Apple Search Popularity via Sonar, 24 Oc
 - Reply to comments within the first hour.
 - Never buy views or subscribers, and never ask for likes in exchange for anything.
 - Don't name other games in titles, tags or comments.
+
+---
+
+## Rebuilds (25 Oct 2026): viewer-task formats
+The two weakest uploads (clutch, i-thought-this-was-easy) gave the viewer nothing to do. These replacements open on a task in the first second, the format that worked for guess-the-number.
+Upload them as **new** Shorts (don't edit the old ones; the feed judges a new upload fresh). Leave the old ones up or set them to Private.
+
+### short-beat-the-timer.mp4 (10 s, no voice, music + sound effects)
+- **Title**: `Can you solve it before 0:00? ⏱️ #shorts`
+- **Cover**: frame at 0.3 s (big 0:06 timer and the glowing ? tiles)
+- **Description**:
+  ```
+  6 seconds. 3 empty tiles. Can you fill them before the timer hits 0? ⏱️ Comment your answer 👇
+
+  NumFall is a timed number puzzle with gravity: every row, column and box holds each number once, and numbers fall to the lowest gap. Brain games and logic puzzles for adults, no ads, works offline.
+
+  🧩 Get NumFall on the App Store (iPhone & iPad only): https://apps.apple.com/app/apple-store/id6820579220?pt=129582636&mt=8&ct=youtube
+
+  #brainteaser #iqtest #puzzlegames #braingames #timer #clutch #numberpuzzle #numfall
+  ```
+- **Tags**: `beat the timer, can you solve this, 5 second challenge, iq test, brain test, clutch, puzzle games, puzzle game, brain games, logic puzzles, number puzzle, number games, brain teaser, puzzle games for adults, puzzle games no ads, offline games, iphone games, mobile games, ios games, numfall`
+- **Altered or synthetic content**: No (no AI voice in this one).
+- **Pinned comment**: `What goes in the ? tiles, top to bottom? 👇 (no pausing 👀)`
+
+### short-spot-the-mistake.mp4 (12 s, voice-over)
+- **Title**: `One drop breaks the rules. Spot it? 👀 #shorts`
+- **Cover**: frame at 3.4 s ("Pause and look 👀")
+- **Description**:
+  ```
+  One of these drops breaks the rules. Can you spot it before the countdown? 👀 Pause and look!
+
+  The rule: every row, column and box holds each number once. NumFall is a number puzzle game with gravity: 230 levels from 4×4 to 9×9, a daily puzzle, no ads, play offline.
+
+  🧩 Get NumFall on the App Store (iPhone & iPad only): https://apps.apple.com/app/apple-store/id6820579220?pt=129582636&mt=8&ct=youtube
+
+  #spotthemistake #brainteaser #iqtest #puzzlegames #braingames #logicpuzzles #numberpuzzle #numfall
+  ```
+- **Tags**: `spot the mistake, spot the difference, find the mistake, can you spot it, iq test, brain test, puzzle games, puzzle game, brain games, logic puzzles, number puzzle, number games, brain teaser, puzzle games for adults, puzzle games no ads, offline games, iphone games, mobile games, ios games, numfall`
+- **Altered or synthetic content**: Yes (AI voice-over).
+- **Pinned comment**: `Did you spot it before the reveal? Be honest 👇`

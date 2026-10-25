@@ -187,6 +187,52 @@ const VIDEOS = {
     return endCard(tl, who, sp);
   },
 
+  // "Beat the timer": the viewer races a giant countdown; last drop at 1 second; no voice; loops.
+  'beat-the-timer'() {
+    const tl = new TL(); combo = 0;
+    const m = midGame('quick-024', 3);
+    tl.add({ music: 'tense', level: m.id, prefill: m.pre, timer: null, noHud: true, ghosts: m.moves.map(x => [x[0], x[1]]), counter: 'LEVEL 24' });
+    tl.add({ caption: 'Solve it before the timer hits <b>0</b> 👇', capDur: 2.6, capStyle: 'hook' });
+    tl.add({ bigTimer: 6, zoomTo: 1.08, zoomDur: 5.6 });
+    for (let s2 = 0; s2 < 6; s2++) tl.events.push({ at: s2 + 0.02, name: s2 >= 3 ? 'heart' : 'tick' });
+    tl.at(3.0).add({ vignette: true });
+    tl.at(4.0); drop(tl, m.moves[0][1], m.moves[0][2]);
+    tl.at(4.7); drop(tl, m.moves[1][1], m.moves[1][2]);
+    tl.at(5.55); drop(tl, m.moves[2][1], m.moves[2][2]);
+    tl.at(5.75).add({ stopBig: true, vignette: false, ghosts: [], burst: 'big', pop: 'CLUTCH!', shake: 0.8, zoomTo: 1.0, zoomDur: 0.3 }).sfx('boom').sfx('chime', { root: 5 });
+    tl.at(6.0).add({ hideBig: true, caption: 'Did you beat me? 👀', capDur: 2.2, capStyle: 'hook' });
+    tl.at(8.1).add({ end: true }).sfx('whoosh');
+    tl.at(9.9);
+    return tl;
+  },
+
+  // "Spot the mistake": a drop that breaks the rule freezes on screen; countdown; red rings reveal the clash.
+  'spot-the-mistake'() {
+    const tl = new TL(), who = 'af_heart', sp = 1.12; combo = 0;
+    const m = midGame('classic-018', 4), L = LEVELS[m.id];
+    const g = gridAfter(L, m.pre);
+    for (const [r, c, v] of m.moves.slice(0, 2)) g[r][c] = v;
+    const [wr, wc] = m.moves[2];
+    // A wrong value that clashes with a number already in the same column (easy to see).
+    let wv = null, clash = null;
+    for (let r = 0; r < L.size && !wv; r++) if (r !== wr && g[r][wc] && g[r][wc] !== L.solution[wr][wc]) { wv = g[r][wc]; clash = [r, wc]; }
+    tl.add({ music: true, level: m.id, prefill: m.pre, timer: 52, counter: 'LEVEL 18' });
+    tl.say('One of these drops breaks the rules. <b>Spot it?</b>', who, sp, { capStyle: 'hook' });
+    tl.at(0.7); drop(tl, m.moves[0][1], m.moves[0][2]);
+    tl.at(1.4); drop(tl, m.moves[1][1], m.moves[1][2]);
+    tl.at(2.1).add({ drop: [wc, wv], hold: true }).sfx('drop', { step: combo++ });
+    tl.at(3.4).add({ caption: 'Pause and look 👀', capDur: 2.0, capStyle: 'hook', focus: [wr, wc], zoomTo: 1.12, zoomDur: 0.5 });
+    for (const n2 of [3, 2, 1]) { tl.add({ countdown: n2 }).sfx('beep'); tl.wait(0.62); }
+    tl.add({ reveal: true, rings: [clash, [wr, wc]], shake: 0.7 }).sfx('wrong');
+    const d = tl.say(`There! Two <b>${wv}s</b> in the same column.`, who, sp, { capStyle: 'hook' });
+    tl.wait(d + 0.3);
+    tl.add({ fix: true, rings: null, focus: null, zoomTo: 1.0, zoomDur: 0.3, burst: 'small', pop: `It's a ${L.solution[wr][wc]}!` }).sfx('chime', { root: 3 });
+    tl.wait(0.3);
+    const d2 = tl.say('Did you get it? Tell me in the comments!', who, sp);
+    tl.wait(d2 + 0.2);
+    return endCard(tl, who, sp);
+  },
+
   // Sound on: a 9x9 board fills with a rising scale.
   'satisfying-sound'() {
     const tl = new TL(), who = 'af_heart', sp = 1.05; combo = 0;
@@ -242,6 +288,7 @@ function frame(arg) {
   let caption = null, capAt = 0, capDur = 0, capStyle = '', pop = null, popAt = -9, burst = null, burstAt = -9, shakeAt = -9, shakeAmp = 0;
   let zoom = 1, zoomFrom = 1, zoomTo = 1, zoomAt = 0, zoomDur = 0.35, focus = null, ghostAt = null, countdown = null, countAt = -9;
   let banner = null, bannerAt = -9, stars = 0, starsAt = -9, endAt = null, wrongs = [], levelAt = 0;
+  let ghosts = [], rings = null, ringsAt = -9, big = null, bigAt = 0, bigStop = null, vignette = false, vigAt = 0, noHud = false, revealAt = null;
   const landing = c => { let r = level.size - 1; while (r >= 0 && grid[r][c]) r--; return r; };
   for (const st of video.steps) {
     if (st.at > t) break;
@@ -249,7 +296,7 @@ function frame(arg) {
       level = levels[st.level]; levelAt = st.at;
       grid = level.givens.map(r => r.map(v => v ? { v, given: true } : null));
       for (const [r, c] of st.prefill || []) grid[r][c] = { v: level.solution[r][c] };
-      hearts = 3; wrongs = []; stars = 0; ghostAt = null;
+      hearts = 3; wrongs = []; stars = 0; ghostAt = null; ghosts = []; rings = null; revealAt = null; noHud = !!st.noHud;
       if ('timer' in st) { timer = st.timer; timerAt = st.at; timerStop = null; }
     }
     if (st.counter !== undefined) counter = st.counter;
@@ -261,6 +308,14 @@ function frame(arg) {
     if (st.zoomTo !== undefined) { zoomFrom = zoom; zoomTo = st.zoomTo; zoomAt = st.at; zoomDur = st.zoomDur || 0.35; }
     if (st.focus !== undefined) focus = st.focus;
     if (st.ghostAt !== undefined) ghostAt = st.ghostAt;
+    if (st.ghosts) ghosts = st.ghosts;
+    if (st.rings !== undefined) { rings = st.rings; ringsAt = st.at; }
+    if (st.bigTimer) { big = st.bigTimer; bigAt = st.at; bigStop = null; }
+    if (st.stopBig) bigStop = st.at;
+    if (st.hideBig) big = null;
+    if (st.vignette !== undefined) { vignette = st.vignette; vigAt = st.at; }
+    if (st.reveal) revealAt = st.at;
+    if (st.fix) for (const row of grid) for (const cell of row) if (cell && cell.hold) { const [rr, cc] = cell.pos; cell.v = level.solution[rr][cc]; cell.hold = false; cell.fixedAt = st.at; }
     if (st.countdown) { countdown = st.countdown; countAt = st.at; }
     if (st.banner !== undefined) { banner = st.banner; bannerAt = st.at; }
     if (st.stars) { stars = st.stars; starsAt = st.at; }
@@ -268,7 +323,8 @@ function frame(arg) {
     if (st.end) endAt = st.at;
     if (st.drop) {
       const [c, v] = st.drop, r = landing(c), dur = 0.12 + 0.03 * (r + 2);
-      if (level.solution[r][c] === v) grid[r][c] = { v, at: st.at, dur };
+      if (st.hold) grid[r][c] = { v, at: st.at, dur, hold: true, pos: [r, c] };
+      else if (level.solution[r][c] === v) grid[r][c] = { v, at: st.at, dur };
       else { wrongs.push({ r, c, v, at: st.at, dur }); if (st.at + dur <= t) hearts = Math.max(0, hearts - 1); }
     }
     // Zoom value at this point (for chained tweens).
@@ -302,7 +358,18 @@ function frame(arg) {
       const glow = clamp(1 - (t - cell.at - cell.dur) / 0.4);
       if (glow > 0) extra += `;filter:brightness(${1 + glow * 0.5})`;
     }
-    html += tile(cell.v, cx(c), cy(r), cell.given ? 'given' : 'player', extra);
+    if (cell.hold && revealAt !== null && t >= revealAt) {
+      const k2 = t - revealAt, sh = Math.sin(k2 * 44) * Math.max(0, 0.5 - k2) * s * 0.2;
+      html += tile(cell.v, cx(c) + sh, cy(r), 'wrong', `outline:${s * .06}px solid #fff;outline-offset:${s * .05}px;filter:drop-shadow(0 0 ${s * .3}px #FF6B7A)`);
+    } else {
+      if (cell.fixedAt !== undefined && t - cell.fixedAt < 0.4) extra = `transform:scale(${1 + 0.25 * Math.sin(clamp((t - cell.fixedAt) / 0.4) * Math.PI)});filter:brightness(1.4)`;
+      html += tile(cell.v, cx(c), cy(r), cell.given ? 'given' : 'player', extra);
+    }
+  }
+  for (const [gr, gc] of ghosts) if (!grid[gr][gc]) { const p = 0.75 + 0.25 * Math.sin(t * 7 + gr + gc); html += tile('', cx(gc), cy(gr), 'ghost', `transform:scale(${0.96 + 0.06 * p})`); }
+  if (rings) for (const [rr, rc] of rings) {
+    const k = backOut((t - ringsAt) / 0.3), pul = 1 + 0.06 * Math.sin(t * 9);
+    html += `<div style="position:absolute;left:${cx(rc) - s * .14}px;top:${cy(rr) - s * .14}px;width:${s * 1.28}px;height:${s * 1.28}px;border-radius:50%;border:${Math.max(4, s * .09)}px solid #FF4D5E;box-shadow:0 0 ${s * .5}px rgba(255,77,94,.8);transform:scale(${Math.max(0, k) * pul});box-sizing:border-box"></div>`;
   }
   if (ghostAt) { const p = 0.75 + 0.25 * Math.sin(t * 7); html += tile('', cx(ghostAt[1]), cy(ghostAt[0]), 'ghost', `transform:scale(${0.96 + 0.06 * p})`); }
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
@@ -324,13 +391,13 @@ function frame(arg) {
   // HUD above the board
   const heart = on => `<svg width="24" height="22" viewBox="0 0 24 22"><path d="M12 21s-9-5.6-9-12A5 5 0 0 1 12 6a5 5 0 0 1 9 3c0 6.4-9 12-9 12z" fill="${on ? '#FF6B7A' : '#3A4058'}"/></svg>`;
   let hud = '';
-  if (timer !== null) {
+  if (timer !== null && !noHud) {
     const now = timerStop !== null ? Math.min(t, timerStop) : t;
     const left = Math.max(0, timer - (now - timerAt)), secs = Math.ceil(left), red = left <= 5;
     const pulse = red && timerStop === null ? 1 + 0.12 * Math.pow(Math.max(0, Math.cos((left % 1) * Math.PI * 2)), 6) : 1;
     hud += `<div class="chip" style="left:${bx}px;top:${by - 60}px;transform:scale(${pulse});transform-origin:0 50%;background:${red ? '#E5485A' : 'rgba(39,44,61,.92)'}"><svg width="19" height="19" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="#fff" stroke-width="2.6"/><path d="M12 9v4l3 2M9 2h6" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>0:${String(secs).padStart(2, '0')}</div>`;
   }
-  hud += `<div class="chip" style="right:${bx}px;top:${by - 60}px;gap:4px">${heart(hearts > 0)}${heart(hearts > 1)}${heart(hearts > 2)}</div>`;
+  if (!noHud) hud += `<div class="chip" style="right:${bx}px;top:${by - 60}px;gap:4px">${heart(hearts > 0)}${heart(hearts > 1)}${heart(hearts > 2)}</div>`;
   if (counter) hud += `<div style="position:absolute;left:0;right:0;top:${by + bh + 22}px;text-align:center;font-size:22px;font-weight:700;color:#B3A8FF;letter-spacing:.1em">${counter}</div>`;
   if (stars) {
     let sh = '';
@@ -367,10 +434,16 @@ function frame(arg) {
   let flash = '';
   for (const w of wrongs) { const k = t - w.at - w.dur; if (k >= 0 && k < 0.35) flash = `box-shadow:inset 0 0 160px rgba(255,60,80,${0.7 * (1 - k / 0.35)})`; }
   if (burst === 'big' && t - burstAt >= 0 && t - burstAt < 0.18) flash = `background:rgba(255,255,255,${0.35 * (1 - (t - burstAt) / 0.18)})`;
+  if (vignette && !flash) { const left = big ? big - (t - bigAt) : 1; const beat = Math.pow(Math.max(0, Math.cos(((left % 1) + 1) * Math.PI * 2)), 4); flash = `box-shadow:inset 0 0 ${120 + 80 * beat}px rgba(255,40,60,${0.35 + 0.35 * beat})`; }
   document.getElementById('flash').style.cssText = flash;
   // ---- UI layer: captions, pop, countdown, banner, clock, end card
   let ui = '';
   if (clock) ui += `<div class="chip" style="left:50%;top:52px;transform:translateX(-50%);font-size:22px"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="#B3A8FF"/></svg>${clock}</div>`;
+  if (big !== null) {
+    const now = bigStop !== null ? Math.min(t, bigStop) : t, left = Math.max(0, big - (now - bigAt)), secs = Math.ceil(left), red = left <= 3;
+    const beat = bigStop === null ? Math.pow(Math.max(0, Math.cos((left % 1) * Math.PI * 2)), 6) : 0;
+    ui += `<div style="position:absolute;left:0;right:0;top:${by - 116}px;text-align:center;font-size:${104 * (1 + 0.14 * beat)}px;font-weight:700;line-height:1;color:${red ? '#FF5468' : '#fff'};-webkit-text-stroke:8px #0B0D14;paint-order:stroke fill;font-variant-numeric:tabular-nums">0:0${secs}</div>`;
+  }
   if (pop && t - popAt < 1.1) {
     const k = t - popAt, sc = backOut(k / 0.25) * (1 + 0.04 * Math.sin(k * 12)), op = clamp((1.1 - k) / 0.25);
     ui += `<div id="pop" style="top:${by + bh * 0.5 - 50}px;font-size:${pop.length > 9 ? 62 : 76}px;color:#F5E663;transform:scale(${sc}) rotate(-6deg);opacity:${op}">${pop}</div>`;
