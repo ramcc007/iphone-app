@@ -7,7 +7,7 @@ import FirebaseAnalytics
 
 /// Opt-in ad measurement with Google Analytics for Firebase (owner's decision, 26 October 2026), so Google Ads can count
 /// installs and played levels from NumFall's ads.
-/// - Off until the player taps Allow (Info.plist keeps collection and every consent type off by default).
+/// - Off until the player taps Accept (Info.plist keeps collection and every consent type off by default).
 /// - Never sends the player's name, sessions or iCloud data; only Firebase's automatic app events plus `tutorial_complete`
 ///   and `level_clear` (board and stars).
 /// - No advertising identifier: the app never shows the App Tracking Transparency prompt, so iOS never hands out the IDFA,
@@ -35,7 +35,7 @@ enum AdMeasurement {
         #endif
     }
 
-    /// Whether to ask the player (once, on the home screen).
+    /// Whether the player still has to be asked (RootView also waits for a cleared level).
     static var shouldAsk: Bool { available && choice == .undecided }
 
     static func start() {
@@ -81,36 +81,42 @@ enum AdMeasurement {
     #endif
 }
 
-/// The one-time question, shown on the home screen. Both answers are equally easy; the choice can be changed in Settings.
+/// The one-time question, shown on the home screen after the first cleared level. Both answers are equally easy;
+/// the choice can be changed in Settings.
 struct AdMeasurementPrompt: View {
     let answer: (Bool) -> Void
 
     var body: some View {
         VStack(spacing: 18) {
-            Image(systemName: "chart.bar.xaxis")
+            Image(systemName: "hand.raised.fill")
                 .font(.system(size: 40, weight: .semibold))
                 .foregroundStyle(Theme.accent)
                 .accessibilityHidden(true)
-            Text("Help NumFall find new players?")
+            Text("We value your privacy")
                 .scaledFont(22, .bold)
                 .multilineTextAlignment(.center)
-            Text("Allow NumFall to share anonymous app activity (like installs and levels cleared) with Google, so we can see which of our ads bring new players. Your name and progress are never shared, and nothing is used to show you ads.")
+            Text("NumFall uses Google Analytics to understand how the game is played and to measure our ads. Your name and progress are never shared.")
                 .scaledFont(16, .regular)
                 .foregroundStyle(Theme.muted)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("You can change this any time in Settings.")
-                .scaledFont(14, .regular)
-                .foregroundStyle(Theme.muted)
+            VStack(spacing: 6) {
+                Text("Change this any time in Settings.")
+                    .scaledFont(14, .regular)
+                    .foregroundStyle(Theme.muted)
+                Link("Privacy Policy", destination: AppLinks.privacy)
+                    .scaledFont(14, .semibold)
+                    .frame(minHeight: 44)
+            }
             VStack(spacing: 10) {
                 Button { answer(true) } label: {
-                    Text("Allow").scaledFont(17, .semibold).frame(maxWidth: .infinity, minHeight: 44)
+                    Text("Accept").scaledFont(17, .semibold).frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.borderedProminent)
                 Button { answer(false) } label: {
-                    Text("Don\u{2019}t allow").scaledFont(17, .semibold).frame(maxWidth: .infinity, minHeight: 44)
+                    Text("Decline").scaledFont(17, .semibold).frame(maxWidth: .infinity, minHeight: 44)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.borderedProminent)   // same style as Accept: neither answer is pushed
             }
             .padding(.top, 6)
         }

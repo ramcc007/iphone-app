@@ -4,7 +4,7 @@
 
 ## How it works in the app
 - Swift package `firebase-ios-sdk` (12.x), product **`FirebaseAnalytics`**. It includes Google Ads on-device conversion measurement.
-- **Off until the player chooses.** On the first visit to the home screen the app asks once: "Help NumFall find new players?" with equal **Allow** / **Don't allow** buttons. Settings → Privacy → "Share anonymous ad measurement" changes it later. Turning it off stops collection and resets the analytics ID.
+- **Off until the player chooses.** After the first cleared level, back on the home screen, the app asks once: "We value your privacy" with equal **Accept** / **Decline** buttons and a Privacy Policy link. Settings → Privacy → "Share anonymous ad measurement" changes it later. Turning it off stops collection and resets the analytics ID.
 - Info.plist defaults: collection off, all consent types denied, IDFV off, ad personalisation off. The app never shows the App Tracking Transparency prompt, so iOS never gives out the IDFA.
 - Events: Firebase's automatic ones (`first_open`, `session_start`, `app_update` and similar), plus `tutorial_complete` and `level_clear` (board, stars). **Never** the name, session history or iCloud data.
 - Code: `ios/Numfall/AdMeasurement.swift` (prompt, switch, logging), `ios/project.yml` (package and Info keys), `ios/Numfall/Resources/PrivacyInfo.xcprivacy`.
@@ -42,7 +42,7 @@ Also under **Admin → Data collection**, leave **Google signals** **off**.
 ### 5. Build and submit 1.2
 1. GitHub → **Actions** → **TestFlight upload** → **Run workflow** → version `1.2`.
 2. The log must **not** show the warning "GOOGLE_SERVICE_INFO_PLIST is not set".
-3. Test the TestFlight build on your iPhone (delete the old app first so it starts fresh): after the tutorial the "Help NumFall find new players?" sheet appears; both buttons work; Settings → Privacy shows the switch.
+3. Test the TestFlight build on your iPhone (delete the old app first so it starts fresh): clear one level and go back home: the "We value your privacy" sheet appears; both buttons work; Settings → Privacy shows the switch.
 4. App Store Connect → **App Privacy** → update the answers below **before** submitting.
 5. New version **1.2** → choose the build → What's New (below) → **Add for Review**.
 
@@ -62,10 +62,10 @@ Everything else: not collected. The name, progress and sessions stay on the devi
 
 ## What's New text for 1.2
 ```
-Smoother play and small fixes. New: you can choose whether NumFall may share anonymous app activity with Google to measure our ads. It's off unless you tap Allow, never includes your name or progress, and can be changed any time in Settings.
+Smoother play and small fixes. New: you can choose whether NumFall may share anonymous app activity with Google to measure our ads. It's off unless you tap Accept, never includes your name or progress, and can be changed any time in Settings.
 ```
 
 ## App Review notes addition for 1.2
 ```
-Version 1.2 adds Google Analytics for Firebase for measuring our own Google Ads, opt-in only. After the tutorial the app asks once with equal "Allow" / "Don't allow" buttons and collects nothing unless the player taps Allow; it can be changed in Settings → Privacy. The app does not request App Tracking Transparency and does not access the advertising identifier. The player's name and progress are never sent.
+Version 1.2 adds Google Analytics for Firebase for measuring our own Google Ads, opt-in only. After the player clears their first level, the app asks once ("We value your privacy") with equal "Accept" / "Decline" buttons and collects nothing unless the player taps Accept; it can be changed in Settings → Privacy. The app does not request App Tracking Transparency and does not access the advertising identifier. The player's name and progress are never sent.
 ```

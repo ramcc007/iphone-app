@@ -51,7 +51,7 @@ v1 has nothing to buy. Sparks are earned only and can't be bought, sold or excha
 - [ ] **No account system**, so no account-deletion requirement. If accounts are ever added, in-app account deletion is mandatory (5.1.1(v)), and Sign in with Apple is required if any third-party login is offered (4.8).
 - [ ] **App Tracking Transparency:** no tracking and no IDFA, so there's no prompt. 1.2's ad measurement uses Firebase with ATT never requested (no IDFA), IDFV and ad personalisation off, and Google's on-device conversion measurement. [Legal check: confirm with Apple's tracking definition before submitting 1.2; if in doubt, ask App Review in the notes.]
 - [ ] Ask for permissions (notifications) only in context, with a clear reason. The game still works if the player says no.
-- [ ] Analytics: Apple's App Analytics and crash reports, plus (from 1.2) opt-in Google Analytics for Firebase for ad measurement. Asked once with equal Allow / Don't allow buttons; changeable in Settings → Privacy.
+- [ ] Analytics: Apple's App Analytics and crash reports, plus (from 1.2) opt-in Google Analytics for Firebase for ad measurement. Asked once, after the first cleared level, with equal Accept / Decline buttons; changeable in Settings → Privacy.
 - [ ] GDPR (EU/UK) and CCPA (California): the name and session history never leave the device or the player's own iCloud, so we do not collect them. The privacy policy states that [Check with a template or lawyer].
 
 ## 5. Age rating and young players

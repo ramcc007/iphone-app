@@ -27,6 +27,12 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var askMeasurement = false
 
+    /// The privacy question waits until the player has cleared a real level (owner's decision, 26 October 2026),
+    /// then appears once on the home screen.
+    private var shouldAskMeasurement: Bool {
+        AdMeasurement.shouldAsk && app.progress.sessions.contains { $0.outcome == .won }
+    }
+
     /// Game Center sign-in waits until the player is past the Welcome screen.
     private func startServicesIfReady() {
         if app.route != .welcome { GameCenterService.shared.start() }
@@ -53,12 +59,12 @@ struct RootView: View {
             Haptics.enabled = app.progress.hapticsOn
             Sound.enabled = app.progress.soundOn
             startServicesIfReady()
-            if app.route == .home, AdMeasurement.shouldAsk { askMeasurement = true }
+            if app.route == .home, shouldAskMeasurement { askMeasurement = true }
             Reminders.reschedule(doneToday: app.progress.dailyDone(on: DayKey(date: Date())))
         }
         .onChange(of: app.route) { _, route in
             startServicesIfReady()
-            if route == .home, AdMeasurement.shouldAsk { askMeasurement = true }
+            if route == .home, shouldAskMeasurement { askMeasurement = true }
         }
         .sheet(isPresented: $askMeasurement) {
             AdMeasurementPrompt { allowed in
