@@ -8,6 +8,9 @@
 #   ASC_ISSUER_ID    Issuer ID shown above the keys list (a UUID)
 #   ASC_KEY_P8       The whole text of the downloaded AuthKey_XXXXXXXXXX.p8 file, including the BEGIN/END lines
 #   APPLE_TEAM_ID    Team ID from developer.apple.com → Account → Membership details (10 characters)
+# Optional (opt-in ad measurement, from 1.2):
+#   GOOGLE_SERVICE_INFO_PLIST  The whole text of GoogleService-Info.plist from the Firebase console (iOS app store.numfall.app).
+#                              Without it the app builds and works, but measurement is off and the Allow prompt never appears.
 name: TestFlight upload
 
 on:
@@ -52,6 +55,19 @@ jobs:
       - name: Game rules tests (NumfallCore)
         working-directory: ios/NumfallCore
         run: swift test
+
+      - name: Add the Firebase configuration (opt-in ad measurement)
+        env:
+          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+        run: |
+          if [ -z "$GOOGLE_SERVICE_INFO_PLIST" ]; then
+            echo "::warning::GOOGLE_SERVICE_INFO_PLIST is not set: this build has no ad measurement (the app works the same)."
+            exit 0
+          fi
+          printf '%s\n' "$GOOGLE_SERVICE_INFO_PLIST" > ios/Numfall/GoogleService-Info.plist
+          plutil -lint ios/Numfall/GoogleService-Info.plist
+          BID=$(/usr/libexec/PlistBuddy -c 'Print :BUNDLE_ID' ios/Numfall/GoogleService-Info.plist)
+          if [ "$BID" != "store.numfall.app" ]; then echo "::error::GoogleService-Info.plist is for $BID, not store.numfall.app"; exit 1; fi
 
       - name: Generate the Xcode project
         working-directory: ios

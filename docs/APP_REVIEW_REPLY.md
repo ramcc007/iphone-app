@@ -18,6 +18,7 @@ NumFall is a single-player number puzzle with gravity, for anyone aged 4+ who en
 No login, account or sample files are needed. On first launch, type any name (for example "Alex") and tap "Let's play". A short tutorial teaches the move. From the home screen, pick a board (Quick, Classic or Master) and tap the Play button, or open the Daily Drop card. All three boards are open from the start.
 
 4. EXTERNAL SERVICES
+(Written for 1.0. From 1.2 add: "Google Analytics for Firebase, opt-in only: the app asks once with equal Allow / Don't allow buttons and collects nothing unless the player taps Allow. Used to measure our own Google Ads. No IDFA, no ATT prompt, never the player's name or progress.")
 The app uses no third-party services, SDKs, servers, analytics, advertising, payment processors or AI services. It uses only Apple frameworks:
 - Apple Game Center (GameKit): optional achievements and leaderboards. The game works fully without signing in.
 - Apple iCloud key-value storage: syncs the player's own progress across their devices. The developer receives none of it.

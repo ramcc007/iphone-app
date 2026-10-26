@@ -88,6 +88,7 @@ struct SettingsView: View {
     @EnvironmentObject private var app: AppModel
     @State private var confirmReset = false
     @State private var reminderOn = Reminders.enabled
+    @State private var measurementOn = AdMeasurement.choice == .allowed
     @ObservedObject private var gameCenter = GameCenterService.shared
 
     var body: some View {
@@ -134,6 +135,18 @@ struct SettingsView: View {
                     Text(gameCenter.signedIn
                          ? "Your stars and Daily Drop streak can appear on Apple\u{2019}s Game Center leaderboards."
                          : "Sign in to Game Center in iOS Settings to see leaderboards. The game works the same without it.")
+                }
+                if AdMeasurement.available {
+                    Section {
+                        Toggle("Share anonymous ad measurement", isOn: Binding(
+                            get: { measurementOn },
+                            set: { value in AdMeasurement.set(allowed: value); measurementOn = value }
+                        ))
+                    } header: {
+                        Text("Privacy")
+                    } footer: {
+                        Text("Lets Google count installs and levels cleared, so we can see which ads bring new players. Never your name or progress, and never used to show you ads.")
+                    }
                 }
                 Section("Progress") {
                     LabeledContent("Sparks", value: "\(app.progress.sparks)")

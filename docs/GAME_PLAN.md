@@ -192,7 +192,7 @@ Version 1 has **no ads and no In-App Purchases**. Every Spark is earned by playi
 - **NumFall Complete:** a one-time purchase that unlocks all themes and gives bonus Sparks.
 - **Rewarded ads:** watch an ad for Sparks.
 
-**Owner's decision (7 October 2026):** v1 ships with no ads, no In-App Purchases and no third-party SDKs. **Ads and In-App Purchases are planned for a later version.** Nothing is installed for them now. When that version is planned, follow the checklist in "Adding ads and purchases later" below.
+**Owner's decision (7 October 2026):** v1 ships with no ads, no In-App Purchases and no third-party SDKs. **Ads and In-App Purchases are planned for a later version.** Nothing is installed for them now. (26 October 2026: opt-in Google Analytics for Firebase was added in 1.2 for ad measurement only; see `docs/GOOGLE_ADS_MEASUREMENT.md`.) When that version is planned, follow the checklist in "Adding ads and purchases later" below.
 
 Because v1 players will have earned everything by playing, any later purchases must only be optional shortcuts. Levels must never be made harder to push people towards paying.
 

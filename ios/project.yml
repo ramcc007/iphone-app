@@ -9,6 +9,10 @@ options:
 packages:
   NumfallCore:
     path: NumfallCore
+  # Google Analytics for Firebase: opt-in ad measurement only (owner's decision, 26 October 2026; see ios/Numfall/AdMeasurement.swift).
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: "12.0.0"
 targets:
   Numfall:
     type: application
@@ -17,6 +21,8 @@ targets:
       - path: Numfall
     dependencies:
       - package: NumfallCore
+      - package: Firebase
+        product: FirebaseAnalytics          # includes Google Ads on-device conversion measurement; no IDFA without the ATT prompt
     entitlements:
       path: Numfall/Numfall.entitlements
       # Listed here because XcodeGen writes this file from these properties (an empty list gave build 7 no Game Center or iCloud).
@@ -31,6 +37,13 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.puzzle-games
         ITSAppUsesNonExemptEncryption: false
+        # Measurement stays off until the player taps Allow (AdMeasurement turns it on). No IDFV, no ad personalisation.
+        FIREBASE_ANALYTICS_COLLECTION_ENABLED: false
+        GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED: false
+        GOOGLE_ANALYTICS_DEFAULT_ALLOW_ANALYTICS_STORAGE: false
+        GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_STORAGE: false
+        GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_USER_DATA: false
+        GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS: false
         CFBundleURLTypes:                              # numfall://daily opens today's Daily Drop (In-App Event deep link)
           - CFBundleURLName: store.numfall.app
             CFBundleURLSchemes: [numfall]
@@ -49,7 +62,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: store.numfall.app    # permanent: registered in the Apple Developer account and App Store Connect
-        MARKETING_VERSION: "1.1"
+        MARKETING_VERSION: "1.2"
         CURRENT_PROJECT_VERSION: "1"
         TARGETED_DEVICE_FAMILY: "1,2"                  # iPhone and iPad
         SWIFT_VERSION: "5.0"
@@ -58,6 +71,7 @@ targets:
         CODE_SIGN_STYLE: Automatic
         ENABLE_PREVIEWS: YES
         SUPPORTS_MACCATALYST: NO
+        OTHER_LDFLAGS: "$(inherited) -ObjC"            # Firebase Analytics needs its Objective-C categories linked
         SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: YES
       configs:
         # Release is only built by .github/workflows/testflight.yml, which creates a short-lived Apple Distribution

@@ -149,6 +149,7 @@ final class AppModel: ObservableObject {
     }
 
     func finishTutorial() {
+        if !progress.tutorialDone { AdMeasurement.log("tutorial_complete") }
         update { $0.finishTutorial(device: deviceID) }
     }
 
@@ -169,6 +170,10 @@ final class AppModel: ObservableObject {
         let record = SessionRecord(levelID: levelID, startedAt: startedAt, seconds: max(0, seconds),
                                    outcome: outcome, stars: stars, sparks: sparks)
         update { $0.record(record) }
+        if outcome == .won {
+            // Opt-in only (see AdMeasurement): the board and stars, never the name or the session history.
+            AdMeasurement.log("level_clear", ["board": String(levelID.split(separator: "-").first ?? ""), "stars": stars])
+        }
     }
 
     /// Removes everything, including the name and session history, and starts again at Welcome.

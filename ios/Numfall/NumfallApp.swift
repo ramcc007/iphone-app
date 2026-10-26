@@ -5,6 +5,10 @@ import NumfallCore
 struct NumfallApp: App {
     @StateObject private var app = AppModel()
 
+    init() {
+        AdMeasurement.start()   // does nothing until the player allows it (and only in builds with the Firebase file)
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()
@@ -21,6 +25,7 @@ struct NumfallApp: App {
 struct RootView: View {
     @EnvironmentObject private var app: AppModel
     @Environment(\.scenePhase) private var scenePhase
+    @State private var askMeasurement = false
 
     /// Game Center sign-in waits until the player is past the Welcome screen.
     private func startServicesIfReady() {
@@ -48,9 +53,19 @@ struct RootView: View {
             Haptics.enabled = app.progress.hapticsOn
             Sound.enabled = app.progress.soundOn
             startServicesIfReady()
+            if app.route == .home, AdMeasurement.shouldAsk { askMeasurement = true }
             Reminders.reschedule(doneToday: app.progress.dailyDone(on: DayKey(date: Date())))
         }
-        .onChange(of: app.route) { _, _ in startServicesIfReady() }
+        .onChange(of: app.route) { _, route in
+            startServicesIfReady()
+            if route == .home, AdMeasurement.shouldAsk { askMeasurement = true }
+        }
+        .sheet(isPresented: $askMeasurement) {
+            AdMeasurementPrompt { allowed in
+                AdMeasurement.set(allowed: allowed)
+                askMeasurement = false
+            }
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Reminders.reschedule(doneToday: app.progress.dailyDone(on: DayKey(date: Date()))) }
         }

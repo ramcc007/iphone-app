@@ -9,7 +9,7 @@ Key facts:
 - Levels come in named groups of ten, each with a difficulty meter of one to five flames.
 - Daily Drop: one new puzzle per day, the same for every player, with a streak.
 - Sparks are earned by playing and spent on hints, undos, an extra heart or skipping a level. They cannot be bought.
-- No ads, no in-app purchases, no accounts and no tracking. The App Store privacy label is "Data Not Collected". The player's name and progress stay on their device and in their own iCloud.
+- No ads, no in-app purchases and no accounts. The player's name and progress stay on their device and in their own iCloud. From version 1.2, optional anonymous ad measurement (Google Analytics for Firebase) runs only if the player taps Allow; no advertising identifier and no tracking.
 - Accessibility: Dynamic Type, VoiceOver and Reduce Motion.
 - Website: {{siteUrl}} · Support email: {{supportEmail}}
 

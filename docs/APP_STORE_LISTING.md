@@ -83,6 +83,7 @@ Cartoon or fantasy violence, realistic violence, sexual content or nudity, profa
 Unrestricted web access: **No**. User-generated content: **No**. Loot boxes or simulated gambling: **No**.
 
 ## App Privacy (App Store Connect)
+**From version 1.2 use the answers in `docs/GOOGLE_ADS_MEASUREMENT.md` (opt-in Google Analytics for Firebase).** Versions 1.0 and 1.1 were:
 "Data Not Collected." (Game Center scores and achievements go only to Apple's Game Center. Confirm in App Store Connect's privacy questionnaire that using GameKit does not require declaring data as collected by the developer; it normally does not.) The app has no analytics, advertising or third-party code, and the developer receives nothing. The name, progress and sessions stay on the device and in the player's own iCloud (Apple's key-value storage), which is not "collected" by the developer. Tracking: **No**. Re-check this answer if anything below changes.
 
 ## Notes for App Review

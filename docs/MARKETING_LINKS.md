@@ -4,7 +4,7 @@ Every link opens the normal NumFall App Store page. The `ct=` part tells App Sto
 App Store Connect → NumFall → Analytics → Acquisition → Campaigns (data appears after a few installs, usually within 1-3 days).
 `pt=129582636` is the developer's provider ID; it is public in every link and is not a secret.
 
-Rules: use the link for that channel only. Never shorten links with services that add tracking (keep "Data Not Collected" honest).
+Rules: use the link for that channel only. Never shorten links with services that add tracking (keep our privacy promises honest).
 Apple shows campaign data only once a campaign has enough installs, so small numbers may appear as blank.
 
 | Campaign | Where to use it | Link |

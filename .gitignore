@@ -13,3 +13,6 @@ site/dist/
 
 # Private website values (name, email)
 site/site.config.local.json
+
+# Firebase app configuration: written by the TestFlight workflow from the GOOGLE_SERVICE_INFO_PLIST secret
+ios/Numfall/GoogleService-Info.plist

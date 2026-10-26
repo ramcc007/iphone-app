@@ -1,10 +1,10 @@
-<!-- title: Privacy Policy | description: What {{appName}} stores, where it stays, and how to delete it. We do not collect your data. -->
+<!-- title: Privacy Policy | description: What {{appName}} stores, where it stays, the optional ad measurement you can allow, and how to delete it. -->
 <div class="narrow page">
 <h1>Privacy Policy</h1>
 <p class="meta">Effective {{effectiveDate}}. Applies to the {{appName}} app for iPhone and iPad, the {{appName}} web preview and this website.</p>
-<p class="lead">The short version: the {{appName}} app does not collect your data. What the game needs to remember stays on your device and in your own iCloud. We have no server that receives it, and we cannot see it.</p>
+<p class="lead">The short version: your name and progress stay on your device and in your own iCloud. We have no server that receives them, and we cannot see them. From version 1.2 the app can also share anonymous app activity with Google to measure our ads, <strong>but only if you tap Allow</strong>.</p>
 
-<div class="glance"><div><span>&#128683;</span>No ads</div><div><span>&#128065;</span>No tracking in the app</div><div><span>&#128274;</span>No accounts</div><div><span>&#128241;</span>Data stays on your device</div></div>
+<div class="glance"><div><span>&#128683;</span>No ads</div><div><span>&#128065;</span>Ad measurement only if you allow it</div><div><span>&#128274;</span>No accounts</div><div><span>&#128241;</span>Data stays on your device</div></div>
 
 <h2>Who we are</h2>
 <p>{{appName}} is published by {{legalName}} (&ldquo;we&rdquo;). Contact: {{emailLink}}.</p>
@@ -26,12 +26,23 @@
 
 <h2>What the app does not do</h2>
 <ul>
-<li>No advertising and no advertising identifiers.</li>
-<li>No tracking of you across other companies&rsquo; apps and websites.</li>
-<li>No analytics or crash-reporting software of our own, and no third-party software development kits (SDKs).</li>
+<li>No advertising in the app, and no advertising identifier (IDFA): the app never asks to track you.</li>
+<li>No tracking of you across other companies&rsquo; apps and websites, and nothing is used to show you personalised ads.</li>
+<li>Your name, progress and session history are never sent to us or to Google.</li>
 <li>No accounts or sign-in.</li>
-<li>No sale or sharing of data, because we do not have any.</li>
-<li>We run no server. The only network traffic is Apple&rsquo;s own iCloud and Game Center, if you use them (see below).</li>
+<li>No sale of data.</li>
+<li>We run no server. Network traffic is Apple&rsquo;s own iCloud and Game Center if you use them, and Google Analytics only if you allow ad measurement (see below).</li>
+</ul>
+
+<h2 id="measurement">Ad measurement (optional, from version 1.2)</h2>
+<p>We advertise {{appName}} with Google Ads. To see which ads bring new players, version 1.2 and later include Google Analytics for Firebase. It is <strong>off until you choose</strong>: the app asks once (&ldquo;Help NumFall find new players?&rdquo;) with two equal buttons, and nothing is collected unless you tap <strong>Allow</strong>.</p>
+<ul>
+<li><strong>What is shared if you allow it:</strong> a random identifier for this installation of the app (not your Apple ID and not the advertising identifier), app activity such as the first time the app opens, finishing the tutorial and clearing a level (the board and stars), basic device information (model, iOS version, app version) and an approximate location (country or region) that Google works out from your IP address.</li>
+<li><strong>What is never shared:</strong> your name, your session history, your iCloud data, or anything you type.</li>
+<li><strong>Why:</strong> to count installs and played levels that come from our own ads, and to understand how many people play (analytics). It is not used to show you ads, and ad personalisation is turned off.</li>
+<li><strong>Who processes it:</strong> Google, under the <a href="https://policies.google.com/privacy">Google Privacy Policy</a> and Google&rsquo;s data processing terms. Google may process it outside your country.</li>
+<li><strong>How long:</strong> we keep Analytics data for 2 months.</li>
+<li><strong>Your choice:</strong> change it any time in the app: Settings &rarr; Privacy &rarr; &ldquo;Share anonymous ad measurement&rdquo;. Turning it off stops collection and resets the app&rsquo;s analytics identifier.</li>
 </ul>
 
 <h2>Game Center (optional)</h2>
@@ -61,7 +72,7 @@
 <p>The web version saves your name and progress in your browser&rsquo;s local storage on your own device. Nothing is sent to us. Clearing your browser data removes it.</p>
 
 <h2>Children</h2>
-<p>{{appName}} is a general-audience puzzle game. We do not knowingly collect personal information from anyone, including children, because the app does not send any information to us. If you are under 13 (or the age required where you live), please ask a parent or guardian before typing your name in the app, and use a first name or nickname instead.</p>
+<p>{{appName}} is a general-audience puzzle game. We do not knowingly collect personal information from anyone, including children: the app never sends us your name or progress, and the optional ad measurement above is anonymous and only runs if it is allowed. If you are under 13 (or the age required where you live), please ask a parent or guardian before typing your name in the app, and use a first name or nickname instead.</p>
 
 <h2>Keeping and deleting your data</h2>
 <ul>
@@ -71,7 +82,7 @@
 </ul>
 
 <h2>Your rights</h2>
-<p>Depending on where you live (for example under the EU and UK GDPR or the California CCPA) you may have rights to access, correct, delete or move your personal data. Because we do not hold your data, you exercise these yourself with the controls above. If you have a question, email {{emailLink}}.</p>
+<p>Depending on where you live (for example under the EU and UK GDPR or the California CCPA) you may have rights to access, correct, delete or move your personal data. We do not hold your name or progress, so you exercise those rights yourself with the controls above. For ad measurement, turn it off in Settings (this also resets the identifier); Google deletes Analytics data after 2 months. If you have a question, email {{emailLink}}.</p>
 
 <h2>Changes to this policy</h2>
 <p>If we ever change what the app stores or add anything that sends data off your device, we will update this page and the App Privacy details in the App Store before the change ships, and the effective date above will change.</p>

@@ -75,7 +75,7 @@ How it plays: tap a number, tap a column, and it falls to the lowest empty cell.
 - 3 boards: Quick 4×4 (30 levels), Classic 6×6 (100), Master 9×9 (100), all open from the start
 - A Daily Drop puzzle that's the same for everyone, with streaks and Game Center leaderboards
 - Every level solvable by logic, no guessing
-- No ads, no in-app purchases, no account, no tracking
+- No ads, no in-app purchases, no account
 - iPhone and iPad, syncs with iCloud
 
 App Store: <reddit link>
@@ -106,7 +106,7 @@ I'm a solo developer and just launched NumFall on iPhone and iPad. It's a number
 - 230 levels on three boards (4×4, 6×6, 9×9), all solvable without guessing
 - A daily puzzle that's the same for everyone, with streaks and Game Center leaderboards
 - From 15 November: "The 30-Day Daily Drop" event
-- No ads, no in-app purchases, no tracking, no account
+- No ads, no in-app purchases, no account
 
 Screenshots and icon: https://www.numfall.store
 Happy to answer anything or send a short gameplay video.
@@ -144,7 +144,7 @@ LinkedIn (ct=linkedin):
 ```
 I just shipped my first iPhone and iPad game, NumFall 🎉
 
-It's a number puzzle with gravity: numbers drop into columns, so the order you play them is the puzzle. 230 levels, a daily challenge, Game Center leaderboards. No ads, no tracking.
+It's a number puzzle with gravity: numbers drop into columns, so the order you play them is the puzzle. 230 levels, a daily challenge, Game Center leaderboards. No ads.
 
 The part I'm proudest of: I don't own a Mac. I built it on Windows, and GitHub's cloud Macs compile, sign and upload it to Apple.
 
@@ -166,7 +166,7 @@ If you like puzzles, give it a try and tell me what you think: <linkedin link>
 **Product Hunt** (ct=producthunt): launch on a Tuesday-Thursday, 00:01 Pacific. Expect a small bump.
 - Name: NumFall
 - Tagline (60 max): `A number puzzle where gravity changes everything`
-- Description: `Tap a number, tap a column, watch it fall to the lowest gap. Fill the grid so every row, column and box has each number once, before the clock runs out. 230 levels, a daily puzzle and Game Center leaderboards. No ads, no tracking.`
+- Description: `Tap a number, tap a column, watch it fall to the lowest gap. Fill the grid so every row, column and box has each number once, before the clock runs out. 230 levels, a daily puzzle and Game Center leaderboards. No ads.`
 - First comment: why you made it, the "no Mac" story in two lines, one question for the community.
 
 **Indie Hackers**: a short post on building and launching without a Mac, with what worked and what didn't (people there like honest numbers).
