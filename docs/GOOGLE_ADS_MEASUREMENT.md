@@ -60,7 +60,7 @@ Everything else: not collected. The name, progress and sessions stay on the devi
 
 ⚠ **Owner and legal check:** Apple's definition of "tracking" covers linking app data with other companies' data for ad measurement. We answer **No** because there is no IDFA, no ATT prompt, IDFV and ad personalisation are off, and Google's on-device measurement keeps matching on the device. If you or an adviser read it differently, the answers become "Used for tracking: Yes" and the app must show the ATT prompt before measurement starts. Ask before submitting if unsure.
 
-## What's New text for 1.2
+## What's New text for 1.2 (paste it in English (U.S.) **and** English (U.K.): language menu, top right)
 ```
 Smoother play and small fixes. New: you can choose whether NumFall may share anonymous app activity with Google to measure our ads. It's off unless you tap Accept, never includes your name or progress, and can be changed any time in Settings.
 ```

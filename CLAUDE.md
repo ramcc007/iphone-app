@@ -23,4 +23,5 @@ It **will be published on the Apple App Store**, and a marketing/support website
 - Only original or properly licensed art, sound, fonts and code. Never copy another game's name, look or assets.
 - Keep the website in mind: the privacy policy, terms, support page and marketing page must exist at public URLs before submission.
 - Flag anything that needs a human decision or legal check rather than guessing.
+- **Every App Store update: give What's New (and any keyword or promo changes) for every localisation**: English (U.S.) and English (U.K.) today. A missing localisation blocks "Add for Review" (happened with 1.2).
 - Planning documents live in `docs/`.
