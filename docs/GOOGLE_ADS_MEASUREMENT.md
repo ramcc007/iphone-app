@@ -47,6 +47,8 @@ Also under **Admin → Data collection**, leave **Google signals** **off**.
 5. New version **1.2** → choose the build → What's New (below) → **Add for Review**.
 
 ## App Privacy answers for 1.2 (App Store Connect → App Privacy → Edit)
+
+> **1.2 was rejected on 27 Oct 2026 (Guideline 5.1.2(i))** because the published label said these types were **used to track**. Every row must say **Used for tracking: No**; otherwise Apple requires the ATT prompt. Check the published label shows no "Data Used to Track You" section before submitting.
 **Do you or your third-party partners collect data from this app?** Yes.
 
 | Data type | Collected | Used for | Linked to the user? | Used for tracking? |
