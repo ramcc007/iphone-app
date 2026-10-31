@@ -59,7 +59,7 @@ function load(){if(window.gtag)return;var s=document.createElement('script');s.a
 function get(){try{return localStorage.getItem(k);}catch(e){return null;}}
 function set(v){try{localStorage.setItem(k,v);}catch(e){}}
 var c=get();if(c==='yes')load();else if(c!=='no')b.hidden=false;
-b.addEventListener('click',function(e){var v=e.target.getAttribute('data-c');if(!v)return;set(v);b.hidden=true;if(v==='yes')load();else location.reload();});
+b.addEventListener('click',function(e){var v=e.target.getAttribute('data-c');if(!v)return;set(v);b.hidden=true;if(v==='yes')load();else if(window.gtag)location.reload();});
 var r=document.getElementById('cookie-settings');if(r)r.addEventListener('click',function(e){e.preventDefault();try{localStorage.removeItem(k);}catch(x){}b.hidden=false;});})();</script>` : '';
   // Smart App Banner: Safari on iPhone and iPad shows Apple's "Get" bar at the top of every page.
   const appId = (cfg.appStoreUrl.match(/id(\d+)/) || [])[1];
