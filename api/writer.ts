@@ -8,6 +8,7 @@ import { lastSubmission } from '../writer/server/indexnow';
 import { pausedUntil } from '../writer/server/humanizer';
 import { parseSection } from '../writer/server/steps';
 import { mergeSettings } from '../writer/shared/settings';
+import { saveBlogPost } from '../writer/server/blog';
 import type { Article, Block, Settings } from '../writer/shared/types';
 
 const RUN_BUDGET_MS = 240_000;
@@ -47,6 +48,13 @@ export async function GET(req: Request): Promise<Response> {
         return json(await appFacts(u.searchParams.get('refresh') === '1'));
       case 'posts':
         return json(await db.postsIndex());
+      case 'blog_list':
+        return json(await db.blogList());
+      case 'blog_get': {
+        const p = await db.blogGet(u.searchParams.get('id') ?? '');
+        if (!p) throw new HttpError(404, 'Post not found.');
+        return json(p);
+      }
       default:
         throw new HttpError(404, 'Unknown action.');
     }
@@ -117,6 +125,10 @@ export async function POST(req: Request): Promise<Response> {
         await db.release(id, owner);
         return json(a);
       }
+      case 'blog_save':
+        return json(await saveBlogPost(body.post as Record<string, unknown>, String(body.intent ?? 'draft') as 'draft' | 'publish' | 'unpublish'));
+      case 'blog_delete':
+        return json(await db.blogDelete(String(body.id ?? '')));
       case 'settings': {
         const s = mergeSettings(body.settings as Partial<Settings>);
         return json(await db.putSettings(s));

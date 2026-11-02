@@ -5,7 +5,7 @@ import { LENGTHS, appStoreLink } from '../shared/settings';
 import { bannedWordHits, cleanArticle, hasNeverPublish, nameHits, structureHits, toSymbols, unsupportedClaims, headingSymbols } from '../shared/clean';
 import { applyUnits, factProblem, humanizeUnits } from '../shared/humanize';
 import { addSlips } from '../shared/slips';
-import { insertLink } from '../shared/links';
+import { insertLink, linkifyBare } from '../shared/links';
 import { bodyWords, cleanSlug, normHeading, plainText, sentenceCase, sentences, titleShape, words } from '../shared/text';
 import { callClaude, parseJson } from './claude';
 import { scan } from './gptzero';
@@ -245,9 +245,9 @@ export function codeRules(a: Article, s: Settings): string[] {
   // At most 2 NumFall mentions; later ones go.
   let seen = 0;
   mapSentences(a, x => (/numfall/i.test(x) ? (++seen > 2 ? (removed.push(x), null) : x) : x));
-  // Every App Store link carries this article's campaign token.
+  // Every link is a real link (no bare addresses), and every App Store link carries this article's campaign token.
   const link = appStoreLink(a.slug ?? '');
-  const fixLinks = (t: string) => t.replace(/\]\((https:\/\/apps\.apple\.com\/[^)]*)\)/g, `](${link})`);
+  const fixLinks = (t: string) => linkifyBare(t).replace(/\]\((https:\/\/apps\.apple\.com\/[^)]*)\)/g, `](${link})`);
   a.body = a.body.map(b => (b.type === 'p' ? { ...b, text: fixLinks(b.text) } : b.type === 'h2' ? b : { ...b, items: b.items.map(fixLinks) }));
   a.faq = a.faq.map(f => ({ ...f, a: fixLinks(f.a) }));
   a.body = a.body.filter((b, i, arr) => !(b.type === 'h2' && (i === arr.length - 1 || arr[i + 1].type === 'h2')));

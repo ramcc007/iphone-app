@@ -34,7 +34,7 @@ beforeEach(() => {
   fake.claudeFail = null;
   // One live article to link to.
   fake.posts.push({
-    article_id: 'old', slug: 'an-existing-live-post', title: 'Naked pairs in small grids', description: 'd', author: 'Ram Das', category: 'How-to and techniques', tags: [], html: '<p>x</p>', faq: [], headings: ['Rows first before boxes'], related: [], word_count: 500, reading_minutes: 2,
+    id: 'old-id', article_id: 'old', slug: 'an-existing-live-post', title: 'Naked pairs in small grids', description: 'd', author: 'Ram Das', category: 'How-to and techniques', tags: [], html: '<p>x</p>', faq: [], headings: ['Rows first before boxes'], related: [], word_count: 500, reading_minutes: 2,
     status: 'published', publish_at: new Date(Date.now() - 86400_000).toISOString(), updated_at: new Date().toISOString(),
   });
 });
@@ -309,4 +309,65 @@ test('RSS feed lists live articles; IndexNow gets everything once, then only new
   fake.posts.push({ ...fake.posts[0], article_id: 'new', slug: 'brand-new-live-post', publish_at: t, updated_at: t });
   await submitToIndexNow(new Date(Date.now() + 5000));
   assert.deepEqual(fake.calls.indexnow[1].urlList, ['https://www.numfall.store/blog', 'https://www.numfall.store/blog/brand-new-live-post']);
+});
+
+test('blog manager: drafts stay private, publish and schedule work, HTML is cleaned, delete removes', async () => {
+  const c = await cookie();
+  const call = async (body: Record<string, unknown>) => {
+    const r = await writerApi.POST(new Request('http://x/api/writer', { method: 'POST', headers: { cookie: c }, body: JSON.stringify(body) }));
+    return { status: r.status, json: (await r.json()) as Record<string, unknown> };
+  };
+  const words = Array.from({ length: 130 }, (_, i) => `word${i}`).join(' ');
+  const post = {
+    title: 'Pencil marks on a 6×6 grid',
+    slug: 'pencil-marks-six-grid',
+    html: `<h2>First steps</h2><p onclick="x()">Solvers note candidates. ${words}</p><script>alert(1)</script><img src=x onerror=alert(1)><p><a href="javascript:alert(1)">bad</a> <a href="/blog/an-existing-live-post">good</a> https://apps.apple.com/app/id6820579220</p>`,
+    excerpt: 'How solvers use pencil marks.',
+    description: 'How solvers use pencil marks on a 6×6 grid.',
+    meta_title: 'Pencil marks on 6×6 grids',
+    author: 'Emily Carter',
+    category: 'How-to and techniques',
+    tags: ['6x6', 'notes'],
+    faq: [{ q: 'what are pencil marks', a: 'Small notes of possible numbers. See https://www.numfall.store/ for the app.' }],
+    sources: [{ name: 'Example', url: 'https://example.org/a' }, { name: 'Bad', url: 'javascript:1' }],
+  };
+  // Draft: saved, never public.
+  const d = await call({ action: 'blog_save', intent: 'draft', post });
+  assert.equal(d.status, 200, JSON.stringify(d.json));
+  assert.equal(d.json.status, 'draft');
+  const html = String(d.json.html);
+  assert.ok(!/script|onclick|onerror|<img|javascript/i.test(html), html);
+  assert.ok(html.includes('<a href="/blog/an-existing-live-post">good</a>'));
+  assert.equal((d.json.sources as unknown[]).length, 1);
+  assert.deepEqual(d.json.headings, ['First steps']);
+  let r = await pageApi.GET(new Request('https://www.numfall.store/api/page?r=post&slug=pencil-marks-six-grid'));
+  assert.equal(r.status, 404, 'drafts are not public');
+
+  // Publish now: public, with TOC-ready headings, sources, linked bare URLs, meta title.
+  const pub = await call({ action: 'blog_save', intent: 'publish', post: { ...post, id: d.json.id, publish_at: new Date(Date.now() - 1000).toISOString() } });
+  assert.equal(pub.json.status, 'published');
+  r = await pageApi.GET(new Request('https://www.numfall.store/api/page?r=post&slug=pencil-marks-six-grid'));
+  assert.equal(r.status, 200);
+  const page = await r.text();
+  assert.match(page, /<title>Pencil marks on 6×6 grids \| NumFall<\/title>/);
+  assert.match(page, /<h2 id="first-steps">First steps<\/h2>/);
+  assert.match(page, /class="sources"[\s\S]*example\.org\/a/);
+  assert.match(page, /<a href="https:\/\/apps\.apple\.com\/app\/id6820579220"[^>]*>NumFall on the App Store<\/a>/, 'bare App Store address became a link');
+  assert.match(page, /<a href="https:\/\/www\.numfall\.store\/">numfall\.store<\/a>/, 'bare address in the FAQ became a link');
+  const cat = await (await pageApi.GET(new Request('https://www.numfall.store/api/page?r=blog&cat=how-to-and-techniques'))).text();
+  assert.ok(cat.includes('/blog/pencil-marks-six-grid') && cat.includes('class="gridmark'));
+
+  // Future date: scheduled, 404 for visitors.
+  const sch = await call({ action: 'blog_save', intent: 'publish', post: { ...post, id: d.json.id, publish_at: new Date(Date.now() + 86400_000).toISOString() } });
+  assert.equal(sch.json.status, 'scheduled');
+  // Duplicate slug and bad slug are refused with a plain message.
+  const dup = await call({ action: 'blog_save', intent: 'draft', post: { ...post, slug: 'an-existing-live-post' } });
+  assert.equal(dup.status, 409);
+  const bad = await call({ action: 'blog_save', intent: 'draft', post: { ...post, slug: 'two-words' } });
+  assert.equal(bad.status, 400);
+  // List and delete.
+  const list = (await (await writerApi.GET(new Request('http://x/api/writer?action=blog_list', { headers: { cookie: c } }))).json()) as { id: string }[];
+  assert.ok(list.some(x => x.id === d.json.id));
+  await call({ action: 'blog_delete', id: d.json.id });
+  assert.ok(!fake.posts.some(p => p.id === d.json.id));
 });

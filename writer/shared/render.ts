@@ -1,5 +1,6 @@
 // Article blocks to the HTML stored in public.posts.html. The page adds the app cards, FAQ and extras.
 import type { Block } from './types';
+import { linkifyBare } from './links';
 
 export const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -33,9 +34,9 @@ export function blocksToHtml(body: Block[]): string {
     .map((b, i) => {
       const pre = i === mid ? APP_CARD_MARK + '\n' : '';
       if (b.type === 'h2') return `${pre}<h2 id="${headingId(b.text)}">${escapeHtml(b.text)}</h2>`;
-      if (b.type === 'p') return `${pre}<p>${inline(b.text)}</p>`;
+      if (b.type === 'p') return `${pre}<p>${inline(linkifyBare(b.text))}</p>`;
       const tag = b.type;
-      return `${pre}<${tag}>${b.items.map(it => `<li>${inline(it)}</li>`).join('')}</${tag}>`;
+      return `${pre}<${tag}>${b.items.map(it => `<li>${inline(linkifyBare(it))}</li>`).join('')}</${tag}>`;
     })
     .join('\n');
 }

@@ -13,7 +13,7 @@ export interface Calls {
 }
 
 type ArticleRow = { id: string; batch_id: string | null; position: number; status: string; stopped: boolean; next_attempt_at: string; lease_owner: string | null; lease_until: string | null; publish_at: string | null; slug: string | null; data: Record<string, unknown>; created_at: string; updated_at: string };
-type PostRow = Record<string, unknown> & { article_id: string; slug: string; status: string; publish_at: string; title: string; headings: string[]; tags: string[]; category: string; updated_at: string };
+type PostRow = Record<string, unknown> & { id?: string; article_id: string | null; slug: string; status: string; publish_at: string; title: string; headings: string[]; tags: string[]; category: string; updated_at: string };
 
 export class Fake {
   server!: Server;
@@ -94,6 +94,7 @@ export class Fake {
     if (u.pathname === '/lookup') return [200, { results: [{ trackName: 'NumFall: Number Puzzle Game', price: 0, contentAdvisoryRating: '4+', minimumOsVersion: '17.0', description: 'Daily Drop puzzle. Earn Sparks by playing.' }] }];
     if (u.pathname === '/site/') return [200, '<p>No ads. No accounts. No purchases.</p>', { 'content-type': 'text/html' }];
     if (u.pathname === '/rest/v1/rpc/writer_api') return this.rpc(body);
+    if (u.pathname === '/rest/v1/rpc/writer_blog_api') return this.blogRpc(body);
     if (u.pathname === '/rest/v1/posts') return this.publicPosts(u);
     return [404, { error: 'no route' }];
   }
@@ -284,6 +285,52 @@ export class Fake {
         for (const p of this.posts) if (p.status === 'scheduled' && Date.parse(p.publish_at) <= now) (p.status = 'published'), n++;
         for (const r of this.articles.values()) if (r.status === 'scheduled' && r.publish_at && Date.parse(r.publish_at) <= now) ((r.status = 'published'), ((r.data as { status: string }).status = 'published'));
         return [200, { published: n }];
+      }
+      default:
+        return [400, { message: `unknown op ${b.p_op}` }];
+    }
+  }
+
+  // ---------- Supabase: writer_blog_api (blog manager) ----------
+  private blogRpc(b: { p_secret: string; p_op: string; p_args: Record<string, unknown> }): [number, unknown] {
+    if (b.p_secret !== this.secret) return [401, { message: 'unauthorised' }];
+    const a = b.p_args ?? {};
+    const post = (a.post ?? {}) as Record<string, unknown>;
+    const id = (a.id ?? post.id) as string | undefined;
+    const slugOk = (x: unknown) => /^[a-z0-9]+(-[a-z0-9]+){2,5}$/.test(String(x));
+    switch (b.p_op) {
+      case 'post_list':
+        return [200, [...this.posts].sort((x, y) => y.publish_at.localeCompare(x.publish_at)).map(({ html: _h, faq: _f, ...rest }) => rest)];
+      case 'post_get':
+        return [200, this.posts.find(p => p.id === id) ?? null];
+      case 'post_save': {
+        if (!slugOk(post.slug)) return [400, { message: 'new row violates check constraint "posts_slug_check"' }];
+        if (this.posts.some(p => p.slug === post.slug && p.id !== id)) return [409, { message: 'duplicate key value violates unique constraint "posts_slug_key"' }];
+        if (id) {
+          const i = this.posts.findIndex(p => p.id === id);
+          if (i === -1) return [400, { message: 'post not found' }];
+          this.posts[i] = { ...this.posts[i], ...post, id, updated_at: new Date().toISOString() } as PostRow;
+          return [200, this.posts[i]];
+        }
+        const row = { excerpt: '', meta_title: '', sources: [], related: [], ...post, id: `p${this.posts.length + 1}x`, updated_at: new Date().toISOString() } as unknown as PostRow;
+        this.posts.push(row);
+        return [200, row];
+      }
+      case 'post_upsert_article': {
+        if (!slugOk(post.slug)) return [400, { message: 'check constraint' }];
+        const i = this.posts.findIndex(p => p.article_id === post.article_id);
+        const row = { ...post, id: i >= 0 ? this.posts[i].id : `a${this.posts.length + 1}x`, updated_at: new Date().toISOString() } as PostRow;
+        if (i >= 0) this.posts[i] = row;
+        else {
+          if (this.posts.some(p => p.slug === post.slug)) return [409, { message: 'duplicate slug' }];
+          this.posts.push(row);
+        }
+        return [200, { id: row.id, slug: row.slug }];
+      }
+      case 'post_delete': {
+        const n = this.posts.length;
+        this.posts = this.posts.filter(p => p.id !== id);
+        return [200, { deleted: this.posts.length < n }];
       }
       default:
         return [400, { message: `unknown op ${b.p_op}` }];

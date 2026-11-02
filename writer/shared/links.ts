@@ -33,3 +33,71 @@ export function insertLink(body: Block[], anchor: string, href: string): Block[]
 }
 
 export const linkTargets = (text: string) => [...text.matchAll(/\]\(([^)]+)\)/g)].map(m => m[1]);
+
+// Bare web addresses become proper links with readable words:
+//   "on the App Store at https://apps.apple.com/..." -> "on [the App Store](https://apps.apple.com/...)"
+//   any other App Store address                    -> "[NumFall on the App Store](...)"
+//   numfall.store addresses                         -> "[numfall.store](...)" (or the page's path)
+//   other sites                                     -> "[example.org](...)"
+// Text already inside a markdown link is left alone.
+const BARE_URL = /https?:\/\/[^\s<>"')\]]+/g;
+export function linkifyBare(t: string): string {
+  if (!/https?:\/\//.test(t)) return t;
+  const parts = t.split(/(\[[^\]]+\]\([^)]+\))/);
+  return parts
+    .map((seg, i) => {
+      if (i % 2 === 1) return seg; // an existing markdown link
+      let out = '';
+      let last = 0;
+      for (const m of seg.matchAll(BARE_URL)) {
+        let url = m[0];
+        const trail = url.match(/[.,;:!?]+$/)?.[0] ?? '';
+        if (trail) url = url.slice(0, -trail.length);
+        let before = seg.slice(last, m.index);
+        let host = '';
+        try {
+          host = new URL(url).host.replace(/^www\./, '');
+        } catch {
+          out += before + m[0];
+          last = (m.index ?? 0) + m[0].length;
+          continue;
+        }
+        let link: string;
+        if (host === 'apps.apple.com') {
+          const lead = before.match(/\b(the App Store)\s*(?:at|here|via|on|:)?\s*:?\s*$/i);
+          if (lead) {
+            before = before.slice(0, before.length - lead[0].length);
+            link = `[${lead[1]}](${url})`;
+            if (before && !/\s$/.test(before)) before += ' ';
+          } else link = `[NumFall on the App Store](${url})`;
+        } else if (host === 'numfall.store') {
+          const path = new URL(url).pathname.replace(/\/$/, '');
+          link = `[${path && path !== '' ? `numfall.store${path}` : 'numfall.store'}](${url})`;
+        } else link = `[${host}](${url})`;
+        out += before + link + trail;
+        last = (m.index ?? 0) + m[0].length;
+      }
+      return out + seg.slice(last);
+    })
+    .join('');
+}
+
+// For HTML already on the site: bare addresses in text (not inside tags or links) become links.
+export function linkifyHtml(html: string): string {
+  return html.replace(/(<a\b[\s\S]*?<\/a>)|(<[^>]+>)|([^<]+)/g, (m, a, tag, text) => {
+    if (a || tag || !text || !/https?:\/\//.test(text)) return m;
+    return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 $2').replace(BARE_URL, (u: string) => {
+      const trail = u.match(/[.,;:!?]+$/)?.[0] ?? '';
+      const url = (trail ? u.slice(0, -trail.length) : u).replace(/&amp;/g, '&');
+      let label = url;
+      try {
+        const h = new URL(url).host.replace(/^www\./, '');
+        label = h === 'apps.apple.com' ? 'NumFall on the App Store' : h;
+      } catch {
+        return u;
+      }
+      const ext = !/^https:\/\/www\.numfall\.store/.test(url);
+      return `<a href="${url.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"${ext ? ' rel="noopener" target="_blank"' : ''}>${label}</a>${trail}`;
+    });
+  });
+}

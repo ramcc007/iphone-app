@@ -141,17 +141,26 @@ function ctxFor(s: Settings, deadline: number, now: () => Date): S.Ctx {
 
 // Puts an article on the site (status scheduled/published), or leaves it ready for you.
 export async function publishArticle(a: Article, s: Settings, when: 'auto' | 'now' | string, now = new Date()): Promise<void> {
+  S.codeRules(a, s); // last pass: links, names, app claims (also fixes articles written before a rule was added)
   const problem = S.finalCheck(a, s);
   if (problem) throw new HttpError(422, `Not posted: ${problem}.`);
   const at = when === 'now' ? now : when === 'auto' ? (a.options.publishAt ? new Date(a.options.publishAt) : now) : new Date(when);
   if (Number.isNaN(at.getTime())) throw new HttpError(400, 'Bad publish time.');
   const live = at.getTime() <= now.getTime();
   const words = S.wordCountOf(a);
-  await db.upsertPost({
+  // Sources: the research notes the article was written from (one per site, at most 8).
+  const seen = new Set<string>();
+  const sources = (a.research?.facts ?? [])
+    .filter(f => { const h = (() => { try { return new URL(f.url).host; } catch { return ''; } })(); if (!h || seen.has(h)) return false; seen.add(h); return true; })
+    .slice(0, 8)
+    .map(f => ({ name: f.source, url: f.url }));
+  await db.upsertArticlePost({
     article_id: a.id,
     slug: a.slug,
     title: a.title,
     description: a.description,
+    excerpt: a.description,
+    sources,
     author: a.options.author,
     category: a.plan?.category ?? 'Number puzzles',
     tags: a.plan?.tags ?? [],

@@ -4,7 +4,8 @@ import { cleanArticle, hasNeverPublish, toSymbols, nameHits, bannedWordHits, uns
 import { factProblem, cleanRewrite } from '../writer/shared/humanize';
 import { cleanSlug, titleShape, sentenceCase } from '../writer/shared/text';
 import { backdateSlots, localDate, scheduleSlots, tzOffsetMinutes } from '../writer/shared/schedule';
-import { insertLink } from '../writer/shared/links';
+import { insertLink, linkifyBare, linkifyHtml } from '../writer/shared/links';
+import { sanitizeHtml } from '../writer/shared/sanitize';
 import { addSlips } from '../writer/shared/slips';
 import { blocksToHtml, inline } from '../writer/shared/render';
 import { unwrapDeadLinks, pageTitle } from '../writer/site/blog';
@@ -140,4 +141,20 @@ test('page titles drop the site name when they would go over 60 characters', () 
   assert.equal(pageTitle('Short title'), 'Short title | NumFall');
   const long = 'How to solve a 9×9 logic grid without guessing at any point';
   assert.equal(pageTitle(long), long);
+});
+
+test('bare web addresses become links with readable words', () => {
+  assert.equal(
+    linkifyBare('The app is available on the App Store at https://apps.apple.com/app/apple-store/id6820579220?pt=1&ct=x.'),
+    'The app is available on [the App Store](https://apps.apple.com/app/apple-store/id6820579220?pt=1&ct=x).',
+  );
+  assert.equal(linkifyBare('Try https://apps.apple.com/app/id1 now'), 'Try [NumFall on the App Store](https://apps.apple.com/app/id1) now');
+  assert.equal(linkifyBare('See [this](https://a.org/b) and https://example.org/x.'), 'See [this](https://a.org/b) and [example.org](https://example.org/x).');
+  assert.match(linkifyHtml('<p>At https://apps.apple.com/app/id1?a=1&amp;b=2.</p>'), /<a href="https:\/\/apps\.apple\.com\/app\/id1\?a=1&amp;b=2"[^>]*>NumFall on the App Store<\/a>\./);
+  assert.equal(linkifyHtml('<a href="https://x.org">https://x.org</a>'), '<a href="https://x.org">https://x.org</a>');
+});
+
+test('editor HTML is cleaned: only text tags, safe links, the app-card marker', () => {
+  const out = sanitizeHtml('<div><p style="color:red" onclick="x">Hi <b>bold</b> <i>it</i></p><script>bad()</script><iframe src=x></iframe><!--app-card--><!--other--><a href="javascript:alert(1)">no</a><a href="https://example.org" target=_self>yes</a><h2 class=x>Head</h2><img src=x onerror=y></div>');
+  assert.equal(out, '<p>Hi <strong>bold</strong> <em>it</em></p><!--app-card-->no<a href="https://example.org" rel="noopener" target="_blank">yes</a><h2>Head</h2>');
 });

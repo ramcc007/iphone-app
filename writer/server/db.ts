@@ -6,8 +6,8 @@ import { HttpError, env } from './http';
 
 export class LeaseLost extends Error {}
 
-async function api<T>(op: string, args: Record<string, unknown> = {}): Promise<T> {
-  const url = `${env('SUPABASE_URL')}/rest/v1/rpc/writer_api`;
+async function api<T>(op: string, args: Record<string, unknown> = {}, fn = 'writer_api'): Promise<T> {
+  const url = `${env('SUPABASE_URL')}/rest/v1/rpc/${fn}`;
   const key = env('SUPABASE_ANON_KEY');
   let res: Response;
   try {
@@ -24,6 +24,9 @@ async function api<T>(op: string, args: Record<string, unknown> = {}): Promise<T
   if (!res.ok) {
     if (/lease held/i.test(text)) throw new LeaseLost('Another runner is working on this article.');
     if (/unauthorised/i.test(text)) throw new HttpError(500, 'The database refused WRITER_DB_SECRET. Check it in Vercel.');
+    if (/posts_slug_key|duplicate key.*slug/i.test(text)) throw new HttpError(409, 'Another post already uses this URL slug.');
+    if (/posts_slug_check/i.test(text)) throw new HttpError(400, 'The URL slug must be 3 to 6 lowercase words joined by hyphens.');
+    if (/post not found/i.test(text)) throw new HttpError(404, 'Post not found.');
     throw new HttpError(502, `Database error ${res.status}: ${text.slice(0, 200)}`);
   }
   return (text ? JSON.parse(text) : null) as T;
@@ -87,4 +90,36 @@ export const db = {
   postAdmin: (slug: string) => api<Record<string, unknown> | null>('post_admin', { slug }),
   postsIndex: () => api<PostIndexEntry[]>('posts_index'),
   sweep: () => api<{ published: number }>('sweep'),
+  // Blog manager (writer_blog_api): every post, by id, including hand-written ones.
+  blogList: () => api<BlogRow[]>('post_list', {}, 'writer_blog_api'),
+  blogGet: (id: string) => api<BlogPost | null>('post_get', { id }, 'writer_blog_api'),
+  blogSave: (post: Partial<BlogPost>) => api<BlogPost>('post_save', { post }, 'writer_blog_api'),
+  blogDelete: (id: string) => api<{ deleted: boolean }>('post_delete', { id }, 'writer_blog_api'),
+  upsertArticlePost: (post: Record<string, unknown>) => api<{ id: string; slug: string }>('post_upsert_article', { post }, 'writer_blog_api'),
 };
+
+export type BlogStatus = 'draft' | 'scheduled' | 'published' | 'unpublished';
+export interface BlogRow {
+  id: string;
+  article_id: string | null;
+  slug: string;
+  title: string;
+  excerpt: string;
+  description: string;
+  author: string;
+  category: string;
+  tags: string[];
+  status: BlogStatus;
+  publish_at: string;
+  updated_at: string;
+  word_count: number;
+}
+export interface BlogPost extends BlogRow {
+  meta_title: string;
+  html: string;
+  faq: { q: string; a: string }[];
+  sources: { name: string; url: string }[];
+  headings: string[];
+  related: string[];
+  reading_minutes: number;
+}

@@ -1,7 +1,8 @@
 // Renders /blog, /blog/<slug>, sitemap.xml and llms.txt from the posts table, inside the site's own layout.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { APP_CARD_MARK, escapeHtml as esc } from '../shared/render';
+import { APP_CARD_MARK, escapeHtml as esc, inline } from '../shared/render';
+import { linkifyBare, linkifyHtml } from '../shared/links';
 import { SITE, appStoreLink, APP_ID } from '../shared/settings';
 import { slugify } from '../shared/text';
 
@@ -16,6 +17,9 @@ export interface PublicPost {
   faq: { q: string; a: string }[];
   related: string[];
   reading_minutes: number;
+  excerpt?: string;
+  meta_title?: string;
+  sources?: { name: string; url: string }[];
   publish_at: string;
   updated_at: string;
   status: string;
@@ -111,30 +115,76 @@ export function unwrapDeadLinks(html: string, live: Set<string>): string {
   return html.replace(/<a href="\/blog\/([a-z0-9-]+)">([\s\S]*?)<\/a>/g, (m, slug: string, text: string) => (live.has(slug) ? m : text));
 }
 
+// A small number-grid mark drawn in CSS, different per article (no images needed).
+export function gridMark(slug: string, size: 3 | 4 = 4): string {
+  let h = 2166136261;
+  for (const ch of slug) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  const cells: string[] = [];
+  for (let i = 0; i < size * size; i++) {
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    const v = (h >>> 0) % 7;
+    cells.push(v < 3 ? `<i class="t${v}"></i>` : '<i></i>');
+  }
+  return `<span class="gridmark g${size}" aria-hidden="true">${cells.join('')}</span>`;
+}
+
+export const catSlug = (c: string) => slugify(c);
+
+// Headings get ids so the contents box can link to them.
+function withHeadingIds(html: string): { html: string; toc: { id: string; text: string }[] } {
+  const toc: { id: string; text: string }[] = [];
+  const used = new Set<string>();
+  const out = html.replace(/<h2(?:\s+id="[^"]*")?>([\s\S]*?)<\/h2>/g, (_m, inner: string) => {
+    const text = inner.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').trim();
+    let id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'section';
+    while (used.has(id)) id += '-2';
+    used.add(id);
+    toc.push({ id, text });
+    return `<h2 id="${id}">${inner}</h2>`;
+  });
+  return { html: out, toc };
+}
+
 export function articlePage(f: SiteFiles, p: PublicPost, live: Set<string>, related: PublicPost[], preview?: { goLive: string }): string {
   const url = `${SITE}/blog/${p.slug}`;
   const og = `${SITE}/og/${p.slug}.png`;
-  let body = unwrapDeadLinks(p.html, live);
+  const prepared = withHeadingIds(unwrapDeadLinks(linkifyHtml(p.html), live));
+  let body = prepared.html;
   body = body.includes(APP_CARD_MARK) ? body.replace(APP_CARD_MARK, appCard(p.slug, 'mid')) : body;
+  const toc = prepared.toc.length >= 3
+    ? `<nav class="toc" aria-label="On this page"><p>On this page</p><ol>${prepared.toc.map(t => `<li><a href="#${t.id}">${esc(t.text)}</a></li>`).join('')}${p.faq.length ? '<li><a href="#faq">FAQ</a></li>' : ''}</ol></nav>`
+    : '';
   const faq = p.faq.length
-    ? `<section class="faq post-faq"><h2 id="faq">FAQ</h2>${p.faq.map(x => `<details><summary>${esc(x.q)}</summary><p>${esc(x.a).replace(/\[([^\]]+)\]\((?:[^)]+)\)/g, '$1')}</p></details>`).join('')}</section>`
+    ? `<section class="faq post-faq"><h2 id="faq">FAQ</h2>${p.faq.map(x => `<details><summary>${esc(x.q)}</summary><p>${inline(linkifyBare(x.a))}</p></details>`).join('')}</section>`
+    : '';
+  const sources = p.sources?.length
+    ? `<section class="sources"><h2>Sources</h2><ul>${p.sources.map(x => `<li><a href="${esc(x.url)}" rel="noopener nofollow" target="_blank">${esc(x.name)}</a></li>`).join('')}</ul></section>`
     : '';
   const rel = related.length
-    ? `<section class="related"><h2>Related articles</h2><ul>${related.map(r => `<li><a href="/blog/${r.slug}">${esc(r.title)}</a><span>${esc(r.description)}</span></li>`).join('')}</ul></section>`
+    ? `<section class="related"><h2>Related articles</h2><ul class="cards">${related.map(r => card(r)).join('')}</ul></section>`
     : '';
+  const updated = '';
   const banner = preview ? `<div class="preview-banner" role="status">Preview: this article goes live on ${esc(fmtDate(preview.goLive))} at ${esc(new Date(preview.goLive).toISOString().slice(11, 16))} UTC. Visitors see a 404 until then.</div>` : '';
-  const content = `${banner}<main class="post narrow">
-<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> › <a href="/blog">Blog</a> › <span>${esc(p.category)}</span></nav>
-<article>
+  const content = `${banner}<main class="post">
+<header class="post-head"><div class="narrow">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">›</span> <a href="/blog">Blog</a> <span aria-hidden="true">›</span> <a href="/blog/category/${catSlug(p.category)}">${esc(p.category)}</a></nav>
 <h1>${esc(p.title)}</h1>
-<p class="byline">By ${esc(p.author)} · <time datetime="${p.publish_at}">${fmtDate(p.publish_at)}</time> · ${p.reading_minutes} min read</p>
+${p.description ? `<p class="dek">${esc(p.description)}</p>` : ''}
+<p class="byline"><span class="avatar" aria-hidden="true">${esc(p.author.split(/\s+/).map(w => w[0]).join('').slice(0, 2))}</span><span>By <strong>${esc(p.author)}</strong><br><time datetime="${p.publish_at}">${fmtDate(p.publish_at)}</time>${updated} · ${p.reading_minutes} min read</span></p>
+</div></header>
+<div class="narrow">
+<article class="prose">
+${toc}
 ${body}
 ${appCard(p.slug, 'end')}
 ${faq}
+${sources}
 <p class="disclosure">NumFall is made by the publisher of this site. Any health or brain-training points here are general information, not medical advice.</p>
 ${share(url, p.title)}
 </article>
 ${rel}
+<p class="back"><a href="/blog">← All articles</a></p>
+</div>
 </main>`;
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -152,7 +202,7 @@ ${rel}
         articleSection: p.category,
         keywords: p.tags.join(', '),
       },
-      ...(p.faq.length ? [{ '@type': 'FAQPage', mainEntity: p.faq.map(x => ({ '@type': 'Question', name: x.q, acceptedAnswer: { '@type': 'Answer', text: x.a.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') } })) }] : []),
+      ...(p.faq.length ? [{ '@type': 'FAQPage', mainEntity: p.faq.map(x => ({ '@type': 'Question', name: x.q, acceptedAnswer: { '@type': 'Answer', text: linkifyBare(x.a).replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') } })) }] : []),
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -175,7 +225,7 @@ ${rel}
     ],
   };
   return page(f, {
-    title: pageTitle(p.title),
+    title: p.meta_title ? pageTitle(p.meta_title) : pageTitle(p.title),
     description: p.description,
     canonical: url,
     content,
@@ -189,40 +239,58 @@ ${rel}
   });
 }
 
+function card(p: PublicPost, featured = false): string {
+  return `<li class="pcard${featured ? ' featured' : ''}"><a href="/blog/${p.slug}">
+${gridMark(p.slug, featured ? 4 : 3)}
+<span class="card-body"><span class="chip">${esc(p.category)}</span>
+<${featured ? 'h2' : 'h3'}>${esc(p.title)}</${featured ? 'h2' : 'h3'}>
+<span class="excerpt">${esc(p.excerpt || p.description)}</span>
+<span class="meta">${esc(p.author)} · ${fmtDate(p.publish_at)} · ${p.reading_minutes} min read</span></span></a></li>`;
+}
+
 export const PER_PAGE = 12;
 
 export function indexPage(f: SiteFiles, posts: PublicPost[], pageNo: number, category: string | null): string {
   const cats = [...new Set(posts.map(p => p.category))].sort();
-  const filtered = category ? posts.filter(p => slugify(p.category) === category) : posts;
+  const filtered = category ? posts.filter(p => catSlug(p.category) === category) : posts;
   const pages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const n = Math.min(Math.max(1, pageNo), pages);
   const shown = filtered.slice((n - 1) * PER_PAGE, n * PER_PAGE);
-  const catName = category ? cats.find(c => slugify(c) === category) : undefined;
-  const qs = (k: number) => {
-    const q = new URLSearchParams();
-    if (category) q.set('category', category);
-    if (k > 1) q.set('page', String(k));
-    const s = q.toString();
-    return `/blog${s ? `?${s}` : ''}`;
-  };
-  const content = `<main class="blog narrow">
-<h1>${catName ? esc(catName) : 'NumFall blog: number puzzles and logic puzzles'}</h1>
+  const catName = category ? cats.find(c => catSlug(c) === category) : undefined;
+  const base = category ? `/blog/category/${category}` : '/blog';
+  const href = (k: number) => (k > 1 ? `${base}?page=${k}` : base);
+  const featured = !category && n === 1 && shown.length ? shown[0] : null;
+  const rest = featured ? shown.slice(1) : shown;
+  const nums = Array.from({ length: pages }, (_, i) => i + 1).filter(k => k === 1 || k === pages || Math.abs(k - n) <= 2);
+  const pager = pages > 1
+    ? `<nav class="pager" aria-label="Pages">${n > 1 ? `<a href="${href(n - 1)}" rel="prev">← Newer</a>` : '<span></span>'}<span class="nums">${nums.map((k, i) => `${i && k - nums[i - 1] > 1 ? '<span>…</span>' : ''}${k === n ? `<span aria-current="page">${k}</span>` : `<a href="${href(k)}">${k}</a>`}`).join('')}</span>${n < pages ? `<a href="${href(n + 1)}" rel="next">Older →</a>` : '<span></span>'}</nav>`
+    : '';
+  const content = `<main class="blog">
+<header class="blog-head"><div class="wrap">
+<p class="kicker">${catName ? `<a href="/blog">Blog</a> › Category` : 'The NumFall blog'}</p>
+<h1>${catName ? esc(catName) : 'Number puzzles, logic and the order of moves'}</h1>
 <p class="lead">Solving techniques for 4×4, 6×6 and 9×9 grids, logic puzzle rules, brain game habits and casual puzzle gaming on iPhone and iPad.</p>
-<nav class="cats" aria-label="Categories"><a href="/blog"${!category ? ' aria-current="page"' : ''}>All</a>${cats.map(c => `<a href="/blog?category=${slugify(c)}"${slugify(c) === category ? ' aria-current="page"' : ''}>${esc(c)}</a>`).join('')}</nav>
-${shown.length ? `<ul class="post-list">${shown.map(p => `<li><a href="/blog/${p.slug}"><h2>${esc(p.title)}</h2></a><p>${esc(p.description)}</p><p class="meta">${esc(p.author)} · ${fmtDate(p.publish_at)} · ${esc(p.category)}</p></li>`).join('')}</ul>` : '<p>New articles are on the way.</p>'}
-${pages > 1 ? `<nav class="pager" aria-label="Pages">${n > 1 ? `<a href="${qs(n - 1)}" rel="prev">Newer</a>` : ''}<span>Page ${n} of ${pages}</span>${n < pages ? `<a href="${qs(n + 1)}" rel="next">Older</a>` : ''}</nav>` : ''}
+<nav class="cats" aria-label="Categories"><a href="/blog"${!category ? ' aria-current="page"' : ''}>All</a>${cats.map(c => `<a href="/blog/category/${catSlug(c)}"${catSlug(c) === category ? ' aria-current="page"' : ''}>${esc(c)}</a>`).join('')}</nav>
+</div></header>
+<div class="wrap">
+${shown.length ? `${featured ? `<ul class="cards one">${card(featured, true)}</ul>` : ''}<ul class="cards">${rest.map(p => card(p)).join('')}</ul>` : '<p class="empty">New articles are on the way.</p>'}
+${pager}
+</div>
 </main>`;
   return page(f, {
     title: catName ? pageTitle(`${catName} articles`) : 'Number puzzle and logic puzzle articles | NumFall',
-    description: 'Articles on solving number puzzles and logic grids, puzzle techniques, brain game habits and casual puzzle games for iPhone and iPad.',
-    canonical: `${SITE}${qs(n)}`,
+    description: catName
+      ? `${catName} articles from NumFall: plain guides to number puzzles, logic grids and solving techniques.`.slice(0, 155)
+      : 'Articles on solving number puzzles and logic grids, puzzle techniques, brain game habits and casual puzzle games for iPhone and iPad.',
+    canonical: `${SITE}${href(n)}`,
     content,
+    extraHead: `${n > 1 ? `<link rel="prev" href="${SITE}${href(n - 1)}">\n` : ''}${n < pages ? `<link rel="next" href="${SITE}${href(n + 1)}">\n` : ''}`,
     jsonLd: {
       '@context': 'https://schema.org',
-      '@type': 'Blog',
-      name: 'NumFall blog',
-      url: `${SITE}/blog`,
-      blogPost: shown.map(p => ({ '@type': 'BlogPosting', headline: p.title, url: `${SITE}/blog/${p.slug}`, datePublished: p.publish_at, author: { '@type': 'Person', name: p.author } })),
+      '@graph': [
+        { '@type': catName ? 'CollectionPage' : 'Blog', name: catName ? `${catName}: NumFall blog` : 'NumFall blog', url: `${SITE}${href(n)}`, blogPost: shown.map(p => ({ '@type': 'BlogPosting', headline: p.title, url: `${SITE}/blog/${p.slug}`, datePublished: p.publish_at, author: { '@type': 'Person', name: p.author } })) },
+        { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/` }, { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE}/blog` }, ...(catName ? [{ '@type': 'ListItem', position: 3, name: catName, item: `${SITE}/blog/category/${category}` }] : [])] },
+      ],
     },
   });
 }
@@ -230,6 +298,7 @@ ${pages > 1 ? `<nav class="pager" aria-label="Pages">${n > 1 ? `<a href="${qs(n 
 export function sitemap(f: SiteFiles, posts: PublicPost[]): string {
   const urls = [
     ...f.staticPages.map(p => `  <url><loc>${SITE}${p === '/' ? '/' : p}</loc></url>`),
+    ...[...new Set(posts.map(p => catSlug(p.category)))].map(c => `  <url><loc>${SITE}/blog/category/${c}</loc></url>`),
     ...posts.map(p => `  <url><loc>${SITE}/blog/${p.slug}</loc><lastmod>${(p.updated_at > p.publish_at ? p.updated_at : p.publish_at).slice(0, 10)}</lastmod></url>`),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;

@@ -3,10 +3,10 @@
 // until its time; signed in as admin, the same URL shows a preview with the go-live time.
 import { isAdmin } from '../writer/server/auth';
 import { db } from '../writer/server/db';
-import { articlePage, indexPage, llms, page, rss, siteFiles, sitemap, type PublicPost } from '../writer/site/blog';
+import { articlePage, catSlug, indexPage, llms, page, rss, siteFiles, sitemap, type PublicPost } from '../writer/site/blog';
 
-const COLS = 'slug,title,description,author,category,tags,html,faq,related,reading_minutes,publish_at,updated_at,status';
-const LIST_COLS = 'slug,title,description,author,category,tags,related,reading_minutes,publish_at,updated_at,status';
+const COLS = 'slug,title,description,excerpt,meta_title,author,category,tags,html,faq,sources,related,reading_minutes,publish_at,updated_at,status';
+const LIST_COLS = 'slug,title,description,excerpt,author,category,tags,related,reading_minutes,publish_at,updated_at,status';
 
 async function rest<T>(query: string): Promise<T> {
   const url = process.env.SUPABASE_URL;
@@ -45,7 +45,9 @@ export async function GET(req: Request): Promise<Response> {
     if (r === 'rss') return new Response(rss(f, await livePosts()), { headers: { 'content-type': 'application/rss+xml; charset=utf-8', 'cache-control': PUBLIC_CACHE } });
     if (r === 'blog') {
       const posts = await livePosts();
-      return html(indexPage(f, posts, Number(u.searchParams.get('page') ?? 1) || 1, u.searchParams.get('category')));
+      const cat = u.searchParams.get('cat') ?? u.searchParams.get('category');
+      if (cat && !posts.some(p => catSlug(p.category) === cat)) return notFound();
+      return html(indexPage(f, posts, Number(u.searchParams.get('page') ?? 1) || 1, cat));
     }
     if (r === 'post') {
       const slug = (u.searchParams.get('slug') ?? '').toLowerCase();

@@ -105,3 +105,38 @@ Every finding and change, newest first.
   - The first submission sends everything.
   - A second run with no changes sends nothing.
   - A newly live post sends only itself and /blog.
+
+## 2026-11-02: blog manager, text-only theme, links always clickable
+- **Owner's requests:**
+  - A blog manager with the same options as Scripwise's.
+  - A good theme for text-only posts written in bulk.
+  - Every link in an article should be a real hyperlink.
+- **Finding:** an FAQ answer showed the App Store address as plain text, for two reasons:
+  1. The model wrote a bare URL.
+  2. FAQ answers were rendered with links stripped.
+- **Database (approved):** `supabase/002_blog_manager.sql` adds:
+  - a `draft` status;
+  - `excerpt`, `meta_title` and `sources` columns;
+  - `writer_blog_api`, a secret-checked function to list, get, save (by id, including hand-written posts), delete and post articles.
+  
+  Visitor access is unchanged.
+- **Admin Blog tab:**
+  - **List:** status tabs with counts, search, category filter, sort, "next goes live", and View/Preview, Edit and Delete on each post.
+  - **Editor:**
+    - formatting toolbar: paragraph, H2, H3, bold, italic, underline, strikethrough, lists, quote, divider, link, undo/redo, HTML view;
+    - excerpt, an FAQ editor and a sources editor;
+    - publish controls: draft, publish or update, a future date to schedule, unpublish, delete;
+    - author, category and tags;
+    - SEO: slug, meta title (counted against 60), meta description (counted against 155) and a Google snippet preview.
+  - "Key takeaways" is left out on purpose: the writing rules ban that phrase and summary boxes.
+- **Safety:** editor HTML is sanitized on the server. Only text tags and safe links are kept; scripts, event handlers, images and iframes are removed.
+- **Links:**
+  - The writing rules now ask for markdown links on descriptive words.
+  - Code turns any bare address into a link, in the pipeline, at posting and when pages are rendered. Pages already posted are covered too.
+  - FAQ answers now render links.
+- **Theme (text-only):**
+  - Blog list: header band, category pages at `/blog/category/<slug>` (also in the sitemap), a featured latest post, cards with a CSS number-grid mark per post (no images), and numbered pages.
+  - Article: header with summary line and author initials, a contents box for 3+ headings, accented H2s, a 720px reading width, a Sources section, and related-article cards.
+  - The visible "Updated" date was removed, because it would show on backdated posts. The page's search data still records when a post last changed.
+- **Writer:** posts now carry their research sources (one per site, at most 8) and an excerpt.
+- **Tests:** 26 passing. New ones cover the blog manager flow, the sanitizer and link fixing.

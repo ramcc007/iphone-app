@@ -35,6 +35,8 @@ Never write about the research or the process: no "could not be found", "needs t
 
 Names. Never use the name of any other game, puzzle brand, app or company (for example: ${banned.slice(0, 8).join(', ')}). Describe the rule instead: "each row, column and box holds each number once". When comparing with other apps, describe how play differs in general terms and never call another app worse.
 
+Links. Write every link as a markdown link on a few descriptive words, for example [NumFall on the App Store](URL) or [the NumFall home page](URL). Never paste a bare web address into the text.
+
 App mentions. At most 2 in the whole article, only where NumFall answers the reader's actual question. One plain sentence each, never a sales pitch, with the App Store link given below or a link to the home page. Use only the NumFall facts given; never invent features, ratings, download counts, awards or reviews.
 
 Openings and endings. Open on something specific (a grid, a move, a common mistake), never a definition, a question or "In the world of...". End on a plain fact, a technique to try, or what happens next. Never a summary or a "download now" line.
