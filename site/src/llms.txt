@@ -16,6 +16,7 @@ Key facts:
 ## Pages
 
 - [Home]({{siteUrl}}/): what the game is, how it works, the three boards and the FAQ
+- [About]({{siteUrl}}/about): who makes the game, how it is built (no ads, no purchases, no accounts) and how to get in touch
 - [Support]({{siteUrl}}/support): how to play, timers, stars, Sparks, iCloud sync, Game Center, reminders and contact details
 - [Privacy Policy]({{siteUrl}}/privacy): what the app stores, where it stays and how to delete it
 - [Terms of Use]({{siteUrl}}/terms): the terms for using the app and the web preview

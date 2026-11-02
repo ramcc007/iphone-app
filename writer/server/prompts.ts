@@ -1,6 +1,6 @@
 // Every prompt the writer uses. WRITING_RULES goes into every call that writes or rewrites text.
 import type { Article, PostIndexEntry, Settings } from '../shared/types';
-import { LENGTHS, appStoreLink, SITE } from '../shared/settings';
+import { DEFAULT_BANNED_NAMES, LENGTHS, appStoreLink, SITE } from '../shared/settings';
 
 export const spellingName = (s: Settings['spelling']) => (s === 'en-GB' ? 'British English spelling (colour, favourite, organise)' : 'American English spelling (color, favorite, organize)');
 
@@ -75,6 +75,8 @@ export function researchPrompt(a: Article): { system: string; user: string } {
     system: `You research facts for a puzzle website article. Use web search. Only facts you actually found go in, each with its source name, URL and publication date. Never invent a fact, source, URL or date.`,
     user: `Topic: ${a.options.topic}
 The article is written as of ${a.options.asOf}. Only use sources published on or before ${a.options.asOf}, and nothing that happened after that date.
+
+Source choice: never use a source whose name or web address contains another game, app or brand name (for example ${DEFAULT_BANNED_NAMES.slice(0, 6).join(', ')}), even inside a longer word such as a site name. Those sources are dropped and their facts lost. Prefer encyclopedias (described by subject, not by a game name), universities, journals, government and health bodies, and established news outlets.
 
 Find 6 to 12 useful, specific facts for this topic: rules and history of the puzzle type (described without brand or game names), named solving techniques, grid sizes, and, for brain or habit topics, findings from named studies or official bodies with their year. Keep health and brain findings modest and exactly as the source states them.
 

@@ -50,3 +50,44 @@ export function isTick(req: Request): boolean {
   const h = req.headers.get('authorization') ?? '';
   return !!s && safeEqual(h, `Bearer ${s}`);
 }
+
+// Wrong-password limit: 5 tries per address in 15 minutes, then that address waits 15 minutes.
+// Counted in the database (so every server instance sees it) with an in-memory fallback.
+const FAIL_LIMIT = 5;
+const WINDOW_MS = 15 * 60_000;
+type Fails = { count: number; first: number; lockedUntil: number };
+const memFails = new Map<string, Fails>();
+
+export function clientKey(req: Request): string {
+  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || req.headers.get('x-real-ip') || 'unknown';
+  return `login_fail:${createHmac('sha256', 'nf-login').update(ip).digest('hex').slice(0, 16)}`;
+}
+
+type Store = { get: (k: string) => Promise<Fails | null>; put: (k: string, v: Fails) => Promise<unknown> };
+
+async function readFails(store: Store, k: string): Promise<Fails> {
+  const now = Date.now();
+  const v = (await store.get(k).catch(() => null)) ?? memFails.get(k) ?? null;
+  return v && now - v.first < WINDOW_MS + Math.max(0, v.lockedUntil - now) ? v : { count: 0, first: now, lockedUntil: 0 };
+}
+
+export async function loginLocked(req: Request, store: Store): Promise<number> {
+  const f = await readFails(store, clientKey(req));
+  return Math.max(0, f.lockedUntil - Date.now());
+}
+
+export async function noteLoginFailure(req: Request, store: Store): Promise<void> {
+  const k = clientKey(req);
+  const f = await readFails(store, k);
+  f.count += 1;
+  if (f.count >= FAIL_LIMIT) f.lockedUntil = Date.now() + WINDOW_MS;
+  memFails.set(k, f);
+  await store.put(k, f).catch(() => undefined);
+}
+
+export async function clearLoginFailures(req: Request, store: Store): Promise<void> {
+  const k = clientKey(req);
+  if (!memFails.has(k) && !(await store.get(k).catch(() => null))) return;
+  memFails.delete(k);
+  await store.put(k, { count: 0, first: Date.now(), lockedUntil: 0 }).catch(() => undefined);
+}

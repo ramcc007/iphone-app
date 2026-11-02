@@ -3,7 +3,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { APP_CARD_MARK, escapeHtml as esc, inline } from '../shared/render';
 import { linkifyBare, linkifyHtml } from '../shared/links';
-import { SITE, appStoreLink, APP_ID } from '../shared/settings';
+import { SITE, appStoreLink, APP_ID, DEFAULT_BANNED_NAMES } from '../shared/settings';
+import { safeSources } from '../shared/clean';
 import { slugify } from '../shared/text';
 
 export interface PublicPost {
@@ -45,7 +46,7 @@ export function siteFiles(root = process.cwd()): SiteFiles {
     analytics: readFileSync(join(src, 'analytics.html'), 'utf8'),
     llms: readFileSync(join(src, 'llms.txt'), 'utf8'),
     config,
-    staticPages: ['/', '/support', '/privacy', '/terms', '/press', '/blog'],
+    staticPages: ['/', '/about', '/support', '/privacy', '/terms', '/press', '/blog'],
   };
   return cached;
 }
@@ -94,7 +95,7 @@ export function page(f: SiteFiles, o: PageOpts): string {
 }
 
 function appCard(slug: string, where: 'mid' | 'end'): string {
-  return `<aside class="app-card" aria-label="NumFall on the App Store"><img src="/icon-192.png" alt="" width="64" height="64" loading="lazy"><div><p class="app-name">NumFall: Number Puzzle Game</p><p class="app-line">A number puzzle where numbers fall into place: every row, column and box holds each number once. Free on iPhone and iPad.</p></div><a class="store-badge" href="${esc(appStoreLink(slug))}" target="_blank" rel="noopener" data-card="${where}"><img src="/app-store-badge.svg" alt="Download on the App Store" width="150" height="50"></a></aside>`;
+  return `<aside class="app-card" aria-label="${where === 'mid' ? 'About NumFall' : 'Get NumFall on the App Store'}"><img src="/icon-192.png" alt="" width="64" height="64" loading="lazy"><div><p class="app-name">NumFall: Number Puzzle Game</p><p class="app-line">A number puzzle where numbers fall into place: every row, column and box holds each number once. Free on iPhone and iPad.</p></div><a class="store-badge" href="${esc(appStoreLink(slug))}" target="_blank" rel="noopener" data-card="${where}"><img src="/app-store-badge.svg" alt="Download on the App Store" width="150" height="50"></a></aside>`;
 }
 
 const ICON = {
@@ -185,8 +186,9 @@ export function articlePage(f: SiteFiles, p: PublicPost, live: Set<string>, rela
   const faq = p.faq.length
     ? `<section class="faq post-faq"><h2 id="faq">FAQ</h2>${p.faq.map(x => `<details><summary>${esc(x.q)}</summary><p>${inline(linkifyBare(x.a))}</p></details>`).join('')}</section>`
     : '';
-  const sources = p.sources?.length
-    ? `<section class="sources"><h2>Sources</h2><ul>${p.sources.map(x => `<li><a href="${esc(x.url)}" rel="noopener nofollow" target="_blank">${esc(x.name)}</a></li>`).join('')}</ul></section>`
+  const shown = safeSources(p.sources, DEFAULT_BANNED_NAMES);
+  const sources = shown.length
+    ? `<section class="sources"><h2>Sources</h2><ul>${shown.map(x => `<li><a href="${esc(x.url)}" rel="noopener nofollow" target="_blank">${esc(x.name)}</a></li>`).join('')}</ul></section>`
     : '';
   const rel = related.length
     ? `<section class="related"><h2>Related articles</h2><ul class="cards">${related.map(r => card(r)).join('')}</ul></section>`
@@ -328,6 +330,7 @@ ${pager}
 const SITEMAP_RULES: Record<string, [string, string]> = {
   '/': ['weekly', '1.0'],
   '/blog': ['daily', '0.9'],
+  '/about': ['monthly', '0.5'],
   '/support': ['monthly', '0.4'],
   '/press': ['monthly', '0.3'],
   '/privacy': ['yearly', '0.2'],

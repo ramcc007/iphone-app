@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cleanArticle, hasNeverPublish, toSymbols, nameHits, bannedWordHits, unsupportedClaims, isNonEnglish } from '../writer/shared/clean';
+import { cleanArticle, hasNeverPublish, toSymbols, nameHits, safeSources, bannedWordHits, unsupportedClaims, isNonEnglish } from '../writer/shared/clean';
 import { factProblem, cleanRewrite } from '../writer/shared/humanize';
 import { cleanSlug, titleShape, sentenceCase } from '../writer/shared/text';
 import { backdateSlots, localDate, scheduleSlots, tzOffsetMinutes } from '../writer/shared/schedule';
@@ -215,4 +215,19 @@ test('game names in headings and FAQ questions are cleaned before posting', asyn
   assert.equal(a.faq.length, 3);
   assert.ok(!JSON.stringify(a).match(/sudoku/i));
   assert.equal(finalCheck(a, DEFAULT_SETTINGS), null);
+});
+
+test('banned names are caught inside longer words and web addresses, but short names only as words', () => {
+  assert.deepEqual(nameHits('according to the Eversudoku history guide', DEFAULT_BANNED_NAMES), ['Sudoku']);
+  assert.deepEqual(nameHits('https://en.wikipedia.org/wiki/Glossary_of_Sudoku', DEFAULT_BANNED_NAMES), ['Sudoku']);
+  assert.deepEqual(nameHits('onlinekakuro.com', DEFAULT_BANNED_NAMES), ['Kakuro']);
+  assert.deepEqual(nameHits('A Latin square fills a grid with each number once.', DEFAULT_BANNED_NAMES), []);
+  assert.deepEqual(nameHits('the settings menu', ['Set']), [], 'a short name never matches inside a word');
+  assert.deepEqual(nameHits('play Set with friends', ['Set']), ['Set']);
+  const kept = safeSources([
+    { name: 'Sudoku Royale', url: 'https://www.sudoku-royale.com/x' },
+    { name: 'Puzzle Wiki', url: 'https://www.puzzles.wiki/wiki/Kakuro' },
+    { name: 'Cornell University', url: 'https://pi.math.cornell.edu/x' },
+  ], DEFAULT_BANNED_NAMES);
+  assert.deepEqual(kept.map(x => x.name), ['Cornell University']);
 });

@@ -6,32 +6,110 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "functions": {
-    "api/page.ts": { "maxDuration": 20, "includeFiles": "site/{src/**,site.config.json}" },
-    "api/og.ts": { "maxDuration": 20 },
-    "api/writer.ts": { "maxDuration": 300, "includeFiles": "site/site.config.json" },
-    "api/tick.ts": { "maxDuration": 300, "includeFiles": "site/site.config.json" }
+    "api/page.ts": {
+      "maxDuration": 20,
+      "includeFiles": "site/{src/**,site.config.json}"
+    },
+    "api/og.ts": {
+      "maxDuration": 20
+    },
+    "api/writer.ts": {
+      "maxDuration": 300,
+      "includeFiles": "site/site.config.json"
+    },
+    "api/tick.ts": {
+      "maxDuration": 300,
+      "includeFiles": "site/site.config.json"
+    }
   },
   "rewrites": [
-    { "source": "/blog", "destination": "/api/page?r=blog" },
-    { "source": "/blog/rss.xml", "destination": "/api/page?r=rss" },
-    { "source": "/blog/category/:cat", "destination": "/api/page?r=blog&cat=:cat" },
-    { "source": "/feed.xml", "destination": "/api/page?r=rss" },
-    { "source": "/blog/:slug", "destination": "/api/page?r=post&slug=:slug" },
-    { "source": "/og/:slug", "destination": "/api/og?slug=:slug" },
-    { "source": "/sitemap.xml", "destination": "/api/page?r=sitemap" },
-    { "source": "/llms.txt", "destination": "/api/page?r=llms" },
-    { "source": "/admin", "destination": "/admin/index.html" },
-    { "source": "/admin/:path*", "destination": "/admin/index.html" }
+    {
+      "source": "/blog",
+      "destination": "/api/page?r=blog"
+    },
+    {
+      "source": "/blog/rss.xml",
+      "destination": "/api/page?r=rss"
+    },
+    {
+      "source": "/blog/category/:cat",
+      "destination": "/api/page?r=blog&cat=:cat"
+    },
+    {
+      "source": "/feed.xml",
+      "destination": "/api/page?r=rss"
+    },
+    {
+      "source": "/blog/:slug",
+      "destination": "/api/page?r=post&slug=:slug"
+    },
+    {
+      "source": "/og/:slug",
+      "destination": "/api/og?slug=:slug"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/page?r=sitemap"
+    },
+    {
+      "source": "/llms.txt",
+      "destination": "/api/page?r=llms"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "/admin/index.html"
+    }
   ],
   "headers": [
-    { "source": "/(.*)", "headers": [
-      { "key": "X-Content-Type-Options", "value": "nosniff" },
-      { "key": "Referrer-Policy", "value": "no-referrer" }
-    ] },
-    { "source": "/admin(.*)", "headers": [
-      { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
-      { "key": "Cache-Control", "value": "no-store" },
-      { "key": "X-Frame-Options", "value": "DENY" }
-    ] }
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'sha256-idYdWXMZ38Oua6rTyjNxTOc7sNNCxdu5CRlPntkQ4ZQ=' 'sha256-c9GfSIanlrzxKjua+lkh+9hVQQMSHAs68nzuMaZFVuw=' https://*.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com; media-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/admin(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
   ]
 }

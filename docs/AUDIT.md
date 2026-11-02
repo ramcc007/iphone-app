@@ -229,3 +229,68 @@ Every finding and change, newest first.
   4. deploys only when `npm run build` passes;
   5. records the fix here;
   6. marks the errors resolved with what it did.
+  - **Later the same day:** the owner cancelled the 3-hour check once all articles were done.
+
+## 2026-11-02: full website audit (numfall.store)
+Checked:
+- live pages (home, support, privacy, terms, press, blog, an article, categories, sitemap, robots, llms.txt, RSS);
+- every published and scheduled post in the database;
+- Supabase security and performance advisors, cron jobs and the error log;
+- `npm audit` and a secret scan of the repo and the build;
+- Playwright plus axe-core on every page at 390 px (light) and 1280 px (dark).
+
+**Passing:**
+- no console errors and no sideways scrolling;
+- the sitemap (62 URLs, no lastmod), llms.txt and RSS all list the 51 live articles;
+- IndexNow accepted the last submission (202);
+- analytics load only after Accept;
+- no ratings or download counts claimed;
+- row-level security lets visitors read live posts only;
+- the three public database functions are secret-checked;
+- the admin cookie is HttpOnly, Secure and SameSite=Lax;
+- no secrets in the repo or the build.
+
+**Fixed in code:**
+- **Critical, game names in Sources lists.** About 30 live articles listed Sudoku, KenKen, Kakuro and Wordle sites as sources (for example "SudokuPro blog", "Wikipedia (Glossary of Sudoku)").
+  - Sources whose name or address contains a banned name are now never shown (`safeSources`, applied at render) and are dropped at publish time and in the blog manager.
+  - The research prompt now avoids such sources and prefers encyclopedias, universities, journals, government and health bodies, and news outlets.
+  - The stored rows were left as they are (owner's choice); the render filter hides them.
+- **High, banned names inside longer words.** "Eversudoku" got past the check because names were matched as whole words only. One-word names of 5+ letters now match inside a longer word or address (`nameRe`); short and multi-word names still match as whole words, so a short name added in Settings can't flag ordinary words.
+- **Medium, admin login had no limit.** After 5 wrong passwords in 15 minutes from one address, that address waits 15 minutes. Failures are counted in the existing `writer_api` state store, so no schema change; there is an in-memory fallback. Each wrong password also waits 0.8 s.
+- **Medium, missing browser security headers.** Added on all paths:
+  - Content-Security-Policy: inline scripts allowed only by SHA-256 hash, plus Google Analytics hosts; `frame-ancestors 'none'`; `object-src 'none'`.
+  - Strict-Transport-Security: max-age 2 years.
+  - Permissions-Policy.
+  - X-Frame-Options: DENY.
+  - Cross-Origin-Opener-Policy: same-origin.
+  - A test now fails the build if any inline script on the article page, blog index, 404 page, consent snippet or static pages is missing from the policy.
+  - Checked in Chromium with the headers on: consent banner, Google Analytics loading after Accept, copy-link share button and the admin page all work, with no policy violations.
+- **Low, accessibility:**
+  - Footer headings no longer skip levels.
+  - Static pages are wrapped in a `<main>` landmark.
+  - The two App Store boxes in each article have different labels.
+  - axe (WCAG 2 A/AA plus best practice) now reports no issues on any public page.
+  - The admin login screen itself passes; the earlier flag came from the offline "can't reach server" screen.
+
+**Database (approved):** the live article *offline-puzzle-games-long-flights* (and its writer copy) no longer says "according to the Eversudoku history guide". The sentence now ends "…under the name Number Place." No post title, description, FAQ, tag or body contains a banned name any more.
+
+**New page (approved):** `/about`, built only from the verified app facts. Linked in the footer, sitemap (monthly, 0.5) and llms.txt.
+
+**Owner's decisions (no change):**
+- Bylines stay as they are, even though the named authors are personas and the articles carry no AI disclosure. Flagged as a trust risk with Google.
+- The privacy policy stays as it is. Not added: that the host (Vercel) processes visitors' IP addresses, and that the blog follows the same consent rules.
+- The internal-links step was not re-run. 14 posts (3 live) have no in-text links to other articles; they still show Related articles.
+
+**Accepted risks:**
+- **`npm audit`, moderate: satori SVG escaping (GHSA-wx4j-mvgx-mqwp), via @vercel/og 0.8.5.**
+  - Version 1.0.3, the only fixed release, ships without `hb.wasm` and cannot draw images on Node.
+  - Version 1.0.1 bundles the same old satori code.
+  - The issue needs untrusted text in SVG output. Our share images are PNGs drawn from our own post titles, so it can't be exploited here. Re-check when a working fixed release ships.
+- **Supabase advisor: pg_net in the public schema.** pg_net can't be moved in place. Moving it means dropping and recreating it, which would break the cron jobs. Left as is.
+- **The slug *free-puzzle-games-kids-ipad-no* was cut at the 6-word limit.** Left as is: a live address change would need a redirect.
+
+**Tests:** 36 passing:
+- banned names inside words and web addresses;
+- hidden game-name sources and separate app-card labels;
+- login lockout per address;
+- every inline script covered by the CSP.

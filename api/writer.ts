@@ -1,7 +1,7 @@
 // NumFall Writer API for the admin page (/admin). Every action needs the admin cookie except login.
 import { db } from '../writer/server/db';
 import { HttpError, errorResponse, json, readJson } from '../writer/server/http';
-import { checkPassword, clearCookie, isAdmin, requireAdmin, sessionCookie } from '../writer/server/auth';
+import { checkPassword, clearCookie, clearLoginFailures, isAdmin, loginLocked, noteLoginFailure, requireAdmin, sessionCookie } from '../writer/server/auth';
 import { createBatch, postNow, retry, runFromBrowser, saveArticle, unpublish, type BatchInput } from '../writer/server/runner';
 import { appFacts } from '../writer/server/appfacts';
 import { lastSubmission } from '../writer/server/indexnow';
@@ -12,6 +12,7 @@ import { saveBlogPost } from '../writer/server/blog';
 import type { Article, Block, Settings } from '../writer/shared/types';
 
 const RUN_BUDGET_MS = 240_000;
+const LOGIN_DELAY_MS = Number(process.env.LOGIN_DELAY_MS ?? 800); // slows password guessing
 
 const keys = () => ({
   anthropic: !!process.env.ANTHROPIC_API_KEY,
@@ -80,7 +81,15 @@ export async function POST(req: Request): Promise<Response> {
   try {
     const body = await readJson<Record<string, unknown> & { action?: string }>(req);
     if (body.action === 'login') {
-      if (!checkPassword(String(body.password ?? ''))) throw new HttpError(401, 'Wrong password.');
+      const store = { get: (k: string) => db.getState<{ count: number; first: number; lockedUntil: number }>(k), put: db.putState };
+      const wait = await loginLocked(req, store);
+      if (wait > 0) throw new HttpError(429, `Too many wrong passwords. Try again in ${Math.ceil(wait / 60_000)} minutes.`);
+      if (!checkPassword(String(body.password ?? ''))) {
+        await noteLoginFailure(req, store);
+        await new Promise(r => setTimeout(r, LOGIN_DELAY_MS));
+        throw new HttpError(401, 'Wrong password.');
+      }
+      await clearLoginFailures(req, store);
       return json({ ok: true }, 200, { 'set-cookie': sessionCookie() });
     }
     if (body.action === 'logout') return json({ ok: true }, 200, { 'set-cookie': clearCookie() });

@@ -6,7 +6,8 @@ import type { BlogPost } from './db';
 import { db } from './db';
 import { HttpError } from './http';
 import { htmlHeadings, htmlText, sanitizeHtml } from '../shared/sanitize';
-import { headingSymbols, toSymbols } from '../shared/clean';
+import { headingSymbols, nameHits, toSymbols } from '../shared/clean';
+import { DEFAULT_BANNED_NAMES } from '../shared/settings';
 import { readingMinutes, slugify } from '../shared/text';
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+){2,5}$/;
@@ -26,7 +27,7 @@ export async function saveBlogPost(input: Record<string, unknown>, intent: 'draf
     .filter(f => f.q && f.a);
   const sources = (Array.isArray(input.sources) ? (input.sources as { name?: string; url?: string }[]) : [])
     .map(x => ({ name: String(x.name ?? '').trim().slice(0, 80), url: String(x.url ?? '').trim() }))
-    .filter(x => x.name && /^https?:\/\/[^\s]+\.[^\s]+$/.test(x.url))
+    .filter(x => x.name && /^https?:\/\/[^\s]+\.[^\s]+$/.test(x.url) && !nameHits(`${x.name} ${x.url}`, DEFAULT_BANNED_NAMES).length)
     .slice(0, 8);
   const tags = (Array.isArray(input.tags) ? (input.tags as string[]) : []).map(t => String(t).trim()).filter(Boolean).slice(0, 12);
   const when = str('publish_at') ? new Date(str('publish_at')) : now;

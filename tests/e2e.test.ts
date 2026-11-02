@@ -1,5 +1,7 @@
 // The whole flow against fake Claude, Groq, GPTZero and Supabase servers.
 import { test, before, after, beforeEach } from 'node:test';
+import { createHash } from 'node:crypto';
+import { readFileSync, readdirSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { Fake } from './fakes/server';
 
@@ -12,7 +14,7 @@ let tickApi: typeof import('../api/tick');
 
 before(async () => {
   await fake.start();
-  Object.assign(process.env, fake.env());
+  Object.assign(process.env, fake.env(), { LOGIN_DELAY_MS: '0' });
   runner = await import('../writer/server/runner');
   db = (await import('../writer/server/db')).db;
   pageApi = await import('../api/page');
@@ -46,6 +48,22 @@ async function drain(max = 10): Promise<void> {
     if (!r.worked.length) return;
   }
 }
+
+
+// Every inline script on a page must be allowed by the Content-Security-Policy in vercel.json (by hash),
+// otherwise the browser blocks it on the live site. Changing a script means updating its hash there.
+const cspScriptSrc = () => {
+  const v = JSON.parse(readFileSync('vercel.json', 'utf8')) as { headers: { source: string; headers: { key: string; value: string }[] }[] };
+  const csp = v.headers.find(h => h.source === '/(.*)')!.headers.find(h => h.key === 'Content-Security-Policy')!.value;
+  return csp.split(';').map(x => x.trim()).find(x => x.startsWith('script-src'))!;
+};
+const assertCspCovers = (html: string, where: string) => {
+  const allowed = cspScriptSrc();
+  for (const m of html.matchAll(/<script(?![^>]*\bsrc=)(?![^>]*application\/ld\+json)[^>]*>([\s\S]*?)<\/script>/g)) {
+    const h = `'sha256-${createHash('sha256').update(m[1]).digest('base64')}'`;
+    assert.ok(allowed.includes(h), `${where}: inline script not allowed by the CSP; add ${h} to script-src in vercel.json`);
+  }
+};
 
 const cookie = async () => {
   const r = await writerApi.POST(new Request('http://x/api/writer', { method: 'POST', body: JSON.stringify({ action: 'login', password: 'pw' }) }));
@@ -147,8 +165,28 @@ test('scheduled posts 404 for visitors, preview for the admin, then go live with
   assert.ok(!html.includes('Preview:'));
   assert.ok(html.includes('googletagmanager'), 'public pages keep the consent-based analytics');
 
+  // Sources naming another game, even inside a site name or address, never show.
+  (p as unknown as { sources: { name: string; url: string }[] }).sources = [
+    { name: 'SudokuPro blog', url: 'https://sudokupro.app/blog/history' },
+    { name: 'Eversudoku', url: 'https://eversudoku.com/guides/history/' },
+    { name: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Glossary_of_Sudoku' },
+    { name: 'Cornell University', url: 'https://pi.math.cornell.edu/~mec/four.html' },
+  ];
+  const withSources = await (await pageApi.GET(url(`r=post&slug=${p.slug}`))).text();
+  assert.ok(withSources.includes('Cornell University'));
+  assert.ok(!/sudoku/i.test(withSources), 'no game name anywhere on the page');
+  const labels = [...withSources.matchAll(/<aside class="app-card" aria-label="([^"]+)"/g)].map(m => m[1]);
+  assert.equal(new Set(labels).size, 2, 'each app card has its own label');
+
   const blog = await (await pageApi.GET(url('r=blog'))).text();
   assert.ok(blog.includes(`/blog/${p.slug}`));
+  assertCspCovers(withSources, 'article page');
+  assertCspCovers(blog, 'blog index');
+  assertCspCovers(await (await pageApi.GET(url('r=post&slug=no-such-post-here'))).text(), 'blog 404');
+  // The static pages share the consent script; their own HTML may not add inline scripts.
+  const { siteFiles } = await import('../writer/site/blog');
+  assertCspCovers(siteFiles().analytics.replace(/\{\{gaId\}\}/g, siteFiles().config.gaMeasurementId), 'consent script');
+  for (const f of readdirSync('site/src/pages')) assertCspCovers(readFileSync(`site/src/pages/${f}`, 'utf8'), f);
   const sm = await (await pageApi.GET(url('r=sitemap'))).text();
   assert.ok(sm.includes(`https://www.numfall.store/blog/${p.slug}`) && sm.includes('https://www.numfall.store/support'));
   const llms = await (await pageApi.GET(url('r=llms'))).text();
@@ -274,6 +312,15 @@ test('admin API and tick endpoint refuse callers without the cookie or secret', 
   assert.equal(r2.status, 401);
   const r3 = await tickApi.POST(new Request('http://x/api/tick', { method: 'POST' }));
   assert.equal(r3.status, 401);
+});
+
+test('the admin login locks an address out after 5 wrong passwords; other addresses are unaffected', async () => {
+  const login = (password: string, ip: string) => writerApi.POST(new Request('http://x/api/writer', { method: 'POST', headers: { 'x-forwarded-for': ip }, body: JSON.stringify({ action: 'login', password }) }));
+  for (let i = 0; i < 5; i++) assert.equal((await login('guess' + i, '203.0.113.9')).status, 401);
+  const locked = await login(process.env.ADMIN_PASSWORD!, '203.0.113.9');
+  assert.equal(locked.status, 429, 'even the right password waits out the lock');
+  assert.match(await locked.text(), /Too many wrong passwords/);
+  assert.equal((await login(process.env.ADMIN_PASSWORD!, '198.51.100.4')).status, 200);
 });
 
 test('the admin page never loads Google Analytics', async () => {

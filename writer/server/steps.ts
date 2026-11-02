@@ -2,7 +2,7 @@
 // and the article is saved after every stage, so a run that stops halfway picks up where it left off.
 import type { Article, Block, PostIndexEntry, Settings } from '../shared/types';
 import { LENGTHS, appStoreLink } from '../shared/settings';
-import { bannedWordHits, cleanArticle, hasNeverPublish, nameHits, structureHits, toSymbols, unsupportedClaims, headingSymbols } from '../shared/clean';
+import { bannedWordHits, cleanArticle, hasNeverPublish, nameHits, nameRe, structureHits, toSymbols, unsupportedClaims, headingSymbols } from '../shared/clean';
 import { applyUnits, factProblem, humanizeUnits } from '../shared/humanize';
 import { addSlips } from '../shared/slips';
 import { goodAnchor, insertLink, linkifyBare } from '../shared/links';
@@ -80,7 +80,7 @@ export async function plan(a: Article, c: Ctx): Promise<void> {
   // A repeated heading gets a plain, specific variant; a heading naming another game is reworded by dropping the name.
   plan.sections.forEach((x, i) => {
     if (!x.heading) return;
-    for (const n of nameHits(x.heading, c.s.bannedNames)) x.heading = x.heading.replace(new RegExp(`\\b${n}\\b`, 'gi'), 'grid').replace(/\s{2,}/g, ' ');
+    for (const n of nameHits(x.heading, c.s.bannedNames)) x.heading = x.heading.replace(nameRe(n, 'gi'), 'grid').replace(/\s{2,}/g, ' ');
     if (headings.has(normHeading(x.heading))) x.heading = sentenceCase(`${x.heading} on a ${['4×4', '6×6', '9×9'][i % 3]} board`);
     headings.add(normHeading(x.heading));
   });
@@ -258,7 +258,7 @@ export function codeRules(a: Article, s: Settings): string[] {
   // question names a game or brand is dropped (or reworded the same way if only 3 questions are left).
   const neutral = (t: string) => {
     let out = t;
-    for (const n of nameHits(t, s.bannedNames)) out = out.replace(new RegExp(`\\b${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'), 'number grid');
+    for (const n of nameHits(t, s.bannedNames)) out = out.replace(nameRe(n, 'gi'), 'number grid');
     return out.replace(/\bnumber grid (grid|puzzle)s?\b/gi, 'number grid').replace(/\s{2,}/g, ' ').trim();
   };
   a.body = a.body.map(b => (b.type === 'h2' && nameHits(b.text, s.bannedNames).length ? (removed.push(`heading: ${b.text}`), { ...b, text: neutral(b.text) }) : b));

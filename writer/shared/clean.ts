@@ -192,8 +192,22 @@ export function structureHits(sentence: string): string[] {
 }
 
 // Game, app and brand names that must never appear in public text (whole word, any case).
+// A banned name, also inside a longer word ("Eversudoku", "Glossary_of_Sudoku", "sudokupro.app"): one-word
+// names of 5+ letters match the whole word that contains them. Short or multi-word names match as words only,
+// so a short name added in Settings can't flag ordinary words.
+export function nameRe(n: string, flags = 'i'): RegExp {
+  const e = n.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+  const inside = !/\s/.test(n.trim()) && n.trim().length >= 5;
+  return inside ? new RegExp(`[\\p{L}\\p{N}]*${e}[\\p{L}\\p{N}]*`, `${flags}u`) : new RegExp(`\\b${e}\\b`, flags);
+}
+
 export function nameHits(t: string, names: string[]): string[] {
-  return names.filter(n => new RegExp(`\\b${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')}\\b`, 'i').test(t));
+  return names.filter(n => n.trim() && nameRe(n).test(t));
+}
+
+// Sources shown under an article: none whose name or address names another game or brand.
+export function safeSources<T extends { name: string; url: string }>(sources: T[] | undefined, names: string[]): T[] {
+  return (sources ?? []).filter(x => !nameHits(`${x.name} ${x.url}`, names).length);
 }
 
 // Any NumFall claim the facts sheet doesn't support. Checked on the final text.

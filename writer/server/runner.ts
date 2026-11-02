@@ -9,6 +9,7 @@ import { appFacts } from './appfacts';
 import { db, LeaseLost } from './db';
 import { HttpError } from './http';
 import * as S from './steps';
+import { safeSources } from '../shared/clean';
 
 export const LEASE_SECONDS = 330; // longer than the function limit, so a crashed run frees the article
 const BACKOFF_MIN = [1, 3, 10, 30];
@@ -148,12 +149,11 @@ export async function publishArticle(a: Article, s: Settings, when: 'auto' | 'no
   if (Number.isNaN(at.getTime())) throw new HttpError(400, 'Bad publish time.');
   const live = at.getTime() <= now.getTime();
   const words = S.wordCountOf(a);
-  // Sources: the research notes the article was written from (one per site, at most 8).
+  // Sources: the research notes the article was written from (one per site, at most 8, none naming another game or brand).
   const seen = new Set<string>();
-  const sources = (a.research?.facts ?? [])
+  const sources = safeSources((a.research?.facts ?? []).map(f => ({ name: f.source, url: f.url })), s.bannedNames)
     .filter(f => { const h = (() => { try { return new URL(f.url).host; } catch { return ''; } })(); if (!h || seen.has(h)) return false; seen.add(h); return true; })
-    .slice(0, 8)
-    .map(f => ({ name: f.source, url: f.url }));
+    .slice(0, 8);
   await db.upsertArticlePost({
     article_id: a.id,
     slug: a.slug,
