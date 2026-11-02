@@ -1,14 +1,34 @@
 {
-  "buildCommand": "node tools/site/build.js",
+  "buildCommand": "npm run build",
+  "installCommand": "npm ci",
   "outputDirectory": "site/dist",
-  "installCommand": "",
   "framework": null,
   "cleanUrls": true,
   "trailingSlash": false,
+  "functions": {
+    "api/page.ts": { "maxDuration": 20, "includeFiles": "site/{src/**,site.config.json}" },
+    "api/og.ts": { "maxDuration": 20 },
+    "api/writer.ts": { "maxDuration": 300 },
+    "api/tick.ts": { "maxDuration": 300 }
+  },
+  "rewrites": [
+    { "source": "/blog", "destination": "/api/page?r=blog" },
+    { "source": "/blog/:slug", "destination": "/api/page?r=post&slug=:slug" },
+    { "source": "/og/:slug", "destination": "/api/og?slug=:slug" },
+    { "source": "/sitemap.xml", "destination": "/api/page?r=sitemap" },
+    { "source": "/llms.txt", "destination": "/api/page?r=llms" },
+    { "source": "/admin", "destination": "/admin/index.html" },
+    { "source": "/admin/:path*", "destination": "/admin/index.html" }
+  ],
   "headers": [
     { "source": "/(.*)", "headers": [
       { "key": "X-Content-Type-Options", "value": "nosniff" },
       { "key": "Referrer-Policy", "value": "no-referrer" }
+    ] },
+    { "source": "/admin(.*)", "headers": [
+      { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+      { "key": "Cache-Control", "value": "no-store" },
+      { "key": "X-Frame-Options", "value": "DENY" }
     ] }
   ]
 }

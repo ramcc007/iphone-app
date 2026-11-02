@@ -53,18 +53,11 @@ for (const f of pages) {
   // Website analytics (Google Analytics 4), only after the visitor taps Accept. Declining loads nothing from Google.
   // The app itself collects nothing; this covers numfall.store only (see the privacy policy's "This website" section).
   const ga = cfg.gaMeasurementId;
-  const analytics = ga ? `<div id="consent" class="consent" role="dialog" aria-live="polite" aria-label="Cookie choice" hidden><p>We use Google Analytics cookies to count visits to this website (not the app). OK? <a href="/privacy#website">Details</a></p><div><button type="button" class="btn small" data-c="yes">Accept</button><button type="button" class="btn ghost small" data-c="no">No thanks</button></div></div>
-<script>(function(){var id='${ga}',k='nf-consent',b=document.getElementById('consent');
-function load(){if(window.gtag)return;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+id;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};gtag('js',new Date());gtag('config',id);}
-function get(){try{return localStorage.getItem(k);}catch(e){return null;}}
-function set(v){try{localStorage.setItem(k,v);}catch(e){}}
-var c=get();if(c==='yes')load();else if(c!=='no')b.hidden=false;
-b.addEventListener('click',function(e){var v=e.target.getAttribute('data-c');if(!v)return;set(v);b.hidden=true;if(v==='yes')load();else if(window.gtag)location.reload();});
-var r=document.getElementById('cookie-settings');if(r)r.addEventListener('click',function(e){e.preventDefault();try{localStorage.removeItem(k);}catch(x){}b.hidden=false;});})();</script>` : '';
+  const analytics = ga ? fs.readFileSync(path.join(SRC, 'analytics.html'), 'utf8').replace(/\{\{gaId\}\}/g, ga) : ''; // also used by api/page.ts
   // Smart App Banner: Safari on iPhone and iPad shows Apple's "Get" bar at the top of every page.
   const appId = (cfg.appStoreUrl.match(/id(\d+)/) || [])[1];
   const appBanner = appId ? '<meta name="apple-itunes-app" content="app-id=' + appId + '">' : '';
-  out[f] = fill(layout, { fullTitle: esc(fullTitle), description: esc(description), canonical: esc(cfg.siteUrl + urlPath), robots: notFound ? 'noindex' : 'index, follow', jsonLd, appBanner, analytics, content, year: String(new Date().getFullYear()) });
+  out[f] = fill(layout, { ogType: 'website', ogImage: esc(cfg.siteUrl + '/og-image.png'), ogAlt: esc(cfg.appName + ' app icon: a number tile falling onto a stack. ' + cfg.tagline), extraHead: '', fullTitle: esc(fullTitle), description: esc(description), canonical: esc(cfg.siteUrl + urlPath), robots: notFound ? 'noindex' : 'index, follow', jsonLd, appBanner, analytics, content, year: String(new Date().getFullYear()) });
   // SEO checks: a broken page fails the build (and so the Vercel deploy) instead of going live.
   const problems = [];
   if (fullTitle.length > 65) problems.push('title is ' + fullTitle.length + ' characters (keep it to 65 so search results do not cut it off)');
@@ -86,13 +79,14 @@ for (const f of fs.readdirSync(path.join(SRC, 'static'))) fs.copyFileSync(path.j
 fs.writeFileSync(path.join(DIST, 'site.webmanifest'), JSON.stringify({ name: cfg.appName, short_name: cfg.appName, description: cfg.tagline, start_url: '/', display: 'browser', background_color: '#13161F', theme_color: '#13161F',
   icons: [{ src: '/icon-192.png', sizes: '192x192', type: 'image/png' }, { src: '/icon-512.png', sizes: '512x512', type: 'image/png' }] }, null, 2) + '\n');
 fs.writeFileSync(path.join(DIST, 'robots.txt'), fill(fs.readFileSync(path.join(SRC, 'robots.txt'), 'utf8')));
-fs.writeFileSync(path.join(DIST, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+// sitemap.xml and llms.txt are served by api/page.ts so they list live blog articles too (see vercel.json).
+if (process.env.STATIC_SITEMAP) fs.writeFileSync(path.join(DIST, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   sitemap.map((u) => '  <url><loc>' + esc(u.loc) + '</loc><lastmod>' + u.lastmod + '</lastmod></url>').join('\n') + '\n</urlset>\n');
 // llms.txt (llmstxt.org): a plain-text summary of the site for AI assistants. Plain text, so placeholders are filled without HTML.
 const storeStatus = cfg.appStoreUrl ? 'available on the App Store: ' + cfg.appStoreUrl : 'coming soon to the App Store.';
 const llms = fs.readFileSync(path.join(SRC, 'llms.txt'), 'utf8').replace(/\{\{(\w+)\}\}/g, (m, k) => k === 'storeStatus' ? storeStatus : (k in cfg ? String(cfg[k]) : m));
 if (/\{\{\w+\}\}|sudoku/i.test(llms)) throw new Error('llms.txt: unknown placeholder or trademarked name');
-fs.writeFileSync(path.join(DIST, 'llms.txt'), llms);
+if (process.env.STATIC_SITEMAP) fs.writeFileSync(path.join(DIST, 'llms.txt'), llms);
 console.log('Wrote ' + pages.length + ' pages to site/dist/.');
 if (placeholders.length) console.log('NOT READY TO PUBLISH. Fill these in site/site.config.json:\n  ' + [...new Set(placeholders)].join('\n  '));
 if (placeholders.length && process.env.VERCEL) { console.error('Refusing to deploy a site with placeholders.'); process.exit(1); }

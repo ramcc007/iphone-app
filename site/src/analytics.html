@@ -1,0 +1,8 @@
+<div id="consent" class="consent" role="dialog" aria-live="polite" aria-label="Cookie choice" hidden><p>We use Google Analytics cookies to count visits to this website (not the app). OK? <a href="/privacy#website">Details</a></p><div><button type="button" class="btn small" data-c="yes">Accept</button><button type="button" class="btn ghost small" data-c="no">No thanks</button></div></div>
+<script>(function(){var id='{{gaId}}',k='nf-consent',b=document.getElementById('consent');
+function load(){if(window.gtag)return;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+id;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};gtag('js',new Date());gtag('config',id);}
+function get(){try{return localStorage.getItem(k);}catch(e){return null;}}
+function set(v){try{localStorage.setItem(k,v);}catch(e){}}
+var c=get();if(c==='yes')load();else if(c!=='no')b.hidden=false;
+b.addEventListener('click',function(e){var v=e.target.getAttribute('data-c');if(!v)return;set(v);b.hidden=true;if(v==='yes')load();else if(window.gtag)location.reload();});
+var r=document.getElementById('cookie-settings');if(r)r.addEventListener('click',function(e){e.preventDefault();try{localStorage.removeItem(k);}catch(x){}b.hidden=false;});})();</script>
