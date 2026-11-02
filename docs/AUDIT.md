@@ -61,3 +61,7 @@ Every finding and change, newest first.
 - **Backdated articles:** "written as of its own date" means the prompts give that date and code drops sources dated after it. Web search shows the web as it is today, not as it was on that date.
 - **Prices:** the usage log's Haiku 5.5 and Groq prices are estimates in Settings, so check them against your price pages. Sonnet 5.5 uses Scripwise Writer's figure. Web search is $10 per 1,000 searches, and GPTZero is $0.15 per 1,000 words ($45 per 300,000).
 - **App fact checks:** the App Store and website checks run at most once a day. They can catch a changed price, age rating, minimum iOS version, a dropped Daily Drop or Sparks mention, and a website that stops saying "no ads, no accounts, no purchases". They cannot read new features into the facts. New facts are added by editing `BASE_APP_FACTS` in `writer/server/prompts.ts`.
+
+## 2026-11-02: first production deploy fix
+- **Finding:** on the first production deploy, `/blog`, `/blog/<slug>` and `/sitemap.xml` crashed with "Cannot use import statement outside a module". Vercel compiled the TypeScript functions as ES modules (tsconfig `module: ESNext`), but the repository's package.json is CommonJS. Root `"type": "module"` would break the existing `require()` scripts in `tools/`. The static pages were not affected.
+- **Change:** tsconfig now compiles to CommonJS (`module: CommonJS`, `moduleResolution: Node10`). Checked by compiling every function the same way and loading each with plain Node before pushing.
