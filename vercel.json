@@ -8,11 +8,13 @@
   "functions": {
     "api/page.ts": { "maxDuration": 20, "includeFiles": "site/{src/**,site.config.json}" },
     "api/og.ts": { "maxDuration": 20 },
-    "api/writer.ts": { "maxDuration": 300 },
-    "api/tick.ts": { "maxDuration": 300 }
+    "api/writer.ts": { "maxDuration": 300, "includeFiles": "site/site.config.json" },
+    "api/tick.ts": { "maxDuration": 300, "includeFiles": "site/site.config.json" }
   },
   "rewrites": [
     { "source": "/blog", "destination": "/api/page?r=blog" },
+    { "source": "/blog/rss.xml", "destination": "/api/page?r=rss" },
+    { "source": "/feed.xml", "destination": "/api/page?r=rss" },
     { "source": "/blog/:slug", "destination": "/api/page?r=post&slug=:slug" },
     { "source": "/og/:slug", "destination": "/api/og?slug=:slug" },
     { "source": "/sitemap.xml", "destination": "/api/page?r=sitemap" },

@@ -9,6 +9,7 @@ export interface Calls {
   groq: number;
   openrouter: { model: string; reasoning: unknown; referer?: string }[];
   gptzero: { words: number; text: string }[];
+  indexnow: { host: string; key: string; keyLocation: string; urlList: string[] }[];
 }
 
 type ArticleRow = { id: string; batch_id: string | null; position: number; status: string; stopped: boolean; next_attempt_at: string; lease_owner: string | null; lease_until: string | null; publish_at: string | null; slug: string | null; data: Record<string, unknown>; created_at: string; updated_at: string };
@@ -18,7 +19,7 @@ export class Fake {
   server!: Server;
   url = '';
   secret = 'test-writer-secret';
-  calls: Calls = { claude: [], groq: 0, openrouter: [], gptzero: [] };
+  calls: Calls = { claude: [], groq: 0, openrouter: [], gptzero: [], indexnow: [] };
   articles = new Map<string, ArticleRow>();
   posts: PostRow[] = [];
   settings: Record<string, unknown> = {};
@@ -72,6 +73,7 @@ export class Fake {
       WRITER_DB_SECRET: this.secret,
       APPSTORE_LOOKUP_URL: `${this.url}/lookup`,
       SITE_CHECK_URL: `${this.url}/site`,
+      INDEXNOW_URL: `${this.url}/indexnow`,
       ADMIN_PASSWORD: 'pw',
       TICK_SECRET: 'tick',
     };
@@ -88,6 +90,7 @@ export class Fake {
       return this.reword(body);
     }
     if (u.pathname === '/v2/predict/text') return this.gptzero(body);
+    if (u.pathname === '/indexnow') return (this.calls.indexnow.push(body), [200, '']);
     if (u.pathname === '/lookup') return [200, { results: [{ trackName: 'NumFall: Number Puzzle Game', price: 0, contentAdvisoryRating: '4+', minimumOsVersion: '17.0', description: 'Daily Drop puzzle. Earn Sparks by playing.' }] }];
     if (u.pathname === '/site/') return [200, '<p>No ads. No accounts. No purchases.</p>', { 'content-type': 'text/html' }];
     if (u.pathname === '/rest/v1/rpc/writer_api') return this.rpc(body);

@@ -4,6 +4,7 @@ import { HttpError, errorResponse, json, readJson } from '../writer/server/http'
 import { checkPassword, clearCookie, isAdmin, requireAdmin, sessionCookie } from '../writer/server/auth';
 import { createBatch, postNow, retry, runFromBrowser, saveArticle, unpublish, type BatchInput } from '../writer/server/runner';
 import { appFacts } from '../writer/server/appfacts';
+import { lastSubmission } from '../writer/server/indexnow';
 import { pausedUntil } from '../writer/server/humanizer';
 import { parseSection } from '../writer/server/steps';
 import { mergeSettings } from '../writer/shared/settings';
@@ -31,6 +32,7 @@ export async function GET(req: Request): Promise<Response> {
         return json({
           articles: await db.listArticles(),
           humanizerPaused: { groq: await pausedUntil('groq'), openrouter: await pausedUntil('openrouter') },
+          indexNow: await lastSubmission(),
         });
       case 'get': {
         const a = await db.getArticle(u.searchParams.get('id') ?? '');

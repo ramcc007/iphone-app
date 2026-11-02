@@ -240,5 +240,33 @@ export function llms(f: SiteFiles, posts: PublicPost[]): string {
   const storeStatus = c.appStoreUrl ? `available on the App Store: ${c.appStoreUrl}` : 'coming soon to the App Store.';
   const base = f.llms.replace(/\{\{(\w+)\}\}/g, (m, k: string) => (k === 'storeStatus' ? storeStatus : k in c ? String(c[k]) : m));
   const list = posts.map(p => `- [${p.title}](${SITE}/blog/${p.slug}): ${p.description}`).join('\n');
-  return `${base.trimEnd()}\n- [Blog](${SITE}/blog): articles on number puzzles, logic puzzles and solving techniques\n\n## Articles\n\n${list || '- (none yet)'}\n`;
+  return `${base.trimEnd()}\n- [Blog](${SITE}/blog): articles on number puzzles, logic puzzles and solving techniques\n- [RSS feed](${SITE}/blog/rss.xml): the latest articles\n\n## Articles\n\n${list || '- (none yet)'}\n`;
+}
+
+// RSS 2.0 feed of the latest live articles: /blog/rss.xml
+export function rss(f: SiteFiles, posts: PublicPost[], limit = 50): string {
+  const x = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const items = posts.slice(0, limit).map(p => `    <item>
+      <title>${x(p.title)}</title>
+      <link>${SITE}/blog/${p.slug}</link>
+      <guid isPermaLink="true">${SITE}/blog/${p.slug}</guid>
+      <pubDate>${new Date(p.publish_at).toUTCString()}</pubDate>
+      <dc:creator>${x(p.author)}</dc:creator>
+      <category>${x(p.category)}</category>
+      <description>${x(p.description)}</description>
+    </item>`);
+  const last = posts[0] ? new Date(posts[0].publish_at).toUTCString() : new Date(0).toUTCString();
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>NumFall blog</title>
+    <link>${SITE}/blog</link>
+    <atom:link href="${SITE}/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <description>Number puzzles, logic puzzles and solving techniques from ${x(String(f.config.appName ?? 'NumFall'))}.</description>
+    <language>en-us</language>
+    <lastBuildDate>${last}</lastBuildDate>
+${items.join('\n')}
+  </channel>
+</rss>
+`;
 }

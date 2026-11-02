@@ -59,12 +59,13 @@ function login(): void {
 const STATUS: Record<string, string> = { queued: 'Waiting', generating: 'Writing', checking: 'Checking', publishing: 'Posting', ready: 'Ready', scheduled: 'Scheduled', published: 'Live', failed: 'Stopped' };
 
 async function list(): Promise<void> {
-  const { articles, humanizerPaused } = await api<{ articles: Row[]; humanizerPaused: Record<string, number> }>('list');
+  const { articles, humanizerPaused, indexNow } = await api<{ articles: Row[]; humanizerPaused: Record<string, number>; indexNow: { at: string; submitted: number; note: string } | null }>('list');
   const paused = Object.entries(humanizerPaused ?? {}).filter(([, t]) => t > Date.now());
   const spend = articles.reduce((n, a) => n + (a.summary?.costUsd ?? 0), 0);
   app.innerHTML = `${nav('#/')}<main>
 ${paused.length ? `<p class="note">${paused.map(([p, t]) => `${p === 'groq' ? 'Groq' : 'OpenRouter'} reached its daily limit and is paused until ${when(new Date(t).toISOString())}.`).join(' ')} ${paused.length >= 2 ? 'Articles carry on without the humanizer until one comes back.' : 'The other provider is used meanwhile, if it has a key.'}</p>` : ''}
 <p class="muted">${articles.length} articles · ${money(spend)} spent on these · the background job keeps working when this page is closed.</p>
+<p class="muted small">Search engines (IndexNow, every 12 hours): ${indexNow ? `last run ${when(indexNow.at)}, ${esc(indexNow.note)}` : 'not run yet'} · <a href="/sitemap.xml" target="_blank">sitemap</a> · <a href="/blog/rss.xml" target="_blank">RSS</a> · <a href="/llms.txt" target="_blank">llms.txt</a></p>
 <table class="list"><thead><tr><th>Article</th><th>Status</th><th>Human</th><th>Goes live</th><th>Cost</th></tr></thead><tbody>
 ${articles
   .map(a => {

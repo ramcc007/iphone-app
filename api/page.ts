@@ -3,7 +3,7 @@
 // until its time; signed in as admin, the same URL shows a preview with the go-live time.
 import { isAdmin } from '../writer/server/auth';
 import { db } from '../writer/server/db';
-import { articlePage, indexPage, llms, page, siteFiles, sitemap, type PublicPost } from '../writer/site/blog';
+import { articlePage, indexPage, llms, page, rss, siteFiles, sitemap, type PublicPost } from '../writer/site/blog';
 
 const COLS = 'slug,title,description,author,category,tags,html,faq,related,reading_minutes,publish_at,updated_at,status';
 const LIST_COLS = 'slug,title,description,author,category,tags,related,reading_minutes,publish_at,updated_at,status';
@@ -42,6 +42,7 @@ export async function GET(req: Request): Promise<Response> {
     const f = siteFiles();
     if (r === 'sitemap') return new Response(sitemap(f, await livePosts()), { headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': PUBLIC_CACHE } });
     if (r === 'llms') return new Response(llms(f, await livePosts()), { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': PUBLIC_CACHE } });
+    if (r === 'rss') return new Response(rss(f, await livePosts()), { headers: { 'content-type': 'application/rss+xml; charset=utf-8', 'cache-control': PUBLIC_CACHE } });
     if (r === 'blog') {
       const posts = await livePosts();
       return html(indexPage(f, posts, Number(u.searchParams.get('page') ?? 1) || 1, u.searchParams.get('category')));

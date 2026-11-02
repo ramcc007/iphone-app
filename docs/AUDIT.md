@@ -88,3 +88,20 @@ Every finding and change, newest first.
   - The preview contains no analytics.
   - A live article still contains the consent-based snippet.
   - The admin page source contains no analytics.
+
+## 2026-11-02: RSS feed and 12-hour search engine submission
+- **Owner's request:** an RSS feed, plus llms.txt and the sitemap built and submitted automatically every 12 hours.
+- **Findings (checked 2 November 2026):**
+  - Google retired its sitemap "ping" endpoint in 2023 (pings return 404). Google reads sitemaps from robots.txt and Search Console instead, so nothing can submit to Google automatically without Search Console API access.
+  - IndexNow covers Bing, Yandex, Naver and Seznam. Google does not take part.
+- **Changes:**
+  - `/blog/rss.xml` (also `/feed.xml`) serves the latest 50 live articles in RSS 2.0. The feed link is in every page's head and in llms.txt.
+  - The sitemap, llms.txt and RSS are built from the database on each request (cached for at most 5 minutes), so they are always current and never need a scheduled rebuild.
+  - `/api/tick?job=submit` sends new or changed URLs to IndexNow (the first run sends every page). It sends nothing when nothing changed.
+  - The IndexNow key is public by design and lives in `site/site.config.json` and `site/src/static/<key>.txt`.
+  - The admin page shows the last submission.
+- **Test added:**
+  - The RSS feed contains the live articles.
+  - The first submission sends everything.
+  - A second run with no changes sends nothing.
+  - A newly live post sends only itself and /blog.

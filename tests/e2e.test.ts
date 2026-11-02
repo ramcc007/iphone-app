@@ -27,7 +27,7 @@ beforeEach(() => {
   fake.usage.length = 0;
   fake.state.clear();
   fake.settings = { maxFailures: 3 };
-  fake.calls = { claude: [], groq: 0, openrouter: [], gptzero: [] };
+  fake.calls = { claude: [], groq: 0, openrouter: [], gptzero: [], indexnow: [] };
   fake.groqMode = 'ok';
   fake.openrouterMode = 'ok';
   delete process.env.OPENROUTER_API_KEY;
@@ -280,4 +280,33 @@ test('the admin page never loads Google Analytics', async () => {
   const html = readFileSync('site/admin/index.html', 'utf8');
   assert.ok(!/googletagmanager|gtag|analytics/i.test(html));
   assert.ok(!/googletagmanager|gtag/.test(readFileSync('writer/ui/main.ts', 'utf8')));
+});
+
+test('RSS feed lists live articles; IndexNow gets everything once, then only new or changed pages', async () => {
+  const { submitToIndexNow } = await import('../writer/server/indexnow');
+  const url = (q: string) => new Request(`https://www.numfall.store/api/page?${q}`);
+  const feed = await (await pageApi.GET(url('r=rss'))).text();
+  assert.match(feed, /<rss version="2.0"/);
+  assert.ok(feed.includes('<link>https://www.numfall.store/blog/an-existing-live-post</link>'));
+  assert.ok(feed.includes('<dc:creator>Ram Das</dc:creator>'));
+
+  const first = await submitToIndexNow();
+  assert.equal(fake.calls.indexnow.length, 1);
+  const sent = fake.calls.indexnow[0];
+  assert.equal(sent.host, 'www.numfall.store');
+  assert.match(sent.keyLocation, /^https:\/\/www\.numfall\.store\/[0-9a-f]{32}\.txt$/);
+  assert.ok(sent.urlList.includes('https://www.numfall.store/') && sent.urlList.includes('https://www.numfall.store/blog/an-existing-live-post'));
+  assert.equal(first.submitted, sent.urlList.length);
+
+  // Nothing changed: no request at all.
+  const second = await submitToIndexNow(new Date(Date.now() + 1000));
+  assert.equal(fake.calls.indexnow.length, 1);
+  assert.match(second.note, /nothing new/);
+
+  // A post goes live: only it and /blog are sent.
+  await new Promise(r => setTimeout(r, 20));
+  const t = new Date().toISOString();
+  fake.posts.push({ ...fake.posts[0], article_id: 'new', slug: 'brand-new-live-post', publish_at: t, updated_at: t });
+  await submitToIndexNow(new Date(Date.now() + 5000));
+  assert.deepEqual(fake.calls.indexnow[1].urlList, ['https://www.numfall.store/blog', 'https://www.numfall.store/blog/brand-new-live-post']);
 });
