@@ -197,3 +197,8 @@ Every finding and change, newest first.
 - **OpenRouter finding:** once Groq's daily allowance ran out, the fallback `openai/gpt-oss-20b:free` returned 404 on every call, and that error counted as an article failure. A 404 there usually means the account's privacy settings exclude free endpoints whose host may train on prompts (openrouter.ai/settings/privacy). OpenRouter's own message is now shown, so the reason can be confirmed.
 - **Change:** a humanizer provider that refuses the request (404, a policy refusal, a bad key) is set aside for an hour with its reason. The article moves to the next provider, or carries on without the humanizer, with no strike and no retry loop. The admin page shows the reason.
 - **Tests:** the 404 policy refusal, and which model each step uses. 32 passing.
+- **Follow-up (same evening):** OpenRouter's real 404 reason, now shown, was "This model is unavailable for free. The paid version is available now", so the free `gpt-oss-20b` had been withdrawn. My earlier guess about privacy settings was wrong.
+- **Owner's choice:** fall back to `openrouter/free` (OpenRouter's free router, which picks any available free model on each call), logged at $0. The fact guard and meaning check still apply to every rewrite.
+- **Data changes:** the saved settings were updated to the new fallback, and OpenRouter's one-hour pause was cleared.
+- **Pause notes:** these now show the real reason, not always "daily limit".
+- **Articles:** four that hit the humanizer error were restarted. They finished without the humanizer, because both providers were out at the time.

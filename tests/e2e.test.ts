@@ -229,10 +229,10 @@ test('when Groq is out for the day, the free OpenRouter model takes over the hum
   assert.equal(done.status, 'ready', done.error);
   assert.equal(done.humanize!.skipped, undefined, 'not skipped: the fallback did it');
   assert.ok(done.humanize!.units.some(u => u.state === 'done' || u.state === 'reverted'));
-  assert.ok(done.humanize!.via!.some(v => v.startsWith('openrouter openai/gpt-oss-20b:free')));
+  assert.ok(done.humanize!.via!.some(v => v.startsWith('openrouter openrouter/free')));
   assert.ok((fake.state.get('humanizer_paused_until:groq') as { until: number }).until > Date.now());
   // Free model, OpenRouter's reasoning format, cost 0 in the usage log.
-  assert.ok(fake.calls.openrouter.every(c => c.model === 'openai/gpt-oss-20b:free' && (c.reasoning as { effort: string }).effort === 'low' && c.referer === 'https://www.numfall.store'));
+  assert.ok(fake.calls.openrouter.every(c => c.model === 'openrouter/free' && c.referer === 'https://www.numfall.store'));
   const orUsage = fake.usage.filter(u => u.provider === 'openrouter');
   assert.ok(orUsage.length > 0 && orUsage.every(u => u.cost_usd === 0));
 });

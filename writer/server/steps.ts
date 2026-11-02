@@ -9,7 +9,7 @@ import { goodAnchor, insertLink, linkifyBare } from '../shared/links';
 import { bodyWords, cleanSlug, normHeading, plainText, sentenceCase, sentences, titleShape, words } from '../shared/text';
 import { callClaude, parseJson } from './claude';
 import { scan } from './gptzero';
-import { hasKey, keyName, meaningCheck, pausedUntil, pauseHumanizer, rewriteUnits, routesOf } from './humanizer';
+import { hasKey, keyName, meaningCheck, pauseInfo, pauseHumanizer, rewriteUnits, routesOf } from './humanizer';
 import type { AppFacts } from './prompts';
 import * as P from './prompts';
 
@@ -190,9 +190,9 @@ export async function humanize(a: Article, c: Ctx): Promise<{ waitUntil?: number
       notes.push(`no ${keyName(r)} set`);
       continue;
     }
-    const paused = await pausedUntil(r.provider);
+    const paused = await pauseInfo(r.provider);
     if (paused) {
-      notes.push(`${r.provider} paused until ${new Date(paused).toISOString()} (daily limit)`);
+      notes.push(`${r.provider} paused until ${new Date(paused.until).toISOString()} (${(paused.reason ?? 'daily limit').slice(0, 120)})`);
       continue;
     }
     used = true;

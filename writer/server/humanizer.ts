@@ -27,6 +27,7 @@ export const routesOf = (s: Settings): Route[] => {
   return fb?.enabled && fb.model && !(fb.provider === main.provider && fb.model === main.model) ? [main, { provider: fb.provider, model: fb.model }] : [main];
 };
 export const keyName = (r: Route) => providerInfo(r).key;
+export const isFreeModel = (m: string) => m.endsWith(':free') || m === 'openrouter/free';
 
 export class HumanizerBusy extends Error {
   retryAfterMs: number;
@@ -171,7 +172,7 @@ export async function rewriteUnits(units: HumanizeUnit[], s: Settings, r: Route,
     await Promise.all([worker(), worker(), worker()]);
   } finally {
     if (t.calls) {
-      const p = r.model.endsWith(':free') ? { inPerM: 0, outPerM: 0 } : priceOf(s, r.model);
+      const p = isFreeModel(r.model) ? { inPerM: 0, outPerM: 0 } : priceOf(s, r.model);
       const usd = Math.round(((t.input / 1e6) * p.inPerM + (t.output / 1e6) * p.outPerM) * 1e6) / 1e6;
       addCost(a, usd, { humanizerUsd: usd });
       await db.logUsage({ article_id: a.id, step: 'humanize', provider: r.provider, model: r.model, input_tokens: t.input, output_tokens: t.output, cost_usd: usd, ok: t.failed < t.calls, note: `${t.calls} calls${t.failed ? `, ${t.failed} failed` : ''}` });

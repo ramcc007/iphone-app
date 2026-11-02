@@ -33,6 +33,7 @@ export const DEFAULT_SETTINGS: Settings = {
     'openai/gpt-oss-20b': { inPerM: 0.075, outPerM: 0.3 },
     'openai/gpt-oss-120b': { inPerM: 0.15, outPerM: 0.6 },
     'openai/gpt-oss-20b:free': { inPerM: 0, outPerM: 0 },
+    'openrouter/free': { inPerM: 0, outPerM: 0 },
   },
   searchPer1k: 10,
   gptzeroPer1kWords: 0.15,
@@ -45,7 +46,8 @@ export const DEFAULT_SETTINGS: Settings = {
     method: 'paraphrase',
     temperature: 1.1,
     topP: 1,
-    fallback: { enabled: true, provider: 'openrouter', model: 'openai/gpt-oss-20b:free' },
+    // openrouter/free picks any free model available on each call (OpenRouter withdrew the free gpt-oss-20b, 2 Nov 2026).
+    fallback: { enabled: true, provider: 'openrouter', model: 'openrouter/free' },
   },
   slips: 'light',
   spelling: 'en-US',
