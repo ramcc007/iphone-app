@@ -237,11 +237,18 @@ export const REWRITE_SCHEMA = {
 
 export function linksPrompt(a: Article, candidates: PostIndexEntry[]): { system: string; user: string } {
   return {
-    system: 'You pick internal links for a puzzle website article.',
-    user: `Pick 2 or 3 of these live articles that a reader of this article would find useful, and for each one an anchor: an exact phrase of 2 to 6 words that already appears, word for word, in a paragraph of the article (not in a heading or the first paragraph). Do not change any text.
+    system: 'You choose internal links for a puzzle website, the way an SEO editor would.',
+    user: `Pick 2 or 3 of these live articles that a reader of this article would find useful. For each, choose the anchor text: the words in this article that will become the link.
 
-Live articles:
-${candidates.map(p => `- ${p.slug}: ${p.title}`).join('\n')}
+Anchor rules:
+- The anchor must already appear word for word in a paragraph of the article below (not in a heading, not in the first paragraph). Do not change any text.
+- Choose words a person would type into Google to find the linked article: its topic or technique, such as "naked pairs", "6x6 grid puzzle", "daily puzzle routine" or "puzzles for older adults". Use the linked article's title and tags to judge this.
+- 2 to 5 words. Never generic words like "this article", "read more", "learn more", "here", "this guide" or "click".
+- Each anchor different, and each linked article used once.
+- If no phrase in the article fits a link that well, leave that link out. Fewer good links are better than a weak one.
+
+Live articles (slug: title [tags]):
+${candidates.map(p => `- ${p.slug}: ${p.title}${p.tags.length ? ` [${p.tags.join(', ')}]` : ''}`).join('\n')}
 
 Article:
 ${a.body.filter(b => b.type !== 'h2').map(b => (b.type === 'p' ? b.text : b.items.join('\n'))).join('\n\n')}

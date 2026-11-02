@@ -97,18 +97,46 @@ function appCard(slug: string, where: 'mid' | 'end'): string {
   return `<aside class="app-card" aria-label="NumFall on the App Store"><img src="/icon-192.png" alt="" width="64" height="64" loading="lazy"><div><p class="app-name">NumFall: Number Puzzle Game</p><p class="app-line">A number puzzle where numbers fall into place: every row, column and box holds each number once. Free on iPhone and iPad.</p></div><a class="store-badge" href="${esc(appStoreLink(slug))}" target="_blank" rel="noopener" data-card="${where}"><img src="/app-store-badge.svg" alt="Download on the App Store" width="150" height="50"></a></aside>`;
 }
 
-function share(url: string, title: string): string {
-  const u = encodeURIComponent(url);
+const ICON = {
+  share: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  mail: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="m4 7 8 6 8-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+
+// Share panel: the phone's own share sheet where available, the main networks by name, email and copy link.
+// No third-party scripts; every button is a plain link. UTM tags show which network brought each visit.
+function share(url: string, title: string, slug: string): string {
+  const tagged = (src: string) => encodeURIComponent(`${url}?utm_source=${src}&utm_medium=social&utm_campaign=share`);
   const t = encodeURIComponent(title);
-  return `<div class="share" aria-label="Share"><span>Share:</span>
-<a href="https://twitter.com/intent/tweet?url=${u}&amp;text=${t}" target="_blank" rel="noopener">X</a>
-<a href="https://www.facebook.com/sharer/sharer.php?u=${u}" target="_blank" rel="noopener">Facebook</a>
-<a href="https://www.linkedin.com/sharing/share-offsite/?url=${u}" target="_blank" rel="noopener">LinkedIn</a>
-<a href="https://www.reddit.com/submit?url=${u}&amp;title=${t}" target="_blank" rel="noopener">Reddit</a>
-<a href="mailto:?subject=${t}&amp;body=${u}">Email</a>
-<button type="button" class="copy" data-url="${esc(url)}">Copy link</button></div>
-<script>document.querySelectorAll('.share .copy').forEach(function(b){b.addEventListener('click',function(){try{navigator.clipboard.writeText(b.dataset.url);b.textContent='Link copied';}catch(e){}});});</script>`;
+  const nets: [string, string, string][] = [
+    ['x', 'X', `https://twitter.com/intent/tweet?url=${tagged('x')}&amp;text=${t}`],
+    ['facebook', 'Facebook', `https://www.facebook.com/sharer/sharer.php?u=${tagged('facebook')}`],
+    ['linkedin', 'LinkedIn', `https://www.linkedin.com/sharing/share-offsite/?url=${tagged('linkedin')}`],
+    ['reddit', 'Reddit', `https://www.reddit.com/submit?url=${tagged('reddit')}&amp;title=${t}`],
+    ['whatsapp', 'WhatsApp', `https://wa.me/?text=${t}%20${tagged('whatsapp')}`],
+  ];
+  return `<section class="sharebox" aria-labelledby="share-h-${slug}">
+<div class="sharebox-head"><p id="share-h-${slug}" class="sharebox-t">Share this article</p><p class="sharebox-s">Know a puzzle fan who would like it? Send it their way.</p></div>
+<div class="share-row">
+<button type="button" class="share-native" data-title="${esc(title)}" data-url="${esc(url)}" hidden>${ICON.share}<span>Share</span></button>
+${nets.map(([k, label, href]) => `<a class="net net-${k}" href="${href}" target="_blank" rel="noopener nofollow">${label}</a>`).join('\n')}
+<a class="net net-email" href="mailto:?subject=${t}&amp;body=${tagged('email')}">${ICON.mail}<span>Email</span></a>
+<button type="button" class="net net-copy share-copy" data-url="${esc(url)}">${ICON.link}<span>Copy link</span></button>
+</div>
+<p class="share-toast" role="status" aria-live="polite"></p>
+</section>`;
 }
+
+const SHARE_SCRIPT = `<script>(function(){
+var canShare=!!navigator.share;
+document.querySelectorAll('.share-native').forEach(function(b){if(canShare)b.hidden=false;b.addEventListener('click',function(){navigator.share({title:b.dataset.title,url:b.dataset.url}).catch(function(){});});});
+function copy(b){var u=b.dataset.url,box=b.closest('.sharebox,.byline-share'),t=box&&box.querySelector('.share-toast');
+function done(){b.classList.add('done');var s=b.querySelector('span');if(s){var o=s.textContent;s.textContent='Copied';setTimeout(function(){s.textContent=o;b.classList.remove('done');},2200);}if(t)t.textContent='Link copied to your clipboard.';}
+if(navigator.clipboard){navigator.clipboard.writeText(u).then(done,function(){prompt('Copy this link',u);});}else{prompt('Copy this link',u);}}
+document.querySelectorAll('.share-copy').forEach(function(b){b.addEventListener('click',function(){copy(b);});});
+document.querySelectorAll('.byline-share').forEach(function(b){b.addEventListener('click',function(){if(canShare){navigator.share({title:b.dataset.title,url:b.dataset.url}).catch(function(){});}else{var box=document.querySelector('.sharebox');if(box)box.scrollIntoView({behavior:'smooth',block:'center'});}});});
+})();</script>`;
 
 // Links to articles that aren't live yet show as plain text until the target is live.
 export function unwrapDeadLinks(html: string, live: Set<string>): string {
@@ -170,7 +198,7 @@ export function articlePage(f: SiteFiles, p: PublicPost, live: Set<string>, rela
 <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">›</span> <a href="/blog">Blog</a> <span aria-hidden="true">›</span> <a href="/blog/category/${catSlug(p.category)}">${esc(p.category)}</a></nav>
 <h1>${esc(p.title)}</h1>
 ${p.description ? `<p class="dek">${esc(p.description)}</p>` : ''}
-<p class="byline"><span class="avatar" aria-hidden="true">${esc(p.author.split(/\s+/).map(w => w[0]).join('').slice(0, 2))}</span><span>By <strong>${esc(p.author)}</strong><br><time datetime="${p.publish_at}">${fmtDate(p.publish_at)}</time>${updated} · ${p.reading_minutes} min read</span></p>
+<div class="byline-row"><p class="byline"><span class="avatar" aria-hidden="true">${esc(p.author.split(/\s+/).map(w => w[0]).join('').slice(0, 2))}</span><span>By <strong>${esc(p.author)}</strong><br><time datetime="${p.publish_at}">${fmtDate(p.publish_at)}</time>${updated} · ${p.reading_minutes} min read</span></p><button type="button" class="byline-share" data-title="${esc(p.title)}" data-url="${esc(url)}">${ICON.share}<span>Share</span></button></div>
 </div></header>
 <div class="narrow">
 <article class="prose">
@@ -180,7 +208,8 @@ ${appCard(p.slug, 'end')}
 ${faq}
 ${sources}
 <p class="disclosure">NumFall is made by the publisher of this site. Any health or brain-training points here are general information, not medical advice.</p>
-${share(url, p.title)}
+${share(url, p.title, p.slug)}
+${SHARE_SCRIPT}
 </article>
 ${rel}
 <p class="back"><a href="/blog">← All articles</a></p>

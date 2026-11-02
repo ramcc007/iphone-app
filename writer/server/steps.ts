@@ -5,7 +5,7 @@ import { LENGTHS, appStoreLink } from '../shared/settings';
 import { bannedWordHits, cleanArticle, hasNeverPublish, nameHits, structureHits, toSymbols, unsupportedClaims, headingSymbols } from '../shared/clean';
 import { applyUnits, factProblem, humanizeUnits } from '../shared/humanize';
 import { addSlips } from '../shared/slips';
-import { insertLink, linkifyBare } from '../shared/links';
+import { goodAnchor, insertLink, linkifyBare } from '../shared/links';
 import { bodyWords, cleanSlug, normHeading, plainText, sentenceCase, sentences, titleShape, words } from '../shared/text';
 import { callClaude, parseJson } from './claude';
 import { scan } from './gptzero';
@@ -305,7 +305,9 @@ export async function links(a: Article, c: Ctx): Promise<void> {
       }
       const valid = new Set(cands.map(x => x.slug));
       for (const l of picked) {
-        if (a.links.length >= 3 || !valid.has(l.slug) || a.links.some(x => x.slug === l.slug)) continue;
+        if (a.links.length >= 3 || !valid.has(l.slug) || a.links.some(x => x.slug === l.slug || x.anchor.toLowerCase() === l.anchor.toLowerCase())) continue;
+        const target = cands.find(x => x.slug === l.slug)!;
+        if (!goodAnchor(l.anchor, target)) continue; // generic or off-topic anchor text
         const next = insertLink(a.body, l.anchor, `/blog/${l.slug}`);
         if (next) {
           a.body = next;

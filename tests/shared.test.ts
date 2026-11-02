@@ -4,7 +4,7 @@ import { cleanArticle, hasNeverPublish, toSymbols, nameHits, bannedWordHits, uns
 import { factProblem, cleanRewrite } from '../writer/shared/humanize';
 import { cleanSlug, titleShape, sentenceCase } from '../writer/shared/text';
 import { backdateSlots, localDate, scheduleSlots, tzOffsetMinutes } from '../writer/shared/schedule';
-import { insertLink, linkifyBare, linkifyHtml } from '../writer/shared/links';
+import { goodAnchor, insertLink, linkifyBare, linkifyHtml } from '../writer/shared/links';
 import { sanitizeHtml } from '../writer/shared/sanitize';
 import { addSlips } from '../writer/shared/slips';
 import { blocksToHtml, inline } from '../writer/shared/render';
@@ -184,4 +184,15 @@ test('non-English check: short English questions pass; other languages and scrip
     '这是一个数字谜题，每一行都要填满。',
     'Игроки проверяют каждую строку.',
   ]) assert.equal(isNonEnglish(bad), true, bad);
+});
+
+test('internal link anchors must read like a search for the linked article', () => {
+  const target = { title: 'Naked pairs in small grids', tags: ['6x6', 'techniques'], slug: 'naked-pairs-small-grids' };
+  assert.equal(goodAnchor('naked pairs', target), true);
+  assert.equal(goodAnchor('spot a naked pair', target), true);
+  assert.equal(goodAnchor('a 6x6 grid', target), true);
+  assert.equal(goodAnchor('this article', target), false);
+  assert.equal(goodAnchor('read more', target), false);
+  assert.equal(goodAnchor('the first move', target), false, 'nothing in common with the target');
+  assert.equal(goodAnchor('pairs', target), false, 'one word is too short');
 });

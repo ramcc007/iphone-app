@@ -101,3 +101,25 @@ export function linkifyHtml(html: string): string {
     });
   });
 }
+
+// An anchor is kept only if it reads like a search for the target: not generic, and sharing at least one
+// meaningful word (or grid size like 6x6) with the target's title, tags or slug.
+const GENERIC_ANCHOR = /^(?:this|that|the|our|a)?\s*(?:article|guide|post|page|piece|link|here|more|read more|learn more|click here|this one)$|\b(?:click|read more|learn more)\b/i;
+const STOP = new Set('a an the and or of to in on for with how what why when is are your you can do does at by from about this that it its into vs'.split(' '));
+const stem = (w: string) => w.toLowerCase().replace(/×/g, 'x').replace(/(?:ing|ers|er|es|s)$/, '');
+export function goodAnchor(anchor: string, target: { title: string; tags?: string[]; slug: string }): boolean {
+  const words = anchor.trim().split(/\s+/);
+  if (words.length < 2 || words.length > 6 || GENERIC_ANCHOR.test(anchor.trim())) return false;
+  const pool = new Set(
+    `${target.title} ${(target.tags ?? []).join(' ')} ${target.slug.replace(/-/g, ' ')}`
+      .toLowerCase()
+      .replace(/×/g, 'x')
+      .split(/[^a-z0-9]+/)
+      .filter(w => w && !STOP.has(w))
+      .map(stem),
+  );
+  return words.some(w => {
+    const k = w.toLowerCase().replace(/[^a-z0-9×x]/g, '');
+    return k && !STOP.has(k) && pool.has(stem(k));
+  });
+}

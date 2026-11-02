@@ -167,3 +167,17 @@ Every finding and change, newest first.
   - A JSON answer cut off at the cap is now reported as "cut off at the N-token cap" in the error and the usage log.
   - Internal links are now optional: if picking them fails, the article carries on without them instead of retrying.
 - **Test added:** a cut-off links answer is tried once, logged as cut off, and the article finishes without internal links.
+
+## 2026-11-02: share panel and keyword anchors for internal links
+- **Share UI:**
+  - A "Share this article" panel at the end of each article.
+  - A Share button that opens the device's share sheet (shown only where the browser supports it).
+  - Buttons for X, Facebook, LinkedIn, Reddit, WhatsApp and email, plus Copy link with a "Copied" confirmation (falls back to a copy prompt).
+  - A Share button next to the byline.
+  - Shared links carry `utm_source=<network>&utm_medium=social&utm_campaign=share`, so Analytics shows which network brought each visit. The canonical URL stays clean.
+  - No third-party scripts.
+  - Networks are labelled by name rather than drawn as logos.
+- **Internal links:**
+  - The link picker is told to use as anchor the words a person would search to find the linked article, judged from its title and tags. Anchors are 2 to 5 words, never generic ("this article", "read more"), each different, and leaving a link out beats a weak one.
+  - Code check `goodAnchor`: an anchor must share a meaningful word or grid size with the target's title, tags or slug, and generic anchors are rejected.
+- **Tests:** anchor rules, and the share panel's presence on live articles. 30 passing.
