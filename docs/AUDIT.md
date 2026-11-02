@@ -294,3 +294,41 @@ Checked:
 - hidden game-name sources and separate app-card labels;
 - login lockout per address;
 - every inline script covered by the CSP.
+
+## 2026-11-03: mobile-first pass (all pages)
+**Tested:**
+- Pages: home, about, support, privacy, terms, press, 404, blog list, page 2, a category page, an article and the blog 404.
+- Sizes: 360×800, 390×844, 430×932, 844×390 (landscape) and 768×1024, in light and dark mode. Run with `tools/site/mobile-check.cjs` (Playwright).
+- Lighthouse 12 mobile (slow 4G, 4× CPU) on five page types.
+
+**Found and fixed (CSS only, `site/src/style.css`):**
+- **Header nav wrapped to two rows on phones up to 390 px**, making the sticky header 99 px tall (12% of the screen). It's now one 63 px row from 360 px up: tighter link padding and a slightly smaller wordmark. In landscape (height ≤ 500 px) the header no longer sticks, so it doesn't cover a sixth of the screen.
+- **Tap targets under 44 px:**
+  - wordmark (34 px);
+  - footer links (34 px, touching);
+  - category chips (40);
+  - pager numbers (40) and Newer/Older (27);
+  - breadcrumbs (17);
+  - cookie buttons (40).
+  - All are now at least 44 px. Breadcrumbs keep their look with a larger invisible hit area and wider separators.
+  - The footer uses two link columns on phones, so the taller links don't make it longer.
+- **Article text was 19-20 px on phones (about 33 characters a line).** It's now 18 px with 1.7 line height (about 35-40 characters), and stays 19 px on larger screens.
+- **The homepage's falling-number animation kept running invisibly on phones** (opacity 0). It's now switched off below 820 px. Lighthouse blocking time on home went from 150 ms to 0.
+- **The cookie notice is more compact on phones:** 124 px instead of 154 px at 390.
+- **iOS landscape text inflation:** text-size-adjust set to 100%.
+- **Images, icons and videos** are now cached for 7 days (`vercel.json`).
+
+**Checked and already fine:**
+- no sideways scrolling at any size;
+- no text under 12 px;
+- the viewport allows zoom;
+- phone and desktop pages have the same text, headings, links and structured data (nothing important hidden on small screens);
+- contents/FAQ links land headings 21 px below the sticky header;
+- no autoplaying video (the gameplay videos are download links);
+- copy-link and the share sheet work.
+
+**Lighthouse mobile after the fixes:** every page scored 100 in performance, accessibility, best practices and SEO.
+- Largest Contentful Paint: 1.1-1.3 s.
+- Layout shift: 0.
+- Blocking time: 0-30 ms.
+- Page weight: 35-68 KB.
