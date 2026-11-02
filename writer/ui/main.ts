@@ -59,10 +59,11 @@ function login(): void {
 const STATUS: Record<string, string> = { queued: 'Waiting', generating: 'Writing', checking: 'Checking', publishing: 'Posting', ready: 'Ready', scheduled: 'Scheduled', published: 'Live', failed: 'Stopped' };
 
 async function list(): Promise<void> {
-  const { articles, humanizerPausedUntil } = await api<{ articles: Row[]; humanizerPausedUntil: number }>('list');
+  const { articles, humanizerPaused } = await api<{ articles: Row[]; humanizerPaused: Record<string, number> }>('list');
+  const paused = Object.entries(humanizerPaused ?? {}).filter(([, t]) => t > Date.now());
   const spend = articles.reduce((n, a) => n + (a.summary?.costUsd ?? 0), 0);
   app.innerHTML = `${nav('#/')}<main>
-${humanizerPausedUntil ? `<p class="note">The humanizer reached its daily limit and is paused until ${when(new Date(humanizerPausedUntil).toISOString())}. Articles carry on without it.</p>` : ''}
+${paused.length ? `<p class="note">${paused.map(([p, t]) => `${p === 'groq' ? 'Groq' : 'OpenRouter'} reached its daily limit and is paused until ${when(new Date(t).toISOString())}.`).join(' ')} ${paused.length >= 2 ? 'Articles carry on without the humanizer until one comes back.' : 'The other provider is used meanwhile, if it has a key.'}</p>` : ''}
 <p class="muted">${articles.length} articles · ${money(spend)} spent on these · the background job keeps working when this page is closed.</p>
 <table class="list"><thead><tr><th>Article</th><th>Status</th><th>Human</th><th>Goes live</th><th>Cost</th></tr></thead><tbody>
 ${articles
@@ -144,7 +145,7 @@ ${done ? '<button data-do="edit" class="ghost">Edit text</button>' : ''}
 <div class="card"><h2>Checks</h2>
 <p>GPTZero: ${sc ? `<strong>${sc.human}% human</strong> (${sc.ai}% AI, ${sc.mixed}% mixed), ${sc.flagged.length} sentences flagged, ${sc.words} words` : 'not scanned yet'}${a.rescan ? ` · rescan ${a.rescan.human}% human` : ''}</p>
 <p>Rewritten after the scan: ${a.rewritten ?? 0} sentences · grammar slips: ${a.slips ?? 0}</p>
-<p>Humanizer: ${a.humanize ? (a.humanize.skipped ? esc(`skipped (${a.humanize.skipped})`) : `${a.humanize.units.filter(u => u.state === 'done').length} rewritten, ${a.humanize.units.filter(u => u.state === 'kept').length} kept, ${a.humanize.units.filter(u => u.state === 'reverted').length} put back by the meaning check`) : 'not run yet'}</p>
+<p>Humanizer: ${a.humanize ? (a.humanize.skipped ? esc(`skipped (${a.humanize.skipped})`) : `${a.humanize.via?.length ? `via ${esc(a.humanize.via.join(' + '))}: ` : ''}${a.humanize.units.filter(u => u.state === 'done').length} rewritten, ${a.humanize.units.filter(u => u.state === 'kept').length} kept, ${a.humanize.units.filter(u => u.state === 'reverted').length} put back by the meaning check`) : 'not run yet'}</p>
 <p>Internal links: ${a.links?.length ? a.links.map(l => `<code>${esc(l.anchor)}</code> → /blog/${esc(l.slug)}`).join(', ') : 'none'}</p>
 ${a.cleanReport?.removed.length ? `<details><summary>Taken out before posting (${a.cleanReport.removed.length})</summary><ul>${a.cleanReport.removed.map(r => `<li>${esc(r)}</li>`).join('')}</ul></details>` : ''}
 </div>
@@ -222,7 +223,9 @@ async function settingsPage(): Promise<void> {
 ${chk('h_enabled', s.humanizer.enabled, 'On')}
 <div class="row"><label>Provider <select name="h_provider"><option value="groq"${s.humanizer.provider === 'groq' ? ' selected' : ''}>Groq (free tier)</option><option value="openrouter"${s.humanizer.provider === 'openrouter' ? ' selected' : ''}>OpenRouter</option></select></label><label>Model <input name="h_model" value="${esc(s.humanizer.model)}"></label></div>
 <div class="row"><label>Reasoning effort <select name="h_reason">${['low', 'medium', 'high'].map(e => `<option${e === s.humanizer.reasoningEffort ? ' selected' : ''}>${e}</option>`).join('')}</select></label><label>Temperature <input type="number" step="0.05" min="0" max="2" name="h_temp" value="${s.humanizer.temperature}"></label><label>Top-p <input type="number" step="0.05" min="0.05" max="1" name="h_topp" value="${s.humanizer.topP}"></label></div>
-<p class="muted small">Method: paraphrase. If the daily limit is hit, the humanizer pauses itself and articles carry on without it.</p>
+${chk('fb_enabled', s.humanizer.fallback.enabled, 'Fallback when the main provider is out for the day')}
+<div class="row"><label>Fallback provider <select name="fb_provider"><option value="openrouter"${s.humanizer.fallback.provider === 'openrouter' ? ' selected' : ''}>OpenRouter</option><option value="groq"${s.humanizer.fallback.provider === 'groq' ? ' selected' : ''}>Groq</option></select></label><label>Fallback model <input name="fb_model" value="${esc(s.humanizer.fallback.model)}"></label></div>
+<p class="muted small">Method: paraphrase. When a provider hits its daily limit it pauses itself and the fallback takes over; if both are out, articles carry on without the humanizer. OpenRouter free models end in <code>:free</code> (50 requests a day, or 1,000 after a one-time $10 top-up).</p>
 <h2>Text</h2>
 <div class="row"><label>Grammar slips <select name="slips">${['light', 'off', 'heavy'].map(e => `<option${e === s.slips ? ' selected' : ''}>${e}</option>`).join('')}</select></label><label>Spelling <select name="spelling"><option value="en-US"${s.spelling === 'en-US' ? ' selected' : ''}>US English</option><option value="en-GB"${s.spelling === 'en-GB' ? ' selected' : ''}>UK English</option></select></label><label>Default length <select name="defaultLength">${Object.entries(LENGTHS).map(([k, v]) => `<option value="${k}"${k === s.defaultLength ? ' selected' : ''}>${v.label}</option>`).join('')}</select></label></div>
 <label>Authors, one per line (picked at random per article)<textarea name="authors" rows="5">${esc(s.authors.join('\n'))}</textarea></label>
@@ -258,7 +261,7 @@ ${facts ? `<section class="card"><h2>NumFall facts used in articles</h2><p class
       models: { research: g('m_research'), plan: g('m_plan'), write: g('m_write'), check: g('m_check') },
       writeEffort: g('writeEffort') as Settings['writeEffort'],
       maxSearches: +g('maxSearches'),
-      humanizer: { ...s.humanizer, enabled: f.has('h_enabled'), provider: g('h_provider') as 'groq', model: g('h_model'), reasoningEffort: g('h_reason') as 'low', temperature: +g('h_temp'), topP: +g('h_topp') },
+      humanizer: { ...s.humanizer, enabled: f.has('h_enabled'), provider: g('h_provider') as 'groq', model: g('h_model'), reasoningEffort: g('h_reason') as 'low', temperature: +g('h_temp'), topP: +g('h_topp'), fallback: { enabled: f.has('fb_enabled'), provider: g('fb_provider') as 'openrouter', model: g('fb_model') } },
       slips: g('slips') as Settings['slips'],
       spelling: g('spelling') as Settings['spelling'],
       defaultLength: g('defaultLength') as Settings['defaultLength'],

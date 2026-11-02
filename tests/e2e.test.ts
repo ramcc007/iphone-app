@@ -27,8 +27,10 @@ beforeEach(() => {
   fake.usage.length = 0;
   fake.state.clear();
   fake.settings = { maxFailures: 3 };
-  fake.calls = { claude: [], groq: 0, gptzero: [] };
+  fake.calls = { claude: [], groq: 0, openrouter: [], gptzero: [] };
   fake.groqMode = 'ok';
+  fake.openrouterMode = 'ok';
+  delete process.env.OPENROUTER_API_KEY;
   fake.claudeFail = null;
   // One live article to link to.
   fake.posts.push({
@@ -205,7 +207,7 @@ test('the humanizer pauses itself on a daily-limit error and articles carry on w
   const done = fake.articles.get(a.id)!.data as unknown as import('../writer/shared/types').Article;
   assert.equal(done.status, 'ready', done.error);
   assert.match(done.humanize!.skipped!, /daily limit/);
-  const pause = fake.state.get('humanizer_paused_until') as { until: number };
+  const pause = fake.state.get('humanizer_paused_until:groq') as { until: number };
   assert.ok(pause.until > Date.now());
   // The next article skips Groq entirely while paused.
   const groqBefore = fake.calls.groq;
@@ -213,6 +215,37 @@ test('the humanizer pauses itself on a daily-limit error and articles carry on w
   await drain();
   assert.equal(fake.calls.groq, groqBefore);
   assert.match((fake.articles.get(b.id)!.data as { humanize: { skipped: string } }).humanize.skipped, /paused/);
+});
+
+test('when Groq is out for the day, the free OpenRouter model takes over the humanizing', async () => {
+  process.env.OPENROUTER_API_KEY = 'or-key';
+  fake.groqMode = 'daily';
+  const s = await db.getSettings();
+  const [a] = await runner.createBatch({ topics: ['Accessible puzzle games with VoiceOver'], mode: 'manual' }, s);
+  await drain();
+  const done = fake.articles.get(a.id)!.data as unknown as import('../writer/shared/types').Article;
+  assert.equal(done.status, 'ready', done.error);
+  assert.equal(done.humanize!.skipped, undefined, 'not skipped: the fallback did it');
+  assert.ok(done.humanize!.units.some(u => u.state === 'done' || u.state === 'reverted'));
+  assert.ok(done.humanize!.via!.some(v => v.startsWith('openrouter openai/gpt-oss-20b:free')));
+  assert.ok((fake.state.get('humanizer_paused_until:groq') as { until: number }).until > Date.now());
+  // Free model, OpenRouter's reasoning format, cost 0 in the usage log.
+  assert.ok(fake.calls.openrouter.every(c => c.model === 'openai/gpt-oss-20b:free' && (c.reasoning as { effort: string }).effort === 'low' && c.referer === 'https://www.numfall.store'));
+  const orUsage = fake.usage.filter(u => u.provider === 'openrouter');
+  assert.ok(orUsage.length > 0 && orUsage.every(u => u.cost_usd === 0));
+});
+
+test('when both humanizer providers are out for the day, articles carry on without it', async () => {
+  process.env.OPENROUTER_API_KEY = 'or-key';
+  fake.groqMode = 'daily';
+  fake.openrouterMode = 'daily';
+  const s = await db.getSettings();
+  const [a] = await runner.createBatch({ topics: ['Puzzles for older adults'], mode: 'manual' }, s);
+  await drain();
+  const done = fake.articles.get(a.id)!.data as unknown as import('../writer/shared/types').Article;
+  assert.equal(done.status, 'ready', done.error);
+  assert.match(done.humanize!.skipped!, /groq daily limit reached; openrouter daily limit reached/);
+  assert.ok((fake.state.get('humanizer_paused_until:openrouter') as { until: number }).until > Date.now());
 });
 
 test('manual article waits for you; "post now" publishes it; rescan stays off by default', async () => {

@@ -9,7 +9,7 @@ import { insertLink } from '../shared/links';
 import { bodyWords, cleanSlug, normHeading, plainText, sentenceCase, sentences, titleShape, words } from '../shared/text';
 import { callClaude, parseJson } from './claude';
 import { scan } from './gptzero';
-import { humanizerReady, meaningCheck, pausedUntil, pauseHumanizer, rewriteUnits } from './humanizer';
+import { hasKey, keyName, meaningCheck, pausedUntil, pauseHumanizer, rewriteUnits, routesOf } from './humanizer';
 import type { AppFacts } from './prompts';
 import * as P from './prompts';
 
@@ -181,18 +181,39 @@ export async function humanize(a: Article, c: Ctx): Promise<{ waitUntil?: number
     setStage(a, 'meaning', 'Checking the humanizer kept the meaning');
   };
   if (!s.humanizer.enabled) return skip('humanizer is off'), {};
-  if (!humanizerReady(s)) return skip(`no ${s.humanizer.provider === 'groq' ? 'GROQ_API_KEY' : 'OPENROUTER_API_KEY'} set`), {};
-  const paused = await pausedUntil();
-  if (paused) return skip(`humanizer paused until ${new Date(paused).toISOString()} (daily limit)`), {};
-  const r = await rewriteUnits(a.humanize.units, s, a, c.deadline);
-  if (r.daily) {
-    // Daily allowance used up: pause the humanizer and let articles carry on without it.
-    await pauseHumanizer(r.retryAt!);
-    return skip('daily limit reached; carried on without the humanizer'), {};
+  // Main provider first; the fallback when the main one is out for the day or has no key.
+  const notes: string[] = [];
+  let used = false;
+  for (const r of routesOf(s)) {
+    if (!a.humanize.units.some(u => u.state === 'pending')) break;
+    if (!hasKey(r)) {
+      notes.push(`no ${keyName(r)} set`);
+      continue;
+    }
+    const paused = await pausedUntil(r.provider);
+    if (paused) {
+      notes.push(`${r.provider} paused until ${new Date(paused).toISOString()} (daily limit)`);
+      continue;
+    }
+    used = true;
+    const res = await rewriteUnits(a.humanize.units, s, r, a, c.deadline);
+    a.humanize.via = [...new Set([...(a.humanize.via ?? []), `${r.provider} ${r.model}`])];
+    if (res.daily) {
+      // Daily allowance used up: pause this provider and try the next one.
+      await pauseHumanizer(r.provider, res.retryAt!);
+      notes.push(`${r.provider} daily limit reached`);
+      continue;
+    }
+    if (res.retryAt) {
+      a.step = `Humanizer waiting for ${r.provider}'s per-minute limit`;
+      return { waitUntil: res.retryAt };
+    }
+    break;
   }
-  if (r.retryAt) {
-    a.step = 'Humanizer waiting for its per-minute limit';
-    return { waitUntil: r.retryAt };
+  if (a.humanize.units.some(u => u.state === 'pending') && c.deadline - Date.now() < 30_000 && used) return {}; // out of time: carry on next run
+  if (a.humanize.units.some(u => u.state === 'pending')) {
+    // Every provider is out (or has no key): carry on without the humanizer for the rest.
+    return skip(notes.join('; ') || 'no humanizer available'), {};
   }
   if (a.humanize.units.every(u => u.state !== 'pending')) setStage(a, 'meaning', 'Checking the humanizer kept the meaning');
   return {};

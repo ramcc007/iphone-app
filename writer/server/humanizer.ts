@@ -13,8 +13,20 @@ const PROVIDERS = {
   openrouter: { key: 'OPENROUTER_API_KEY', url: 'OPENROUTER_API_URL', base: 'https://openrouter.ai/api/v1/chat/completions', name: 'OpenRouter' },
 } as const;
 
-export const providerOf = (s: Settings) => PROVIDERS[s.humanizer.provider === 'openrouter' ? 'openrouter' : 'groq'];
-export const humanizerReady = (s: Settings) => s.humanizer.enabled && !!process.env[providerOf(s).key];
+// One provider and model the humanizer can call. The main one comes first; the fallback is used when the
+// main one is out for the day or has no key.
+export interface Route {
+  provider: 'groq' | 'openrouter';
+  model: string;
+}
+const providerInfo = (r: Route) => PROVIDERS[r.provider === 'openrouter' ? 'openrouter' : 'groq'];
+export const hasKey = (r: Route) => !!process.env[providerInfo(r).key];
+export const routesOf = (s: Settings): Route[] => {
+  const main: Route = { provider: s.humanizer.provider, model: s.humanizer.model };
+  const fb = s.humanizer.fallback;
+  return fb?.enabled && fb.model && !(fb.provider === main.provider && fb.model === main.model) ? [main, { provider: fb.provider, model: fb.model }] : [main];
+};
+export const keyName = (r: Route) => providerInfo(r).key;
 
 export class HumanizerBusy extends Error {
   retryAfterMs: number;
@@ -26,12 +38,13 @@ export class HumanizerBusy extends Error {
   }
 }
 
-const PAUSE_KEY = 'humanizer_paused_until';
-export async function pausedUntil(): Promise<number> {
-  const v = await db.getState<{ until: number }>(PAUSE_KEY).catch(() => null);
+// Each provider has its own daily allowance, so each is paused on its own.
+const pauseKey = (provider: string) => `humanizer_paused_until:${provider}`;
+export async function pausedUntil(provider: string): Promise<number> {
+  const v = await db.getState<{ until: number }>(pauseKey(provider)).catch(() => null);
   return v?.until && v.until > Date.now() ? v.until : 0;
 }
-export const pauseHumanizer = (until: number) => db.putState(PAUSE_KEY, { until, at: new Date().toISOString() });
+export const pauseHumanizer = (provider: string, until: number) => db.putState(pauseKey(provider), { until, at: new Date().toISOString() });
 
 const SYSTEM = `You reword one paragraph from a puzzle website for ordinary readers. Rewrite it in your own words in plain, literal, everyday English, the way a careful newspaper puzzle columnist writes. Change the words and the sentence order. Keep every number, name and fact, and the same level of certainty. Do not add anything and do not leave anything out. No idioms, no metaphors, no clever lines, no dashes, no words like furthermore, moreover, additionally, crucial or "it is worth noting". Write the paragraph text only: no heading, no label, no quotation marks around it, no note.`;
 
@@ -49,17 +62,21 @@ interface Totals {
   failed: number;
 }
 
-async function chat(paragraph: string, s: Settings, t: Totals, temperature: number): Promise<string> {
-  const p = providerOf(s);
+async function chat(paragraph: string, s: Settings, r: Route, t: Totals, temperature: number): Promise<string> {
+  const p = providerInfo(r);
   const key = process.env[p.key];
   if (!key) throw new HttpError(500, `Missing ${p.key}. Add it in Vercel, or turn the humanizer off in Settings.`);
   let res: Response;
   try {
     res = await fetch(optEnv(p.url, p.base), {
       method: 'POST',
-      headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+      headers: {
+        authorization: `Bearer ${key}`,
+        'content-type': 'application/json',
+        ...(r.provider === 'openrouter' ? { 'HTTP-Referer': 'https://www.numfall.store', 'X-Title': 'NumFall Writer' } : {}),
+      },
       body: JSON.stringify({
-        model: s.humanizer.model,
+        model: r.model,
         messages: [
           { role: 'system', content: SYSTEM },
           { role: 'user', content: EXAMPLE.original },
@@ -68,7 +85,12 @@ async function chat(paragraph: string, s: Settings, t: Totals, temperature: numb
         ],
         temperature,
         top_p: s.humanizer.topP,
-        ...(s.humanizer.model.includes('gpt-oss') ? { reasoning_effort: s.humanizer.reasoningEffort } : {}),
+        // Short thinking for reasoning models: Groq takes reasoning_effort, OpenRouter takes a reasoning object.
+        ...(r.model.includes('gpt-oss')
+          ? r.provider === 'openrouter'
+            ? { reasoning: { effort: s.humanizer.reasoningEffort, exclude: true } }
+            : { reasoning_effort: s.humanizer.reasoningEffort }
+          : {}),
         max_tokens: Math.min(3000, paragraph.split(/\s+/).length * 3 + 600),
       }),
       signal: AbortSignal.timeout(20_000),
@@ -84,7 +106,8 @@ async function chat(paragraph: string, s: Settings, t: Totals, temperature: numb
     const msg = await res.text().catch(() => '');
     const wait = Number.isFinite(after) && after > 0 ? after * 1000 : 60_000;
     // "Rate limit reached ... tokens per day (TPD)" / "requests per day (RPD)", or a long wait, is the daily limit.
-    const daily = /per day|\bTPD\b|\bRPD\b|daily/i.test(msg) || wait > 120_000;
+    // OpenRouter free models: "free-models-per-day" when the 50 or 1,000 a day are used up.
+    const daily = /per[ -]day|\bTPD\b|\bRPD\b|daily/i.test(msg) || wait > 120_000;
     throw new HumanizerBusy(daily ? Math.max(wait, 30 * 60_000) : Math.min(wait, 65_000), daily);
   }
   if (res.status === 401 || res.status === 403) {
@@ -101,10 +124,10 @@ async function chat(paragraph: string, s: Settings, t: Totals, temperature: numb
   return data.choices?.[0]?.message?.content ?? '';
 }
 
-async function rewriteUnit(u: HumanizeUnit, s: Settings, t: Totals): Promise<void> {
+async function rewriteUnit(u: HumanizeUnit, s: Settings, r: Route, t: Totals): Promise<void> {
   let why = '';
   for (const temp of [s.humanizer.temperature, Math.max(0.7, s.humanizer.temperature - 0.3)]) {
-    const text = cleanRewrite(await chat(u.original, s, t, temp), u.original);
+    const text = cleanRewrite(await chat(u.original, s, r, t, temp), u.original);
     const problem = sameness(u.original, text) > 0.8 ? 'came back almost unchanged' : factProblem(u.original, text);
     if (!problem) {
       u.text = text;
@@ -119,7 +142,7 @@ async function rewriteUnit(u: HumanizeUnit, s: Settings, t: Totals): Promise<voi
 }
 
 // Rewrites pending units, three at a time, until done or out of time.
-export async function rewriteUnits(units: HumanizeUnit[], s: Settings, a: Article, deadline: number): Promise<{ retryAt?: number; daily?: boolean }> {
+export async function rewriteUnits(units: HumanizeUnit[], s: Settings, r: Route, a: Article, deadline: number): Promise<{ retryAt?: number; daily?: boolean }> {
   const t: Totals = { input: 0, output: 0, calls: 0, failed: 0 };
   const queue = units.filter(u => u.state === 'pending');
   let busy: HumanizerBusy | undefined;
@@ -127,7 +150,7 @@ export async function rewriteUnits(units: HumanizeUnit[], s: Settings, a: Articl
     while (queue.length && Date.now() < deadline - 25_000 && !busy) {
       const u = queue.shift()!;
       try {
-        await rewriteUnit(u, s, t);
+        await rewriteUnit(u, s, r, t);
       } catch (e) {
         u.state = 'pending';
         if (e instanceof HumanizerBusy) busy = e;
@@ -139,10 +162,10 @@ export async function rewriteUnits(units: HumanizeUnit[], s: Settings, a: Articl
     await Promise.all([worker(), worker(), worker()]);
   } finally {
     if (t.calls) {
-      const p = priceOf(s, s.humanizer.model);
+      const p = r.model.endsWith(':free') ? { inPerM: 0, outPerM: 0 } : priceOf(s, r.model);
       const usd = Math.round(((t.input / 1e6) * p.inPerM + (t.output / 1e6) * p.outPerM) * 1e6) / 1e6;
       addCost(a, usd, { humanizerUsd: usd });
-      await db.logUsage({ article_id: a.id, step: 'humanize', provider: s.humanizer.provider, model: s.humanizer.model, input_tokens: t.input, output_tokens: t.output, cost_usd: usd, ok: t.failed < t.calls, note: `${t.calls} calls${t.failed ? `, ${t.failed} failed` : ''}` });
+      await db.logUsage({ article_id: a.id, step: 'humanize', provider: r.provider, model: r.model, input_tokens: t.input, output_tokens: t.output, cost_usd: usd, ok: t.failed < t.calls, note: `${t.calls} calls${t.failed ? `, ${t.failed} failed` : ''}` });
     }
   }
   return busy ? { retryAt: Date.now() + busy.retryAfterMs, daily: busy.daily } : {};

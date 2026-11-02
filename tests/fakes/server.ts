@@ -7,6 +7,7 @@ import type { AddressInfo } from 'node:net';
 export interface Calls {
   claude: { step: string; model: string; article?: string; at: number }[];
   groq: number;
+  openrouter: { model: string; reasoning: unknown; referer?: string }[];
   gptzero: { words: number; text: string }[];
 }
 
@@ -17,7 +18,7 @@ export class Fake {
   server!: Server;
   url = '';
   secret = 'test-writer-secret';
-  calls: Calls = { claude: [], groq: 0, gptzero: [] };
+  calls: Calls = { claude: [], groq: 0, openrouter: [], gptzero: [] };
   articles = new Map<string, ArticleRow>();
   posts: PostRow[] = [];
   settings: Record<string, unknown> = {};
@@ -25,6 +26,7 @@ export class Fake {
   usage: Record<string, unknown>[] = [];
   // Behaviour switches for tests.
   groqMode: 'ok' | 'daily' | 'minute' = 'ok';
+  openrouterMode: 'ok' | 'daily' = 'ok';
   claudeFail: ((step: string) => boolean) | null = null;
   gptzeroHuman = 0.42;
   sectionText: (i: number) => string = i =>
@@ -62,6 +64,7 @@ export class Fake {
       ANTHROPIC_API_URL: this.url,
       GROQ_API_KEY: 'k',
       GROQ_API_URL: `${this.url}/groq/chat/completions`,
+      OPENROUTER_API_URL: `${this.url}/openrouter/chat/completions`,
       GPTZERO_API_KEY: 'k',
       GPTZERO_API_URL: this.url,
       SUPABASE_URL: this.url,
@@ -79,6 +82,11 @@ export class Fake {
     const body = raw ? JSON.parse(raw) : {};
     if (u.pathname === '/v1/messages') return this.claude(body);
     if (u.pathname === '/groq/chat/completions') return this.groq(body);
+    if (u.pathname === '/openrouter/chat/completions') {
+      this.calls.openrouter.push({ model: body.model, reasoning: body.reasoning, referer: String(req.headers['http-referer'] ?? '') });
+      if (this.openrouterMode === 'daily') return [429, { error: { message: 'Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day' } }];
+      return this.reword(body);
+    }
     if (u.pathname === '/v2/predict/text') return this.gptzero(body);
     if (u.pathname === '/lookup') return [200, { results: [{ trackName: 'NumFall: Number Puzzle Game', price: 0, contentAdvisoryRating: '4+', minimumOsVersion: '17.0', description: 'Daily Drop puzzle. Earn Sparks by playing.' }] }];
     if (u.pathname === '/site/') return [200, '<p>No ads. No accounts. No purchases.</p>', { 'content-type': 'text/html' }];
@@ -155,6 +163,10 @@ export class Fake {
     this.calls.groq++;
     if (this.groqMode === 'daily') return [429, { error: { message: 'Rate limit reached for model on tokens per day (TPD): Limit 200000' } }, { 'retry-after': '3600' }];
     if (this.groqMode === 'minute') return [429, { error: { message: 'Rate limit reached on tokens per minute (TPM)' } }, { 'retry-after': '20' }];
+    return this.reword(b);
+  }
+
+  private reword(b: { messages: { content: string }[] }): [number, unknown] {
     const p = b.messages[b.messages.length - 1].content;
     // A crude reword that keeps every number and name: different connecting words, same facts.
     const out = p

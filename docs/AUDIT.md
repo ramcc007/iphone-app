@@ -65,3 +65,17 @@ Every finding and change, newest first.
 ## 2026-11-02: first production deploy fix
 - **Finding:** on the first production deploy, `/blog`, `/blog/<slug>` and `/sitemap.xml` crashed with "Cannot use import statement outside a module". Vercel compiled the TypeScript functions as ES modules (tsconfig `module: ESNext`), but the repository's package.json is CommonJS. Root `"type": "module"` would break the existing `require()` scripts in `tools/`. The static pages were not affected.
 - **Change:** tsconfig now compiles to CommonJS (`module: CommonJS`, `moduleResolution: Node10`). Checked by compiling every function the same way and loading each with plain Node before pushing.
+
+## 2026-11-02: humanizer fallback to OpenRouter's free model
+- **Owner's decision:** when the main humanizer provider (Groq) runs out for the day, fall back automatically to OpenRouter's free model instead of skipping the humanizer.
+- **Finding:** the old OpenRouter option used `openai/gpt-oss-20b`, which is the paid listing on OpenRouter. The free listing is `openai/gpt-oss-20b:free` (checked on openrouter.ai, 2 November 2026). OpenRouter's free models allow 20 requests a minute and 50 a day, or 1,000 a day after a one-time purchase of $10 in credits (as published in October 2026). One article's humanizer step is roughly 20 to 50 requests.
+- **Changes:**
+  - Settings now have `humanizer.fallback` (on, OpenRouter, `openai/gpt-oss-20b:free`).
+  - Each provider has its own daily pause (`humanizer_paused_until:groq`, `humanizer_paused_until:openrouter`).
+  - The humanize step tries the main provider, then the fallback. It skips only when both are out or have no key.
+  - OpenRouter calls send `reasoning: { effort, exclude }` (Groq keeps `reasoning_effort`), plus the HTTP-Referer and X-Title headers.
+  - Free models are logged at $0.
+  - The admin page shows which provider humanized each article and which providers are paused.
+- **Tests added:**
+  - Groq out for the day: OpenRouter's free model does the work, and its calls are logged at $0.
+  - Both providers out: the article carries on without the humanizer, and both are paused.

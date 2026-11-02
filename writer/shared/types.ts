@@ -136,7 +136,7 @@ export interface Article {
   description?: string;
   body: Block[];
   faq: Faq[];
-  humanize?: { units: HumanizeUnit[]; skipped?: string };
+  humanize?: { units: HumanizeUnit[]; skipped?: string; via?: string[] };
   links?: { slug: string; anchor: string }[];
   scan?: Score;
   scanCount: number; // never more than 1 unless "rescan after rewrite" is on and it is not a batch article
@@ -179,6 +179,8 @@ export interface Settings {
     method: 'paraphrase';
     temperature: number;
     topP: number;
+    // Used automatically when the main provider is out for the day (or has no key).
+    fallback: { enabled: boolean; provider: 'groq' | 'openrouter'; model: string };
   };
   slips: SlipLevel;
   spelling: Spelling;

@@ -28,7 +28,10 @@ export async function GET(req: Request): Promise<Response> {
     requireAdmin(req);
     switch (action) {
       case 'list':
-        return json({ articles: await db.listArticles(), humanizerPausedUntil: await pausedUntil() });
+        return json({
+          articles: await db.listArticles(),
+          humanizerPaused: { groq: await pausedUntil('groq'), openrouter: await pausedUntil('openrouter') },
+        });
       case 'get': {
         const a = await db.getArticle(u.searchParams.get('id') ?? '');
         if (!a) throw new HttpError(404, 'Article not found.');
