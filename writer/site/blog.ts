@@ -64,6 +64,7 @@ interface PageOpts {
   ogType?: string;
   robots?: string;
   extraHead?: string;
+  noAnalytics?: boolean; // admin-only pages (previews) never load Google Analytics
 }
 
 export function page(f: SiteFiles, o: PageOpts): string {
@@ -81,7 +82,7 @@ export function page(f: SiteFiles, o: PageOpts): string {
     ogAlt: esc(o.ogAlt ?? `${c.appName}: ${c.tagline}`),
     extraHead: o.extraHead ?? '',
     jsonLd: o.jsonLd ? `<script type="application/ld+json">${JSON.stringify(o.jsonLd).replace(/</g, '\\u003c')}</script>` : '',
-    analytics: ga ? f.analytics.replace(/\{\{gaId\}\}/g, ga) : '',
+    analytics: ga && !o.noAnalytics ? f.analytics.replace(/\{\{gaId\}\}/g, ga) : '',
     content: o.content,
     year: String(new Date().getFullYear()),
   };
@@ -183,6 +184,7 @@ ${rel}
     ogAlt: p.title,
     ogType: 'article',
     robots: preview ? 'noindex, nofollow' : 'index, follow',
+    noAnalytics: !!preview,
     extraHead: `<meta property="article:published_time" content="${p.publish_at}">\n<meta property="article:author" content="${esc(p.author)}">\n`,
   });
 }

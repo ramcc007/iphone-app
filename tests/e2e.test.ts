@@ -129,6 +129,7 @@ test('scheduled posts 404 for visitors, preview for the admin, then go live with
   const preview = await r.text();
   assert.match(preview, /Preview: this article goes live on/);
   assert.match(preview, /noindex/);
+  assert.ok(!/googletagmanager|gtag|id="consent"/.test(preview), 'no Google Analytics on admin previews');
 
   // Time passes: the 10-minute sweep marks it published.
   p.publish_at = new Date(Date.now() - 60_000).toISOString();
@@ -143,6 +144,7 @@ test('scheduled posts 404 for visitors, preview for the admin, then go live with
   assert.equal((html.match(/class="app-card"/g) ?? []).length, 2, 'app card mid-article and at the end');
   assert.ok(!/aggregateRating|ratingValue/.test(html), 'no rating claimed');
   assert.ok(!html.includes('Preview:'));
+  assert.ok(html.includes('googletagmanager'), 'public pages keep the consent-based analytics');
 
   const blog = await (await pageApi.GET(url('r=blog'))).text();
   assert.ok(blog.includes(`/blog/${p.slug}`));
@@ -271,4 +273,11 @@ test('admin API and tick endpoint refuse callers without the cookie or secret', 
   assert.equal(r2.status, 401);
   const r3 = await tickApi.POST(new Request('http://x/api/tick', { method: 'POST' }));
   assert.equal(r3.status, 401);
+});
+
+test('the admin page never loads Google Analytics', async () => {
+  const { readFileSync } = await import('node:fs');
+  const html = readFileSync('site/admin/index.html', 'utf8');
+  assert.ok(!/googletagmanager|gtag|analytics/i.test(html));
+  assert.ok(!/googletagmanager|gtag/.test(readFileSync('writer/ui/main.ts', 'utf8')));
 });

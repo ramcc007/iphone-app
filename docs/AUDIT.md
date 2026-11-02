@@ -79,3 +79,12 @@ Every finding and change, newest first.
 - **Tests added:**
   - Groq out for the day: OpenRouter's free model does the work, and its calls are logged at $0.
   - Both providers out: the article carries on without the humanizer, and both are paused.
+
+## 2026-11-02: no Google Analytics on admin pages
+- **Owner's request:** no Google Analytics code on any admin page.
+- **Finding:** `/admin` (the writer) never had the analytics snippet. The only admin-only page that loaded it was the signed-in preview of a scheduled article, which uses the public layout.
+- **Change:** previews are rendered without the consent banner and analytics script. Public pages keep the consent-based analytics as before.
+- **Tests:**
+  - The preview contains no analytics.
+  - A live article still contains the consent-based snippet.
+  - The admin page source contains no analytics.
