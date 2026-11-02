@@ -169,3 +169,19 @@ test('sitemap: changefreq and priority on every URL, no lastmod', () => {
   assert.ok(xml.includes('<loc>https://www.numfall.store/</loc>\n<changefreq>weekly</changefreq>\n<priority>1.0</priority>'));
   assert.equal((xml.match(/<url>/g) ?? []).length, 5);
 });
+
+test('non-English check: short English questions pass; other languages and scripts are caught', () => {
+  for (const ok of [
+    'Do crosswords help older adults think better?',
+    'Are logic puzzles good for seniors?',
+    'Crosswords, word searches and number grids',
+    'Daily puzzles improve working memory in healthy adults, according to a 2023 review covering 21 trials.',
+    'Most players check each row before they drop a number into the grid, and many beginners skip that step.',
+  ]) assert.equal(isNonEnglish(ok), false, ok);
+  for (const bad of [
+    'Ye paheli bahut aasaan hai aur log isko jaldi hal karte hain kyunki yeh chhota hai aur maza aata hai.',
+    'Los jugadores revisan cada fila antes de colocar un número en la cuadrícula para evitar errores comunes.',
+    '这是一个数字谜题，每一行都要填满。',
+    'Игроки проверяют каждую строку.',
+  ]) assert.equal(isNonEnglish(bad), true, bad);
+});

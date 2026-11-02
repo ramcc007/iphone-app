@@ -154,3 +154,8 @@ Every finding and change, newest first.
   | Press | monthly | 0.3 |
   | Privacy, Terms | yearly | 0.2 |
 - **Note:** Google has said it does not use changefreq or priority but does use an accurate lastmod (Search Central blog, June 2023). The IndexNow submission still sends changed pages every 12 hours, whatever the sitemap says.
+
+## 2026-11-02: false "non-English text" block
+- **Finding:** a batch article ("Are logic puzzles good for older adults? what studies show") could not be posted. The final check called the English FAQ question "Do crosswords help older adults think better?" non-English. The check scored text by the share of words from a short list of common English words, and a 7-word question can contain none of them.
+- **Change:** the check now flags any non-Latin script at once. For Latin-script text it judges word share only on 12+ words, against a fuller list of English function words (threshold 12%), so short headings and questions are never judged that way. Spanish and Hindi-in-Latin paragraphs are still caught.
+- **Test added:** the exact question, other short English lines, plus Spanish, Hindi-in-Latin, Chinese and Russian samples.

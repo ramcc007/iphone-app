@@ -59,18 +59,31 @@ export const isPipelineNote = (s: string) => PIPELINE.some(r => r.test(s));
 export const isResearchRemark = (s: string) => RESEARCH.some(r => r.test(s));
 export const hasMarker = (s: string) => new RegExp(MARKER_RE.source, 'i').test(s);
 
-// Rough non-English test: share of words that are common English words. Catches a paragraph the
-// humanizer answered in another language (or another script).
-const COMMON = new Set(
-  'the a an and or but of to in on at for with by from is are was were be been it its this that these those they them their there he she we you your i not no as if so than then when which who what how why can will would should may might more most some any all each every one two three number numbers grid row rows column columns box boxes puzzle puzzles player players solver solvers game games time first next same other also only just very each into out up down over after before while where because about level levels'.split(' '),
+// Non-English test, for text the humanizer may answer in another language.
+//  - Any non-Latin script (Hindi, Chinese, Arabic, Cyrillic...) counts as non-English.
+//  - Latin-script text is judged only when it is long enough (12+ words): English prose is roughly 40%
+//    common function words, other languages almost none of these. Short lines (headings, FAQ questions)
+//    are never judged by word share, so "Do crosswords help older adults think better?" passes.
+const FUNCTION_WORDS = new Set(
+  ('a an the and or but nor so yet if then than that this these those there here it its they them their theirs he him his she her hers we us our you your yours i me my mine ' +
+   'is are was were be been being am do does did done have has had having can could will would shall should may might must ' +
+   'of to in on at by for with from into onto over under about after before between through during without within along across around ' +
+   'not no as up down out off just only also very too more most less least many much some any each every all both few other another such ' +
+   'what which who whom whose when where why how one two three first next same own while because until though although whether ' +
+   'player players solver solvers puzzle puzzles grid grids number numbers row rows column columns box boxes level levels game games time').split(' '),
 );
 export function englishShare(t: string): number {
-  if (/[^\u0000-ɏ -⁯₠-⃏←-⇿×]/.test(t.replace(/[–—‘’“”]/g, ''))) return 0;
   const ws = t.toLowerCase().match(/[a-z']+/g) ?? [];
-  if (ws.length < 6) return 1;
-  return ws.filter(w => COMMON.has(w)).length / ws.length;
+  if (!ws.length) return 1;
+  return ws.filter(w => FUNCTION_WORDS.has(w)).length / ws.length;
 }
-export const isNonEnglish = (t: string) => englishShare(t) < 0.12;
+const NON_LATIN = /[\u0370-\u03FF\u0400-\u04FF\u0590-\u05FF\u0600-\u06FF\u0900-\u0DFF\u0E00-\u0FFF\u1100-\u11FF\u3040-\u30FF\u3400-\u9FFF\uAC00-\uD7AF]/;
+export function isNonEnglish(t: string): boolean {
+  if (NON_LATIN.test(t)) return true;
+  const ws = t.match(/[A-Za-z']+/g) ?? [];
+  if (ws.length < 12) return false;
+  return englishShare(t) < 0.12;
+}
 
 export interface CleanReport {
   removed: string[]; // sentences or notes taken out, for the article record (never published)
