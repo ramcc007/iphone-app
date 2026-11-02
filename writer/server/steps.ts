@@ -156,7 +156,7 @@ export async function writeSections(a: Article, c: Ctx): Promise<void> {
 // ---------- extras ----------
 export async function extras(a: Article, c: Ctx): Promise<void> {
   const p = P.faqPrompt(a, c.s);
-  const r = await callClaude({ s: c.s, model: c.s.models.write, effort: 'low', step: 'faq', article: a, deadline: c.deadline, maxTokens: 4000, schema: P.FAQ_SCHEMA, ...p });
+  const r = await callClaude({ s: c.s, model: c.s.models.faq, effort: 'low', step: 'faq', article: a, deadline: c.deadline, maxTokens: 4000, schema: P.FAQ_SCHEMA, ...p });
   const x = parseJson<{ faq: { q: string; a: string }[]; description: string }>(r.text);
   // Worded the way people search, shown as a proper question.
   a.faq = (x.faq ?? [])
@@ -196,7 +196,17 @@ export async function humanize(a: Article, c: Ctx): Promise<{ waitUntil?: number
       continue;
     }
     used = true;
-    const res = await rewriteUnits(a.humanize.units, s, r, a, c.deadline);
+    let res: { retryAt?: number; daily?: boolean };
+    try {
+      res = await rewriteUnits(a.humanize.units, s, r, a, c.deadline);
+    } catch (e) {
+      // A provider that refuses the request (wrong model, privacy setting, bad key) is set aside for an hour
+      // and the article moves on: to the next provider, or without the humanizer. No retry loop.
+      const msg = e instanceof Error ? e.message : String(e);
+      await pauseHumanizer(r.provider, Date.now() + 60 * 60_000, msg);
+      notes.push(`${r.provider} unavailable (${msg.slice(0, 160)})`);
+      continue;
+    }
     a.humanize.via = [...new Set([...(a.humanize.via ?? []), `${r.provider} ${r.model}`])];
     if (res.daily) {
       // Daily allowance used up: pause this provider and try the next one.
@@ -353,7 +363,7 @@ export async function rewrite(a: Article, c: Ctx): Promise<void> {
   if (todo.length) {
     const items = todo.map((x, i) => ({ id: i + 1, ...x }));
     const p = P.rewritePrompt(a, c.s, items);
-    const r = await callClaude({ s: c.s, model: c.s.models.write, effort: 'low', step: 'rewrite flagged', article: a, deadline: c.deadline, maxTokens: 8000, schema: P.REWRITE_SCHEMA, ...p });
+    const r = await callClaude({ s: c.s, model: c.s.models.rewrite, effort: 'low', step: 'rewrite flagged', article: a, deadline: c.deadline, maxTokens: 8000, schema: P.REWRITE_SCHEMA, ...p });
     const map = new Map<string, string>();
     for (const x of parseJson<{ rewrites: { id: number; text: string }[] }>(r.text).rewrites ?? []) {
       const it = items[x.id - 1];

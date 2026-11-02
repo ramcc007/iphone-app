@@ -44,7 +44,11 @@ export async function pausedUntil(provider: string): Promise<number> {
   const v = await db.getState<{ until: number }>(pauseKey(provider)).catch(() => null);
   return v?.until && v.until > Date.now() ? v.until : 0;
 }
-export const pauseHumanizer = (provider: string, until: number) => db.putState(pauseKey(provider), { until, at: new Date().toISOString() });
+export const pauseHumanizer = (provider: string, until: number, reason = 'daily limit') => db.putState(pauseKey(provider), { until, reason, at: new Date().toISOString() });
+export async function pauseInfo(provider: string): Promise<{ until: number; reason?: string } | null> {
+  const v = await db.getState<{ until: number; reason?: string }>(pauseKey(provider)).catch(() => null);
+  return v?.until && v.until > Date.now() ? v : null;
+}
 
 const SYSTEM = `You reword one paragraph from a puzzle website for ordinary readers. Rewrite it in your own words in plain, literal, everyday English, the way a careful newspaper puzzle columnist writes. Change the words and the sentence order. Keep every number, name and fact, and the same level of certainty. Do not add anything and do not leave anything out. No idioms, no metaphors, no clever lines, no dashes, no words like furthermore, moreover, additionally, crucial or "it is worth noting". Write the paragraph text only: no heading, no label, no quotation marks around it, no note.`;
 
@@ -116,7 +120,12 @@ async function chat(paragraph: string, s: Settings, r: Route, t: Totals, tempera
   }
   if (!res.ok) {
     t.failed++;
-    throw new HttpError(502, `${p.name} error ${res.status}. Check the humanizer model in Settings.`);
+    // The provider's own reason (e.g. OpenRouter's "No endpoints found matching your data policy") says what to change.
+    const detail = await res
+      .json()
+      .then(j => (j as { error?: { message?: string } } | null)?.error?.message ?? '')
+      .catch(() => '');
+    throw new HttpError(502, `${p.name} error ${res.status}${detail ? `: ${String(detail).slice(0, 200)}` : ''}`);
   }
   const data = (await res.json()) as { choices?: { message?: { content?: string } }[]; usage?: { prompt_tokens?: number; completion_tokens?: number } };
   t.input += data.usage?.prompt_tokens ?? 0;

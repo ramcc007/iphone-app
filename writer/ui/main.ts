@@ -60,11 +60,11 @@ function login(): void {
 const STATUS: Record<string, string> = { queued: 'Waiting', generating: 'Writing', checking: 'Checking', publishing: 'Posting', ready: 'Ready', scheduled: 'Scheduled', published: 'Live', failed: 'Stopped' };
 
 async function list(): Promise<void> {
-  const { articles, humanizerPaused, indexNow } = await api<{ articles: Row[]; humanizerPaused: Record<string, number>; indexNow: { at: string; submitted: number; note: string } | null }>('list');
-  const paused = Object.entries(humanizerPaused ?? {}).filter(([, t]) => t > Date.now());
+  const { articles, humanizerPaused, indexNow } = await api<{ articles: Row[]; humanizerPaused: Record<string, { until: number; reason?: string } | null>; indexNow: { at: string; submitted: number; note: string } | null }>('list');
+  const paused = Object.entries(humanizerPaused ?? {}).filter((x): x is [string, { until: number; reason?: string }] => !!x[1] && x[1].until > Date.now());
   const spend = articles.reduce((n, a) => n + (a.summary?.costUsd ?? 0), 0);
   app.innerHTML = `${nav('#/')}<main>
-${paused.length ? `<p class="note">${paused.map(([p, t]) => `${p === 'groq' ? 'Groq' : 'OpenRouter'} reached its daily limit and is paused until ${when(new Date(t).toISOString())}.`).join(' ')} ${paused.length >= 2 ? 'Articles carry on without the humanizer until one comes back.' : 'The other provider is used meanwhile, if it has a key.'}</p>` : ''}
+${paused.length ? `<p class="note">${paused.map(([p, t]) => `${p === 'groq' ? 'Groq' : 'OpenRouter'} is paused until ${when(new Date(t.until).toISOString())} (${esc((t.reason ?? 'daily limit').slice(0, 160))}).`).join(' ')} ${paused.length >= 2 ? 'Articles carry on without the humanizer until one comes back.' : 'The other provider is used meanwhile, if it has a key.'}</p>` : ''}
 <p class="muted">${articles.length} articles · ${money(spend)} spent on these · the background job keeps working when this page is closed.</p>
 <p class="muted small">Search engines (IndexNow, every 12 hours): ${indexNow ? `last run ${when(indexNow.at)}, ${esc(indexNow.note)}` : 'not run yet'} · <a href="/sitemap.xml" target="_blank">sitemap</a> · <a href="/blog/rss.xml" target="_blank">RSS</a> · <a href="/llms.txt" target="_blank">llms.txt</a></p>
 <table class="list"><thead><tr><th>Article</th><th>Status</th><th>Human</th><th>Goes live</th><th>Cost</th></tr></thead><tbody>
@@ -219,7 +219,8 @@ async function settingsPage(): Promise<void> {
 <p class="small">Keys in Vercel: ${Object.entries(me.keys).map(([k, v]) => `${k} ${v ? '✓' : '✗'}`).join(' · ')}</p>
 <h2>Claude</h2>
 <div class="row"><label>Research model <input name="m_research" value="${esc(s.models.research)}"></label><label>Plan model <input name="m_plan" value="${esc(s.models.plan)}"></label></div>
-<div class="row"><label>Writing model <input name="m_write" value="${esc(s.models.write)}"></label><label>Checks and links model <input name="m_check" value="${esc(s.models.check)}"></label></div>
+<div class="row"><label>Writing model (article body) <input name="m_write" value="${esc(s.models.write)}"></label><label>FAQ model <input name="m_faq" value="${esc(s.models.faq)}"></label><label>Post-scan rewrite model <input name="m_rewrite" value="${esc(s.models.rewrite)}"></label></div>
+<div class="row"><label>Checks and links model <input name="m_check" value="${esc(s.models.check)}"></label></div>
 <div class="row"><label>Writing effort <select name="writeEffort">${['low', 'medium', 'high'].map(e => `<option${e === s.writeEffort ? ' selected' : ''}>${e}</option>`).join('')}</select></label><label>Web searches per article <input type="number" name="maxSearches" min="1" max="10" value="${s.maxSearches}"></label></div>
 <h2>Humanizer</h2>
 ${chk('h_enabled', s.humanizer.enabled, 'On')}
@@ -260,7 +261,7 @@ ${facts ? `<section class="card"><h2>NumFall facts used in articles</h2><p class
     }
     const next: Settings = {
       ...s,
-      models: { research: g('m_research'), plan: g('m_plan'), write: g('m_write'), check: g('m_check') },
+      models: { research: g('m_research'), plan: g('m_plan'), write: g('m_write'), faq: g('m_faq'), rewrite: g('m_rewrite'), check: g('m_check') },
       writeEffort: g('writeEffort') as Settings['writeEffort'],
       maxSearches: +g('maxSearches'),
       humanizer: { ...s.humanizer, enabled: f.has('h_enabled'), provider: g('h_provider') as 'groq', model: g('h_model'), reasoningEffort: g('h_reason') as 'low', temperature: +g('h_temp'), topP: +g('h_topp'), fallback: { enabled: f.has('fb_enabled'), provider: g('fb_provider') as 'openrouter', model: g('fb_model') } },

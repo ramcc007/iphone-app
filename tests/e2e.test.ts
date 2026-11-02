@@ -394,3 +394,33 @@ test('a cut-off links answer does not stop the article: it carries on without in
     (fake as unknown as { claude: unknown }).claude = orig;
   }
 });
+
+test('OpenRouter refusing the request (404 data policy) does not stop the article; the reason is shown', async () => {
+  process.env.OPENROUTER_API_KEY = 'or-key';
+  fake.groqMode = 'daily';
+  fake.openrouterMode = 'policy';
+  const s = await db.getSettings();
+  const [a] = await runner.createBatch({ topics: ['Morning puzzle habits for people who are not morning people'], mode: 'manual' }, s);
+  await drain();
+  const done = fake.articles.get(a.id)!.data as unknown as import('../writer/shared/types').Article;
+  assert.equal(done.status, 'ready', done.error);
+  assert.equal(done.failures, 0);
+  assert.match(done.humanize!.skipped!, /openrouter unavailable \(OpenRouter error 404: No endpoints found matching your data policy/);
+  const pause = fake.state.get('humanizer_paused_until:openrouter') as { until: number; reason: string };
+  assert.ok(pause.until > Date.now() && /data policy/.test(pause.reason));
+  // The next article doesn't call OpenRouter again while it is set aside.
+  const before = fake.calls.openrouter.length;
+  await runner.createBatch({ topics: ['Calm puzzle games to play before bed'], mode: 'manual' }, s);
+  await drain();
+  assert.equal(fake.calls.openrouter.length, before);
+});
+
+test('FAQ and the post-scan rewrite use the cheaper model; the body uses the writing model', async () => {
+  const s = await db.getSettings();
+  await runner.createBatch({ topics: ['Speed solving habits for timed number puzzles'], mode: 'manual' }, s);
+  await drain();
+  const by = (step: string) => fake.calls.claude.filter(c => c.step === step).map(c => c.model);
+  assert.ok(by('faq').every(m => m === 'claude-haiku-5-5'));
+  assert.ok(by('rewrite').every(m => m === 'claude-haiku-5-5'));
+  assert.ok(fake.calls.claude.filter(c => c.step.startsWith('section')).every(c => c.model === 'claude-sonnet-5-5'));
+});

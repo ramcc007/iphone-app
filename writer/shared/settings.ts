@@ -23,7 +23,8 @@ export const DEFAULT_BANNED_NAMES = [
 // Prices in USD. Sonnet 5.5 matches Scripwise Writer's settings; check the others against your Anthropic
 // and Groq price pages and correct them in Settings if they differ.
 export const DEFAULT_SETTINGS: Settings = {
-  models: { research: 'claude-haiku-5-5', plan: 'claude-haiku-5-5', write: 'claude-sonnet-5-5', check: 'claude-haiku-5-5' },
+  // Cost (owner's choice, 2 November 2026): the FAQ and the one post-scan rewrite use Haiku; the body is written with Sonnet.
+  models: { research: 'claude-haiku-5-5', plan: 'claude-haiku-5-5', write: 'claude-sonnet-5-5', faq: 'claude-haiku-5-5', rewrite: 'claude-haiku-5-5', check: 'claude-haiku-5-5' },
   writeEffort: 'medium',
   prices: {
     'claude-haiku-5-5': { inPerM: 1, outPerM: 5 },

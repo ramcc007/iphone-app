@@ -181,3 +181,19 @@ Every finding and change, newest first.
   - The link picker is told to use as anchor the words a person would search to find the linked article, judged from its title and tags. Anchors are 2 to 5 words, never generic ("this article", "read more"), each different, and leaving a link out beats a weak one.
   - Code check `goodAnchor`: an anchor must share a meaningful word or grid size with the target's title, tags or slug, and generic anchors are rejected.
 - **Tests:** anchor rules, and the share panel's presence on live articles. 30 passing.
+
+## 2026-11-02: cost, and OpenRouter 404 stopping articles
+- **Cost finding** (usage log, 17 articles, about $0.33 each):
+
+  | Step | Per article |
+  |---|---|
+  | GPTZero scan (owner's existing plan, counted at $0.15 per 1,000 words) | ~$0.16 |
+  | Research (Haiku with web search) | ~$0.06 |
+  | Section writing (Sonnet) | ~$0.045 |
+  | Post-scan rewrite (Sonnet) | ~$0.024 |
+  | Plan, FAQ, meaning check, links | ~$0.045 |
+- **Owner's choice:** of the options offered, use Haiku for the FAQ and the one post-scan rewrite. New settings `models.faq` and `models.rewrite` (default `claude-haiku-5-5`). The article body stays on Sonnet.
+- **GPTZero:** one scan per article, confirmed in the log (15 scans for 15 articles). There is no rescan.
+- **OpenRouter finding:** once Groq's daily allowance ran out, the fallback `openai/gpt-oss-20b:free` returned 404 on every call, and that error counted as an article failure. A 404 there usually means the account's privacy settings exclude free endpoints whose host may train on prompts (openrouter.ai/settings/privacy). OpenRouter's own message is now shown, so the reason can be confirmed.
+- **Change:** a humanizer provider that refuses the request (404, a policy refusal, a bad key) is set aside for an hour with its reason. The article moves to the next provider, or carries on without the humanizer, with no strike and no retry loop. The admin page shows the reason.
+- **Tests:** the 404 policy refusal, and which model each step uses. 32 passing.

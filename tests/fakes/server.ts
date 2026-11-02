@@ -27,7 +27,7 @@ export class Fake {
   usage: Record<string, unknown>[] = [];
   // Behaviour switches for tests.
   groqMode: 'ok' | 'daily' | 'minute' = 'ok';
-  openrouterMode: 'ok' | 'daily' = 'ok';
+  openrouterMode: 'ok' | 'daily' | 'policy' = 'ok';
   claudeFail: ((step: string) => boolean) | null = null;
   gptzeroHuman = 0.42;
   sectionText: (i: number) => string = i =>
@@ -86,6 +86,7 @@ export class Fake {
     if (u.pathname === '/groq/chat/completions') return this.groq(body);
     if (u.pathname === '/openrouter/chat/completions') {
       this.calls.openrouter.push({ model: body.model, reasoning: body.reasoning, referer: String(req.headers['http-referer'] ?? '') });
+      if (this.openrouterMode === 'policy') return [404, { error: { message: 'No endpoints found matching your data policy (Free model training). Configure: https://openrouter.ai/settings/privacy', code: 404 } }];
       if (this.openrouterMode === 'daily') return [429, { error: { message: 'Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day' } }];
       return this.reword(body);
     }

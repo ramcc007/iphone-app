@@ -165,7 +165,7 @@ export interface ArticleSummary {
 }
 
 export interface Settings {
-  models: { research: string; plan: string; write: string; check: string };
+  models: { research: string; plan: string; write: string; faq: string; rewrite: string; check: string };
   writeEffort: Effort;
   prices: Record<string, { inPerM: number; outPerM: number }>;
   searchPer1k: number;

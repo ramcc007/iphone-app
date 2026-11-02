@@ -5,7 +5,7 @@ import { checkPassword, clearCookie, isAdmin, requireAdmin, sessionCookie } from
 import { createBatch, postNow, retry, runFromBrowser, saveArticle, unpublish, type BatchInput } from '../writer/server/runner';
 import { appFacts } from '../writer/server/appfacts';
 import { lastSubmission } from '../writer/server/indexnow';
-import { pausedUntil } from '../writer/server/humanizer';
+import { pauseInfo } from '../writer/server/humanizer';
 import { parseSection } from '../writer/server/steps';
 import { mergeSettings } from '../writer/shared/settings';
 import { saveBlogPost } from '../writer/server/blog';
@@ -32,7 +32,7 @@ export async function GET(req: Request): Promise<Response> {
       case 'list':
         return json({
           articles: await db.listArticles(),
-          humanizerPaused: { groq: await pausedUntil('groq'), openrouter: await pausedUntil('openrouter') },
+          humanizerPaused: { groq: await pauseInfo('groq'), openrouter: await pauseInfo('openrouter') },
           indexNow: await lastSubmission(),
         });
       case 'get': {
