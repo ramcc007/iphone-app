@@ -252,6 +252,20 @@ export function codeRules(a: Article, s: Settings): string[] {
   const removed: string[] = [];
   // Never another game or brand name, never an unsupported NumFall claim.
   mapSentences(a, x => (nameHits(x, s.bannedNames).length || unsupportedClaims(x).length ? (removed.push(x), null) : x));
+  // Headings and FAQ questions too: a heading has the name swapped for a neutral term; an FAQ item whose
+  // question names a game or brand is dropped (or reworded the same way if only 3 questions are left).
+  const neutral = (t: string) => {
+    let out = t;
+    for (const n of nameHits(t, s.bannedNames)) out = out.replace(new RegExp(`\\b${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'), 'number grid');
+    return out.replace(/\bnumber grid (grid|puzzle)s?\b/gi, 'number grid').replace(/\s{2,}/g, ' ').trim();
+  };
+  a.body = a.body.map(b => (b.type === 'h2' && nameHits(b.text, s.bannedNames).length ? (removed.push(`heading: ${b.text}`), { ...b, text: neutral(b.text) }) : b));
+  const named = a.faq.filter(f => nameHits(f.q, s.bannedNames).length);
+  if (named.length) {
+    removed.push(...named.map(f => `FAQ: ${f.q}`));
+    a.faq = a.faq.length - named.length >= 3 ? a.faq.filter(f => !named.includes(f)) : a.faq.map(f => (named.includes(f) ? { ...f, q: neutral(f.q) } : f));
+  }
+  if (a.title && nameHits(a.title, s.bannedNames).length) a.title = neutral(a.title);
   // At most 2 NumFall mentions; later ones go.
   let seen = 0;
   mapSentences(a, x => (/numfall/i.test(x) ? (++seen > 2 ? (removed.push(x), null) : x) : x));

@@ -196,3 +196,23 @@ test('internal link anchors must read like a search for the linked article', () 
   assert.equal(goodAnchor('the first move', target), false, 'nothing in common with the target');
   assert.equal(goodAnchor('pairs', target), false, 'one word is too short');
 });
+
+test('game names in headings and FAQ questions are cleaned before posting', async () => {
+  const { codeRules, finalCheck } = await import('../writer/server/steps');
+  const { DEFAULT_SETTINGS } = await import('../writer/shared/settings');
+  const a = {
+    id: 'x', slug: 'daily-puzzles-kept-small', title: 'Daily puzzles kept small', description: 'd', options: { hands_off: true },
+    body: [{ type: 'h2', text: 'How Sudoku rules carry over' }, { type: 'p', text: 'Solvers check every row twice. '.repeat(60) }],
+    faq: [
+      { q: 'What is a classic Sudoku grid made of?', a: 'Nine rows, nine columns and nine boxes.' },
+      { q: 'How long should a daily puzzle take?', a: 'Most solvers spend five to ten minutes.' },
+      { q: 'Is a 4x4 grid good for kids?', a: 'Many kids start there because each box has four cells.' },
+      { q: 'Do small puzzles help focus?', a: 'Short breaks help some people reset.' },
+    ],
+  } as unknown as import('../writer/shared/types').Article;
+  codeRules(a, DEFAULT_SETTINGS);
+  assert.equal((a.body[0] as { text: string }).text, 'How number grid rules carry over');
+  assert.equal(a.faq.length, 3);
+  assert.ok(!JSON.stringify(a).match(/sudoku/i));
+  assert.equal(finalCheck(a, DEFAULT_SETTINGS), null);
+});

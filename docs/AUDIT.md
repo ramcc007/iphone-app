@@ -202,3 +202,11 @@ Every finding and change, newest first.
 - **Data changes:** the saved settings were updated to the new fallback, and OpenRouter's one-hour pause was cleared.
 - **Pause notes:** these now show the real reason, not always "daily limit".
 - **Articles:** four that hit the humanizer error were restarted. They finished without the humanizer, because both providers were out at the time.
+
+## 2026-11-02: game name in an FAQ question blocked posting
+- **Finding:** "Daily puzzles easier to stick with when kept small" was stopped by the final check because an FAQ question said "What is a classic Sudoku grid made of?". The clean-up removed banned names from paragraphs and FAQ answers but never checked FAQ questions or section headings. The final check worked as intended: nothing with the name was posted.
+- **Change:** the clean-up now:
+  - swaps a banned name in a heading for "number grid";
+  - drops an FAQ item whose question names a banned game or brand, or rewords it the same way when only 3 questions would be left;
+  - applies the same safeguard to the title.
+- **Test added.** 33 passing.
