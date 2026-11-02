@@ -25,6 +25,7 @@ beforeEach(() => {
   fake.articles.clear();
   fake.posts.length = 0;
   fake.usage.length = 0;
+  fake.errors.length = 0;
   fake.state.clear();
   fake.settings = { maxFailures: 3 };
   fake.calls = { claude: [], groq: 0, openrouter: [], gptzero: [], indexnow: [] };
@@ -423,4 +424,25 @@ test('FAQ and the post-scan rewrite use the cheaper model; the body uses the wri
   assert.ok(by('faq').every(m => m === 'claude-haiku-5-5'));
   assert.ok(by('rewrite').every(m => m === 'claude-haiku-5-5'));
   assert.ok(fake.calls.claude.filter(c => c.step.startsWith('section')).every(c => c.model === 'claude-sonnet-5-5'));
+});
+
+test('every failure goes into the error log; stops and refusals are marked; the admin can resolve them', async () => {
+  const s = await db.getSettings();
+  const [a] = await runner.createBatch({ topics: ['Process of elimination in logic puzzles'], mode: 'manual' }, s);
+  fake.claudeFail = step => step === 'plan';
+  for (let i = 0; i < 4; i++) {
+    fake.articles.get(a.id)!.next_attempt_at = new Date(0).toISOString();
+    await runner.tick(200_000, `e${i}`);
+  }
+  fake.claudeFail = null;
+  const mine = fake.errors.filter(e => e.article_id === a.id);
+  assert.equal(mine.length, 3, 'one entry per failed attempt');
+  assert.equal(mine.at(-1)!.kind, 'stopped');
+  assert.match(String(mine[0].message), /attempt 1 of 3/);
+  assert.equal(mine[0].stage, 'plan');
+  const c = await cookie();
+  const list = (await (await writerApi.GET(new Request('http://x/api/writer?action=errors&open=1', { headers: { cookie: c } }))).json()) as { id: number }[];
+  assert.equal(list.length, 3);
+  await writerApi.POST(new Request('http://x/api/writer', { method: 'POST', headers: { cookie: c }, body: JSON.stringify({ action: 'errors_resolve', ids: list.map(x => x.id) }) }));
+  assert.ok(fake.errors.every(e => e.resolved));
 });

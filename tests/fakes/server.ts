@@ -25,6 +25,7 @@ export class Fake {
   settings: Record<string, unknown> = {};
   state = new Map<string, unknown>();
   usage: Record<string, unknown>[] = [];
+  errors: Record<string, unknown>[] = [];
   // Behaviour switches for tests.
   groqMode: 'ok' | 'daily' | 'minute' = 'ok';
   openrouterMode: 'ok' | 'daily' | 'policy' = 'ok';
@@ -96,6 +97,7 @@ export class Fake {
     if (u.pathname === '/site/') return [200, '<p>No ads. No accounts. No purchases.</p>', { 'content-type': 'text/html' }];
     if (u.pathname === '/rest/v1/rpc/writer_api') return this.rpc(body);
     if (u.pathname === '/rest/v1/rpc/writer_blog_api') return this.blogRpc(body);
+    if (u.pathname === '/rest/v1/rpc/writer_errors_api') return this.errorsRpc(body);
     if (u.pathname === '/rest/v1/posts') return this.publicPosts(u);
     return [404, { error: 'no route' }];
   }
@@ -290,6 +292,18 @@ export class Fake {
       default:
         return [400, { message: `unknown op ${b.p_op}` }];
     }
+  }
+
+  private errorsRpc(b: { p_secret: string; p_op: string; p_args: Record<string, unknown> }): [number, unknown] {
+    if (b.p_secret !== this.secret) return [401, { message: 'unauthorised' }];
+    const a = b.p_args ?? {};
+    if (b.p_op === 'error_add') return (this.errors.push({ id: this.errors.length + 1, at: new Date().toISOString(), resolved: false, kind: 'error', ...a }), [200, { ok: true }]);
+    if (b.p_op === 'error_list') return [200, [...this.errors].reverse().filter(e => !a.open_only || !e.resolved)];
+    if (b.p_op === 'error_resolve') {
+      for (const e of this.errors) if ((a.ids as number[]).includes(e.id as number)) Object.assign(e, { resolved: true, resolution: a.resolution });
+      return [200, { ok: true }];
+    }
+    return [400, { message: 'unknown op' }];
   }
 
   // ---------- Supabase: writer_blog_api (blog manager) ----------

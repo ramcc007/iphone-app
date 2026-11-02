@@ -34,6 +34,7 @@ export async function GET(req: Request): Promise<Response> {
           articles: await db.listArticles(),
           humanizerPaused: { groq: await pauseInfo('groq'), openrouter: await pauseInfo('openrouter') },
           indexNow: await lastSubmission(),
+          openErrors: (await db.errors(true, 500).catch(() => [])).filter(e => e.kind !== 'warning').length,
         });
       case 'get': {
         const a = await db.getArticle(u.searchParams.get('id') ?? '');
@@ -48,6 +49,8 @@ export async function GET(req: Request): Promise<Response> {
         return json(await appFacts(u.searchParams.get('refresh') === '1'));
       case 'posts':
         return json(await db.postsIndex());
+      case 'errors':
+        return json(await db.errors(u.searchParams.get('open') === '1'));
       case 'blog_list':
         return json(await db.blogList());
       case 'blog_get': {
@@ -127,6 +130,8 @@ export async function POST(req: Request): Promise<Response> {
       }
       case 'blog_save':
         return json(await saveBlogPost(body.post as Record<string, unknown>, String(body.intent ?? 'draft') as 'draft' | 'publish' | 'unpublish'));
+      case 'errors_resolve':
+        return json(await db.resolveErrors((body.ids as number[]) ?? [], String(body.resolution ?? 'Marked resolved by you')));
       case 'blog_delete':
         return json(await db.blogDelete(String(body.id ?? '')));
       case 'settings': {

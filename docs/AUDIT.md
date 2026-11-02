@@ -210,3 +210,22 @@ Every finding and change, newest first.
   - drops an FAQ item whose question names a banned game or brand, or rewords it the same way when only 3 questions would be left;
   - applies the same safeguard to the title.
 - **Test added.** 33 passing.
+
+## 2026-11-02: error log and scheduled error check
+- **Owner's request:** keep a log of errors and fix them without the owner reporting each one.
+- **Database (approved):** `supabase/003_error_log.sql` adds `writer_private.error_log` and `writer_errors_api` (secret-checked: add, list, resolve).
+- **What gets logged:**
+  - every failed article step, with stage and attempt number;
+  - articles stopped at the retry cap (`stopped`);
+  - final-check blocks (`blocked`);
+  - humanizer providers set aside (`warning`);
+  - background-run crashes;
+  - public page failures.
+- **Admin:** a new Errors tab (open or all; mark one or all resolved), and a warning on the Articles page when there are open errors.
+- **Scheduled check every 3 hours** (owner's choice: fix and deploy if tests pass). A fresh session:
+  1. reads open errors;
+  2. restarts stuck articles once the cause is fixed;
+  3. fixes code with a test;
+  4. deploys only when `npm run build` passes;
+  5. records the fix here;
+  6. marks the errors resolved with what it did.

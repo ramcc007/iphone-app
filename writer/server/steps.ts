@@ -8,6 +8,7 @@ import { addSlips } from '../shared/slips';
 import { goodAnchor, insertLink, linkifyBare } from '../shared/links';
 import { bodyWords, cleanSlug, normHeading, plainText, sentenceCase, sentences, titleShape, words } from '../shared/text';
 import { callClaude, parseJson } from './claude';
+import { db } from './db';
 import { scan } from './gptzero';
 import { hasKey, keyName, meaningCheck, pauseInfo, pauseHumanizer, rewriteUnits, routesOf } from './humanizer';
 import type { AppFacts } from './prompts';
@@ -204,6 +205,7 @@ export async function humanize(a: Article, c: Ctx): Promise<{ waitUntil?: number
       // and the article moves on: to the next provider, or without the humanizer. No retry loop.
       const msg = e instanceof Error ? e.message : String(e);
       await pauseHumanizer(r.provider, Date.now() + 60 * 60_000, msg);
+      await db.logError({ article_id: a.id, title: a.title ?? a.options.topic, stage: 'humanize', kind: 'warning', message: `${r.provider} set aside for an hour: ${msg}` });
       notes.push(`${r.provider} unavailable (${msg.slice(0, 160)})`);
       continue;
     }

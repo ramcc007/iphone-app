@@ -75,6 +75,7 @@ export async function GET(req: Request): Promise<Response> {
     return notFound();
   } catch (e) {
     console.error(e);
+    await db.logError({ kind: 'error', stage: `page ${r ?? ''}`.trim(), message: `Public page failed (${u.pathname}${u.search}): ${e instanceof Error ? e.message : String(e)}` });
     return new Response('Something went wrong loading this page. Please try again in a minute.', { status: 503, headers: { 'content-type': 'text/plain', 'cache-control': 'no-store', 'retry-after': '60' } });
   }
 }

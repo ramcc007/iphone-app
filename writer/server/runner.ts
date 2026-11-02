@@ -268,6 +268,13 @@ export async function work(a: Article, owner: string, deadline: number, now: () 
         }
         a.failures++;
         a.error = msg;
+        await db.logError({
+          article_id: a.id,
+          title: a.title ?? a.options.topic,
+          stage: a.stage,
+          kind: a.failures >= s.maxFailures ? 'stopped' : /^Not posted:/.test(msg) ? 'blocked' : 'error',
+          message: `${msg} (attempt ${a.failures} of ${s.maxFailures})`,
+        });
         if (a.failures >= s.maxFailures) {
           a.stopped = true;
           a.status = 'failed';
@@ -301,7 +308,10 @@ export async function tick(budgetMs: number, owner = `tick-${randomUUID().slice(
       await work(a, owner, deadline);
       worked.push(a.id);
     } catch (e) {
-      if (!(e instanceof LeaseLost)) console.error('tick', a.id, e);
+      if (!(e instanceof LeaseLost)) {
+        console.error('tick', a.id, e);
+        await db.logError({ article_id: a.id, title: a.title ?? a.options.topic, stage: a.stage, kind: 'error', message: `Background run crashed: ${e instanceof Error ? e.message : String(e)}` });
+      }
     } finally {
       await db.release(a.id, owner).catch(() => undefined);
     }

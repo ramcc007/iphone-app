@@ -95,8 +95,26 @@ export const db = {
   blogGet: (id: string) => api<BlogPost | null>('post_get', { id }, 'writer_blog_api'),
   blogSave: (post: Partial<BlogPost>) => api<BlogPost>('post_save', { post }, 'writer_blog_api'),
   blogDelete: (id: string) => api<{ deleted: boolean }>('post_delete', { id }, 'writer_blog_api'),
+  // Error log (writer_errors_api). Logging never throws: a failed log write must not stop the work.
+  logError: (e: { article_id?: string; title?: string; stage?: string; kind?: 'error' | 'stopped' | 'blocked' | 'warning'; message: string }) =>
+    api('error_add', e, 'writer_errors_api').catch(err => console.error('error log failed', err)),
+  errors: (openOnly = false, limit = 200) => api<ErrorRow[]>('error_list', { open_only: openOnly, limit }, 'writer_errors_api'),
+  resolveErrors: (ids: number[], resolution: string) => api('error_resolve', { ids, resolution }, 'writer_errors_api'),
   upsertArticlePost: (post: Record<string, unknown>) => api<{ id: string; slug: string }>('post_upsert_article', { post }, 'writer_blog_api'),
 };
+
+export interface ErrorRow {
+  id: number;
+  at: string;
+  article_id: string | null;
+  title: string | null;
+  stage: string | null;
+  kind: string;
+  message: string;
+  resolved: boolean;
+  resolved_at: string | null;
+  resolution: string | null;
+}
 
 export type BlogStatus = 'draft' | 'scheduled' | 'published' | 'unpublished';
 export interface BlogRow {

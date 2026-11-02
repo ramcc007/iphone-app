@@ -31,7 +31,7 @@ const toast = (msg: string, bad = false) => {
 };
 
 function nav(active: string): string {
-  const links = [['#/', 'Articles'], ['#/new', 'New batch'], ['#/blog', 'Blog'], ['#/settings', 'Settings'], ['#/usage', 'Usage']];
+  const links = [['#/', 'Articles'], ['#/new', 'New batch'], ['#/blog', 'Blog'], ['#/errors', 'Errors'], ['#/settings', 'Settings'], ['#/usage', 'Usage']];
   return `<header class="bar"><strong>NumFall Writer</strong><nav>${links.map(([h, l]) => `<a href="${h}"${active === h ? ' class="on"' : ''}>${l}</a>`).join('')}<a href="/blog" target="_blank">Blog ↗</a><button id="logout" class="link">Sign out</button></nav></header>`;
 }
 
@@ -60,11 +60,12 @@ function login(): void {
 const STATUS: Record<string, string> = { queued: 'Waiting', generating: 'Writing', checking: 'Checking', publishing: 'Posting', ready: 'Ready', scheduled: 'Scheduled', published: 'Live', failed: 'Stopped' };
 
 async function list(): Promise<void> {
-  const { articles, humanizerPaused, indexNow } = await api<{ articles: Row[]; humanizerPaused: Record<string, { until: number; reason?: string } | null>; indexNow: { at: string; submitted: number; note: string } | null }>('list');
+  const { articles, humanizerPaused, indexNow, openErrors } = await api<{ articles: Row[]; openErrors: number; humanizerPaused: Record<string, { until: number; reason?: string } | null>; indexNow: { at: string; submitted: number; note: string } | null }>('list');
   const paused = Object.entries(humanizerPaused ?? {}).filter((x): x is [string, { until: number; reason?: string }] => !!x[1] && x[1].until > Date.now());
   const spend = articles.reduce((n, a) => n + (a.summary?.costUsd ?? 0), 0);
   app.innerHTML = `${nav('#/')}<main>
 ${paused.length ? `<p class="note">${paused.map(([p, t]) => `${p === 'groq' ? 'Groq' : 'OpenRouter'} is paused until ${when(new Date(t.until).toISOString())} (${esc((t.reason ?? 'daily limit').slice(0, 160))}).`).join(' ')} ${paused.length >= 2 ? 'Articles carry on without the humanizer until one comes back.' : 'The other provider is used meanwhile, if it has a key.'}</p>` : ''}
+${openErrors ? `<p class="note"><a href="#/errors">${openErrors} open error${openErrors === 1 ? '' : 's'}</a> in the error log. A scheduled check reviews and fixes them every 3 hours.</p>` : ''}
 <p class="muted">${articles.length} articles · ${money(spend)} spent on these · the background job keeps working when this page is closed.</p>
 <p class="muted small">Search engines (IndexNow, every 12 hours): ${indexNow ? `last run ${when(indexNow.at)}, ${esc(indexNow.note)}` : 'not run yet'} · <a href="/sitemap.xml" target="_blank">sitemap</a> · <a href="/blog/rss.xml" target="_blank">RSS</a> · <a href="/llms.txt" target="_blank">llms.txt</a></p>
 <table class="list"><thead><tr><th>Article</th><th>Status</th><th>Human</th><th>Goes live</th><th>Cost</th></tr></thead><tbody>
@@ -318,6 +319,7 @@ async function route(): Promise<void> {
     else if (h.startsWith('#/blog/')) await blogEditor(h.slice(7));
     else if (h === '#/new') newBatch();
     else if (h === '#/settings') await settingsPage();
+    else if (h.startsWith('#/errors')) await errorsPage();
     else if (h === '#/usage') await usage();
     else await list();
   } catch (e) {
@@ -583,4 +585,29 @@ ${!isNew ? '<button type="button" class="link danger-text" id="del">Delete post<
     await api('blog_delete', { id: p.id });
     location.hash = '#/blog';
   });
+}
+
+// =====================================================================================================
+// Error log: every failure, newest first. The scheduled check marks them resolved with what it did.
+// =====================================================================================================
+async function errorsPage(): Promise<void> {
+  const all = location.hash.includes('all');
+  const rows = await api<{ id: number; at: string; article_id: string | null; title: string | null; stage: string | null; kind: string; message: string; resolved: boolean; resolved_at: string | null; resolution: string | null }[]>('errors', undefined, all ? {} : { open: '1' });
+  app.innerHTML = `${nav('#/errors')}<main>
+<div class="headrow"><h1>Errors</h1><div>${all ? '<a href="#/errors">Open only</a>' : '<a href="#/errors?all">Show resolved too</a>'}${rows.some(r => !r.resolved) ? ' · <button class="link" id="resolveAll">Mark all open as resolved</button>' : ''}</div></div>
+<p class="muted small">Every failure is logged here. A scheduled check runs every 3 hours: it restarts stuck articles, fixes code where it can (tests must pass before anything goes live) and marks the errors it handled.</p>
+<table class="list"><thead><tr><th>When</th><th>Article</th><th>Kind</th><th>Message</th><th>Status</th></tr></thead><tbody>
+${rows
+  .map(r => `<tr${r.resolved ? ' class="muted"' : ''}><td class="small nowrap">${when(r.at)}</td><td>${r.article_id ? `<a href="#/a/${r.article_id}">${esc(r.title ?? r.article_id)}</a>` : '<span class="muted">(site)</span>'}<div class="muted small">${esc(r.stage ?? '')}</div></td>
+<td><span class="pill ${r.kind === 'stopped' ? 'failed' : r.kind === 'warning' ? 'scheduled' : 'ready'}">${esc(r.kind)}</span></td><td class="small">${esc(r.message)}</td>
+<td class="small">${r.resolved ? `Resolved ${when(r.resolved_at)}${r.resolution ? `<div class="muted">${esc(r.resolution)}</div>` : ''}` : `<button class="link" data-res="${r.id}">Mark resolved</button>`}</td></tr>`)
+  .join('')}
+</tbody></table>${rows.length ? '' : `<p>No ${all ? '' : 'open '}errors.</p>`}</main>`;
+  bindNav();
+  const resolve = async (ids: number[]) => {
+    await api('errors_resolve', { ids, resolution: 'Marked resolved by you' });
+    errorsPage();
+  };
+  app.querySelectorAll<HTMLButtonElement>('[data-res]').forEach(b => b.addEventListener('click', () => resolve([+b.dataset.res!])));
+  $('#resolveAll')?.addEventListener('click', () => resolve(rows.filter(r => !r.resolved).map(r => r.id)));
 }
