@@ -159,3 +159,11 @@ Every finding and change, newest first.
 - **Finding:** a batch article ("Are logic puzzles good for older adults? what studies show") could not be posted. The final check called the English FAQ question "Do crosswords help older adults think better?" non-English. The check scored text by the share of words from a short list of common English words, and a 7-word question can contain none of them.
 - **Change:** the check now flags any non-Latin script at once. For Latin-script text it judges word share only on 12+ words, against a fuller list of English function words (threshold 12%), so short headings and questions are never judged that way. Spanish and Hindi-in-Latin paragraphs are still caught.
 - **Test added:** the exact question, other short English lines, plus Spanish, Hindi-in-Latin, Chinese and Russian samples.
+
+## 2026-11-02: internal-links step cut off at its token cap
+- **Finding:** the batch article "How gravity changes a classic 9x9 number puzzle" failed 3 times at "pick links" with "not valid JSON". The usage log shows exactly 600 output tokens each time, which was the cap, so the answer was cut off. The meaning check was also close to its cap (1,415 of 1,500).
+- **Changes:**
+  - Output caps raised: links 2,500, fresh title 1,500, meaning check 6,000, verify 4,000, FAQ 4,000, research, plan and rewrite 8,000. Caps only limit; they cost nothing unless used.
+  - A JSON answer cut off at the cap is now reported as "cut off at the N-token cap" in the error and the usage log.
+  - Internal links are now optional: if picking them fails, the article carries on without them instead of retrying.
+- **Test added:** a cut-off links answer is tried once, logged as cut off, and the article finishes without internal links.

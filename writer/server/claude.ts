@@ -98,6 +98,12 @@ export async function callClaude(c: ClaudeCall): Promise<ClaudeResult> {
       content.push(...msg.content);
     }
     const text = content.filter(b => b.type === 'text').map(b => b.text ?? '').join('');
+    // A reply cut off at the token cap is reported as such (it would otherwise look like broken JSON).
+    if (msg.stop_reason === 'max_tokens' && c.schema) {
+      await db.logUsage({ article_id: c.article?.id, step: c.step, provider: 'anthropic', model: c.model, input_tokens: input, output_tokens: output, searches, cost_usd: cost(), ok: false, note: `cut off at the ${c.maxTokens}-token cap` });
+      if (c.article) addCost(c.article, cost(), { claudeIn: input, claudeOut: output, searches });
+      throw new HttpError(502, `Claude's answer for "${c.step}" was cut off at the ${c.maxTokens}-token cap.`);
+    }
     const r = { text, input, output, searches, costUsd: cost() };
     if (c.article) addCost(c.article, r.costUsd, { claudeIn: input, claudeOut: output, searches });
     await db.logUsage({ article_id: c.article?.id, step: c.step, provider: 'anthropic', model: c.model, input_tokens: input, output_tokens: output, searches, cost_usd: r.costUsd, ok: true });

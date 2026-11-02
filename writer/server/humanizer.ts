@@ -188,7 +188,7 @@ export async function meaningCheck(units: HumanizeUnit[], s: Settings, a: Articl
     step: 'meaning check',
     article: a,
     deadline,
-    maxTokens: 1500,
+    maxTokens: 6000,
     schema: MEANING_SCHEMA,
     system: 'You compare an original paragraph with a reworded one and only judge facts and meaning, never style or grammar.',
     user: `For each pair, say whether the rewrite changed the meaning: a number, rule, name or step; what a player does or in what order; how certain something is; a claim added or a fact dropped. Rewording, odd phrasing and small grammar mistakes are fine.\n\n${done

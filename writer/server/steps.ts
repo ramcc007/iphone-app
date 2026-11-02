@@ -37,7 +37,7 @@ export function dateNotAfter(d: string, asOf: string): boolean {
 
 export async function research(a: Article, c: Ctx): Promise<void> {
   const p = P.researchPrompt(a);
-  const r = await callClaude({ s: c.s, model: c.s.models.research, step: 'research', article: a, deadline: c.deadline, maxTokens: 4000, webSearch: c.s.maxSearches, schema: P.RESEARCH_SCHEMA, ...p });
+  const r = await callClaude({ s: c.s, model: c.s.models.research, step: 'research', article: a, deadline: c.deadline, maxTokens: 8000, webSearch: c.s.maxSearches, schema: P.RESEARCH_SCHEMA, ...p });
   const raw = parseJson<{ summary: string; facts: Article['research'] extends infer R ? R extends { facts: infer F } ? F : never : never }>(r.text);
   // Only facts that were actually found: a real URL and a date on or before the article's date.
   const facts = (raw.facts ?? []).filter(f => /^https?:\/\/[^\s]+\.[a-z]{2,}/i.test(f.url) && f.fact?.trim() && dateNotAfter(f.date ?? '', a.options.asOf));
@@ -52,7 +52,7 @@ export async function plan(a: Article, c: Ctx): Promise<void> {
   const posts = await c.posts();
   const facts = await c.facts();
   const p = P.planPrompt(a, c.s, posts, facts);
-  const r = await callClaude({ s: c.s, model: c.s.models.plan, step: 'plan', article: a, deadline: c.deadline, maxTokens: 4000, schema: P.PLAN_SCHEMA, ...p });
+  const r = await callClaude({ s: c.s, model: c.s.models.plan, step: 'plan', article: a, deadline: c.deadline, maxTokens: 8000, schema: P.PLAN_SCHEMA, ...p });
   const plan = parseJson<NonNullable<Article['plan']>>(r.text);
   const L = LENGTHS[a.options.length] ?? LENGTHS.medium;
   plan.sections = (plan.sections ?? []).slice(0, L.sections + 2).map((x, i) => ({ heading: i === 0 ? '' : sentenceCase(headingSymbols(x.heading ?? '')), brief: x.brief ?? '', words: Math.max(80, Math.min(600, x.words || Math.round(L.words / L.sections))) }));
@@ -71,7 +71,7 @@ export async function plan(a: Article, c: Ctx): Promise<void> {
   const banned = (t: string) => nameHits(t, c.s.bannedNames).length > 0;
   for (let tries = 0; tries < 2 && (shapes.has(titleShape(plan.title, a.options.topic)) || plan.title.length > 60 || banned(plan.title)); tries++) {
     const t = P.titlePrompt({ ...a, plan }, allTitles.map(x => x.title));
-    const tr = await callClaude({ s: c.s, model: c.s.models.plan, step: 'fresh title', article: a, deadline: c.deadline, maxTokens: 300, schema: P.TITLE_SCHEMA, ...t });
+    const tr = await callClaude({ s: c.s, model: c.s.models.plan, step: 'fresh title', article: a, deadline: c.deadline, maxTokens: 1500, schema: P.TITLE_SCHEMA, ...t });
     plan.title = sentenceCase(headingSymbols(parseJson<{ title: string }>(tr.text).title ?? plan.title));
   }
   if (plan.title.length > 60) plan.title = cut(plan.title, 60);
@@ -156,7 +156,7 @@ export async function writeSections(a: Article, c: Ctx): Promise<void> {
 // ---------- extras ----------
 export async function extras(a: Article, c: Ctx): Promise<void> {
   const p = P.faqPrompt(a, c.s);
-  const r = await callClaude({ s: c.s, model: c.s.models.write, effort: 'low', step: 'faq', article: a, deadline: c.deadline, maxTokens: 2000, schema: P.FAQ_SCHEMA, ...p });
+  const r = await callClaude({ s: c.s, model: c.s.models.write, effort: 'low', step: 'faq', article: a, deadline: c.deadline, maxTokens: 4000, schema: P.FAQ_SCHEMA, ...p });
   const x = parseJson<{ faq: { q: string; a: string }[]; description: string }>(r.text);
   // Worded the way people search, shown as a proper question.
   a.faq = (x.faq ?? [])
@@ -264,7 +264,7 @@ export async function clean(a: Article, c: Ctx): Promise<void> {
   if (r.report.needsCheck.length) {
     const items = r.report.needsCheck.slice(0, 6).map((x, i) => ({ id: i + 1, sentence: x.sentence }));
     const p = P.verifyPrompt(a, items);
-    const v = await callClaude({ s: c.s, model: c.s.models.check, step: 'verify noted sentences', article: a, deadline: c.deadline, maxTokens: 1500, webSearch: items.length, schema: P.VERIFY_SCHEMA, ...p });
+    const v = await callClaude({ s: c.s, model: c.s.models.check, step: 'verify noted sentences', article: a, deadline: c.deadline, maxTokens: 4000, webSearch: items.length, schema: P.VERIFY_SCHEMA, ...p });
     const results = new Map(parseJson<{ results: { id: number; text: string }[] }>(v.text).results.map(x => [x.id, x.text.trim()]));
     const fixes = new Map(items.map(x => [x.sentence, results.get(x.id) ?? '']));
     for (const x of r.report.needsCheck.slice(6)) fixes.set(x.sentence, '');
@@ -295,9 +295,16 @@ export async function links(a: Article, c: Ctx): Promise<void> {
       const preferred = new Set(a.plan?.related ?? []);
       const cands = [...live.filter(p => preferred.has(p.slug)), ...live.filter(p => !preferred.has(p.slug))].slice(0, 40);
       const p = P.linksPrompt(a, cands);
-      const r = await callClaude({ s: c.s, model: c.s.models.check, step: 'pick links', article: a, deadline: c.deadline, maxTokens: 600, schema: P.LINKS_SCHEMA, ...p });
+      // Internal links are a nice-to-have: if picking them fails, the article carries on without them.
+      let picked: { slug: string; anchor: string }[] = [];
+      try {
+        const r = await callClaude({ s: c.s, model: c.s.models.check, step: 'pick links', article: a, deadline: c.deadline, maxTokens: 2500, schema: P.LINKS_SCHEMA, ...p });
+        picked = parseJson<{ links: { slug: string; anchor: string }[] }>(r.text).links ?? [];
+      } catch (e) {
+        a.step = `Internal links skipped: ${(e instanceof Error ? e.message : String(e)).slice(0, 100)}`;
+      }
       const valid = new Set(cands.map(x => x.slug));
-      for (const l of parseJson<{ links: { slug: string; anchor: string }[] }>(r.text).links ?? []) {
+      for (const l of picked) {
         if (a.links.length >= 3 || !valid.has(l.slug) || a.links.some(x => x.slug === l.slug)) continue;
         const next = insertLink(a.body, l.anchor, `/blog/${l.slug}`);
         if (next) {
@@ -344,7 +351,7 @@ export async function rewrite(a: Article, c: Ctx): Promise<void> {
   if (todo.length) {
     const items = todo.map((x, i) => ({ id: i + 1, ...x }));
     const p = P.rewritePrompt(a, c.s, items);
-    const r = await callClaude({ s: c.s, model: c.s.models.write, effort: 'low', step: 'rewrite flagged', article: a, deadline: c.deadline, maxTokens: 4000, schema: P.REWRITE_SCHEMA, ...p });
+    const r = await callClaude({ s: c.s, model: c.s.models.write, effort: 'low', step: 'rewrite flagged', article: a, deadline: c.deadline, maxTokens: 8000, schema: P.REWRITE_SCHEMA, ...p });
     const map = new Map<string, string>();
     for (const x of parseJson<{ rewrites: { id: number; text: string }[] }>(r.text).rewrites ?? []) {
       const it = items[x.id - 1];

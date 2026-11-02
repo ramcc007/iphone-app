@@ -371,3 +371,26 @@ test('blog manager: drafts stay private, publish and schedule work, HTML is clea
   await call({ action: 'blog_delete', id: d.json.id });
   assert.ok(!fake.posts.some(p => p.id === d.json.id));
 });
+
+test('a cut-off links answer does not stop the article: it carries on without internal links', async () => {
+  const s = await db.getSettings();
+  const orig = (fake as unknown as { claude: (b: unknown) => [number, unknown] }).claude.bind(fake);
+  (fake as unknown as { claude: (b: { messages: { content: string }[] }) => [number, unknown] }).claude = (b: { messages: { content: string }[] }) => {
+    if (/Pick 2 or 3 of these live articles/.test(String(b.messages[0].content))) {
+      fake.calls.claude.push({ step: 'links', model: 'x', at: Date.now() });
+      return [200, { content: [{ type: 'text', text: '{"links": [{"slug": "an-exi' }], stop_reason: 'max_tokens', usage: { input_tokens: 100, output_tokens: 2500 } }];
+    }
+    return orig(b);
+  };
+  try {
+    const [a] = await runner.createBatch({ topics: ['How gravity changes a classic 9x9 number puzzle'], mode: 'manual' }, s);
+    await drain();
+    const done = fake.articles.get(a.id)!.data as unknown as import('../writer/shared/types').Article;
+    assert.equal(done.status, 'ready', done.error);
+    assert.deepEqual(done.links, []);
+    assert.equal(fake.calls.claude.filter(c => c.step === 'links').length, 1, 'tried once, no retry loop');
+    assert.ok(fake.usage.some(u => u.step === 'pick links' && u.ok === false && /cut off/.test(String(u.note))));
+  } finally {
+    (fake as unknown as { claude: unknown }).claude = orig;
+  }
+});
