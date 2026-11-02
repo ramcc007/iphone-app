@@ -295,11 +295,22 @@ ${pager}
   });
 }
 
+// Each URL gets changefreq and priority (owner's choice, 2 November 2026); no lastmod.
+const SITEMAP_RULES: Record<string, [string, string]> = {
+  '/': ['weekly', '1.0'],
+  '/blog': ['daily', '0.9'],
+  '/support': ['monthly', '0.4'],
+  '/press': ['monthly', '0.3'],
+  '/privacy': ['yearly', '0.2'],
+  '/terms': ['yearly', '0.2'],
+};
+
 export function sitemap(f: SiteFiles, posts: PublicPost[]): string {
+  const url = (loc: string, changefreq: string, priority: string) => `<url>\n<loc>${loc}</loc>\n<changefreq>${changefreq}</changefreq>\n<priority>${priority}</priority>\n</url>`;
   const urls = [
-    ...f.staticPages.map(p => `  <url><loc>${SITE}${p === '/' ? '/' : p}</loc></url>`),
-    ...[...new Set(posts.map(p => catSlug(p.category)))].map(c => `  <url><loc>${SITE}/blog/category/${c}</loc></url>`),
-    ...posts.map(p => `  <url><loc>${SITE}/blog/${p.slug}</loc><lastmod>${(p.updated_at > p.publish_at ? p.updated_at : p.publish_at).slice(0, 10)}</lastmod></url>`),
+    ...f.staticPages.map(p => url(`${SITE}${p}`, ...(SITEMAP_RULES[p] ?? ['monthly', '0.5']))),
+    ...[...new Set(posts.map(p => catSlug(p.category)))].map(c => url(`${SITE}/blog/category/${c}`, 'weekly', '0.5')),
+    ...posts.map(p => url(`${SITE}/blog/${p.slug}`, 'monthly', '0.7')),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
 }

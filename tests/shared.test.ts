@@ -8,7 +8,7 @@ import { insertLink, linkifyBare, linkifyHtml } from '../writer/shared/links';
 import { sanitizeHtml } from '../writer/shared/sanitize';
 import { addSlips } from '../writer/shared/slips';
 import { blocksToHtml, inline } from '../writer/shared/render';
-import { unwrapDeadLinks, pageTitle } from '../writer/site/blog';
+import { unwrapDeadLinks, pageTitle, sitemap } from '../writer/site/blog';
 import { DEFAULT_BANNED_NAMES } from '../writer/shared/settings';
 import type { Block } from '../writer/shared/types';
 
@@ -157,4 +157,15 @@ test('bare web addresses become links with readable words', () => {
 test('editor HTML is cleaned: only text tags, safe links, the app-card marker', () => {
   const out = sanitizeHtml('<div><p style="color:red" onclick="x">Hi <b>bold</b> <i>it</i></p><script>bad()</script><iframe src=x></iframe><!--app-card--><!--other--><a href="javascript:alert(1)">no</a><a href="https://example.org" target=_self>yes</a><h2 class=x>Head</h2><img src=x onerror=y></div>');
   assert.equal(out, '<p>Hi <strong>bold</strong> <em>it</em></p><!--app-card-->no<a href="https://example.org" rel="noopener" target="_blank">yes</a><h2>Head</h2>');
+});
+
+test('sitemap: changefreq and priority on every URL, no lastmod', () => {
+  const f = { layout: '', analytics: '', llms: '', config: {}, staticPages: ['/', '/blog', '/support'] };
+  const post = { slug: 'pencil-marks-six-grid', title: 't', description: 'd', author: 'a', category: 'How-to and techniques', tags: [], html: '', faq: [], related: [], reading_minutes: 1, publish_at: '2026-11-01T00:00:00Z', updated_at: '2026-11-02T00:00:00Z', status: 'published' };
+  const xml = sitemap(f, [post]);
+  assert.ok(!xml.includes('lastmod'));
+  assert.ok(xml.includes('<url>\n<loc>https://www.numfall.store/blog/category/how-to-and-techniques</loc>\n<changefreq>weekly</changefreq>\n<priority>0.5</priority>\n</url>'));
+  assert.ok(xml.includes('<loc>https://www.numfall.store/blog/pencil-marks-six-grid</loc>\n<changefreq>monthly</changefreq>\n<priority>0.7</priority>'));
+  assert.ok(xml.includes('<loc>https://www.numfall.store/</loc>\n<changefreq>weekly</changefreq>\n<priority>1.0</priority>'));
+  assert.equal((xml.match(/<url>/g) ?? []).length, 5);
 });

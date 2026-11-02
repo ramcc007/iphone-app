@@ -140,3 +140,17 @@ Every finding and change, newest first.
   - The visible "Updated" date was removed, because it would show on backdated posts. The page's search data still records when a post last changed.
 - **Writer:** posts now carry their research sources (one per site, at most 8) and an excerpt.
 - **Tests:** 26 passing. New ones cover the blog manager flow, the sanitizer and link fixing.
+
+## 2026-11-02: sitemap format
+- **Owner's request:** no `<lastmod>`; give every URL `<changefreq>` and `<priority>`, in the same layout as Scripwise's sitemap.
+
+  | Pages | changefreq | priority |
+  |---|---|---|
+  | Home | weekly | 1.0 |
+  | /blog | daily | 0.9 |
+  | Category pages | weekly | 0.5 |
+  | Articles | monthly | 0.7 |
+  | Support | monthly | 0.4 |
+  | Press | monthly | 0.3 |
+  | Privacy, Terms | yearly | 0.2 |
+- **Note:** Google has said it does not use changefreq or priority but does use an accurate lastmod (Search Central blog, June 2023). The IndexNow submission still sends changed pages every 12 hours, whatever the sitemap says.
