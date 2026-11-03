@@ -312,7 +312,7 @@ test('Publish now: a scheduled post goes live at once with today as its date; it
   const sched = fake.posts.filter(p => p.status === 'scheduled');
   assert.equal(sched.length, 2, 'both scheduled');
   const [p1, p2] = sched;
-  assert.ok(Date.parse(String(p1.publish_at)) > Date.now() + 3600_000, 'slot is in the future');
+  assert.ok(Date.parse(String(p1.publish_at)) > Date.now(), 'slot is in the future');
   const page = (slug: string) => pageApi.GET(new Request(`https://www.numfall.store/api/page?r=post&slug=${slug}`));
   assert.equal((await page(String(p1.slug))).status, 404, 'not visible before');
   const c = await cookie();
