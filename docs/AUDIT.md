@@ -418,3 +418,10 @@ The owner's brief and plan were approved first. Owner's choices:
 - On numfall.store, `/api/writer` and `/api/tick` return **410 Gone** (noindex). A redirect to the homepage would be wrong, because these were APIs, never pages. `/admin` is now the new admin area.
 - The writer's Blog tab was removed (the blog is managed at numfall.store/admin) and its links point at www.numfall.store. No API keys are in its browser code; they stay in server functions.
 - ESLint added; `npm run build` runs typecheck, lint, tests, site and admin. 47 tests, passing with and without `APP_ROLE=writer`.
+
+## 2026-11-03: GA4 dashboard not connected (owner's choice)
+- Connecting GA4 needs a Google Cloud project with a service account. The owner's account could not enable the API on the auto-made project, and the owner chose to skip it.
+- With the GA4 env vars missing, the dashboard now shows an "Open Google Analytics" button instead of setup instructions, and hides the range buttons.
+- The GA4 code stays in place: add the three env vars later to turn it on.
+- Writer project: keys added by the owner, redeployed, and checked end to end. The database's IndexNow job reached `numfall-writer.vercel.app/api/tick`, the tick secret was accepted, and the writer read the database with its own secret.
+- Old AI keys removed from numfall-site by the owner.

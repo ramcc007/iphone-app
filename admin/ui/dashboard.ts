@@ -26,7 +26,7 @@ export const WRITER_URL = 'https://numfall-writer.vercel.app';
 export function renderDashboard(el: HTMLElement): void {
   let range: RangeKey = (sessionStorage.getItem('nf-range') as RangeKey) || '7d';
   el.innerHTML = `
-<div class="list-head"><div><h1>Dashboard</h1><p class="summary">Traffic on numfall.store from Google Analytics. Your own visits are not counted on this device.</p></div></div>
+<div class="list-head"><div><h1>Dashboard</h1><p class="summary">numfall.store at a glance. Your own visits are not counted in Google Analytics on this device.</p></div></div>
 <div class="seg" role="group" aria-label="Date range">${RANGES.map(r => `<button type="button" data-range="${r.key}">${r.label}</button>`).join('')}</div>
 <div id="snap" aria-live="polite"></div>
 <section class="panel shortcuts"><h2>Shortcuts</h2><div class="sc-grid">
@@ -61,8 +61,10 @@ ${list('Top locations', s.locations.map(l => `<li><span>${esc([l.city === '(not 
     } catch (e) {
       cache.delete(range);
       const err = e as ApiError;
+      // GA4 isn't connected (owner's choice, 3 Nov 2026): point to Google Analytics instead of asking for setup.
+      if (err.status === 501) ($('.seg', el) as HTMLElement).hidden = true;
       box.innerHTML = err.status === 501
-        ? `<section class="panel notice"><h2>Connect Google Analytics</h2><p>Add these environment variables in Vercel (numfall-site → Settings → Environment Variables), then redeploy:</p><ul>${((err.data.missing as string[]) ?? []).map(m => `<li><code>${esc(m)}</code></li>`).join('')}</ul><p class="small muted">Then give the service account's email Viewer access in GA4 → Admin → Property access management.</p></section>`
+        ? `<section class="panel"><h2>Traffic</h2><p class="muted">Visitor numbers are in Google Analytics.</p><a class="btn" href="https://analytics.google.com/" target="_blank" rel="noopener">Open Google Analytics ↗</a></section>`
         : `<section class="panel notice"><p>${esc(err.message)}</p><button type="button" class="ghost" id="retry">Try again</button></section>`;
       $('#retry', el)?.addEventListener('click', show);
     }
