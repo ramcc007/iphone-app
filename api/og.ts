@@ -1,5 +1,10 @@
 // Open Graph / Twitter image per article: /og/<slug>.png (1200 × 630), drawn from the live post's title.
-import { ImageResponse } from '@vercel/og';
+import type { ImageResponse as OgImageResponse } from '@vercel/og';
+
+// @vercel/og ships only ES modules. These functions are compiled to CommonJS, where a plain import becomes require()
+// and crashes on Vercel (ERR_REQUIRE_ESM). A real dynamic import() loads it; vercel.json includes its files.
+const importEsm = new Function('s', 'return import(s)') as (s: string) => Promise<{ ImageResponse: typeof OgImageResponse }>;
+export const loadImageResponse = async () => (await importEsm('@vercel/og')).ImageResponse;
 import { db } from '../writer/server/db';
 import { isWriterRole } from '../writer/server/role';
 
@@ -28,7 +33,8 @@ export async function GET(req: Request): Promise<Response> {
     h('div', { fontSize: text.length > 48 ? '62px' : '72px', fontWeight: 700, lineHeight: 1.1, letterSpacing: '-1px' }, text),
     h('div', { fontSize: '28px', color: '#A3A9BF' }, 'numfall.store/blog'),
   ]);
-  return new ImageResponse(el as unknown as ConstructorParameters<typeof ImageResponse>[0], {
+  const ImageResponse = await loadImageResponse();
+  return new ImageResponse(el as unknown as ConstructorParameters<typeof OgImageResponse>[0], {
     width: 1200,
     height: 630,
     headers: { 'cache-control': 'public, max-age=86400, s-maxage=604800' },

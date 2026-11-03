@@ -7,10 +7,11 @@ import { join } from 'node:path';
 const out = '.tmp-functions';
 rmSync(out, { recursive: true, force: true });
 execFileSync('npx', ['tsc', '-p', 'tsconfig.json', '--noEmit', 'false', '--outDir', out], { stdio: 'inherit' });
-// og.js is the exception: @vercel/og ships ES modules and Vercel's builder handles it (share images render live).
-const fns = readdirSync(join(out, 'api')).filter(f => f.endsWith('.js') && f !== 'og.js');
+const fns = readdirSync(join(out, 'api')).filter(f => f.endsWith('.js'));
 for (const f of fns) {
-  execFileSync(process.execPath, ['--no-experimental-require-module', '-e', `require(${JSON.stringify('./' + join(out, 'api', f))})`], { stdio: 'inherit' });
+  // og.js also loads @vercel/og (an ES module) the way it does when drawing an image.
+  const extra = f === 'og.js' ? '.loadImageResponse().then(x => { if (typeof x !== "function") process.exit(1); })' : '';
+  execFileSync(process.execPath, ['--no-experimental-require-module', '-e', `require(${JSON.stringify('./' + join(out, 'api', f))})${extra}`], { stdio: 'inherit' });
 }
 rmSync(out, { recursive: true, force: true });
 console.log(`Functions load under CommonJS: ${fns.join(', ')}`);

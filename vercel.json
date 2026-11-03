@@ -11,7 +11,8 @@
       "includeFiles": "site/{src/**,site.config.json}"
     },
     "api/og.ts": {
-      "maxDuration": 20
+      "maxDuration": 20,
+      "includeFiles": "node_modules/@vercel/og/**"
     },
     "api/writer.ts": {
       "maxDuration": 300,
