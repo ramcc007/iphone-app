@@ -356,3 +356,65 @@ Checked:
   - `escapeHtml` tolerates a missing value.
 - **Tests:** 38 passing (2 new: Publish now from the list and from the article page, refusals and IndexNow; date moved to now in the editor). The three buttons were also checked end to end in Chromium against the real admin bundle.
 - **Deploy note:** the first production build failed on Vercel and production stayed on the previous version. One new test assumed the next scheduled slot is always more than an hour away, which depends on the time of day. It now only checks that the slot is in the future, and passes under UTC, New York, Kolkata and Auckland clocks. The second build is live.
+
+## 2026-11-03: numfall.store admin area, and the article writer moved to its own project
+The owner's brief and plan were approved first. Owner's choices:
+- keep the password login (no email allowlist);
+- extend `public.posts` (no new table);
+- the writer gets its own Vercel project;
+- no optional extras.
+
+**Database (approved):**
+- `004_admin_area.sql`:
+  - adds `key_takeaways` and `created_at` (backfilled from the earliest of the publish date and last update);
+  - adds `live_list` and `live_get` to `writer_blog_api`. These apply the live rule (scheduled or published, and `publish_at <= now`) on every read.
+- `005_lock_posts.sql`, applied only after the site read posts through 004:
+  - no public policy;
+  - every table right removed from anon and authenticated. They had SELECT, plus TRUNCATE, REFERENCES and TRIGGER, which the web API never exposed.
+  - Row-level security stays on. Public pages, OG images and IndexNow now read through the secret-checked function on the server. Checked live: blog and sitemap still work, and direct reads are refused.
+
+**Admin API (`api/admin.ts`, `/api/admin/*`):**
+- `requireAdmin` on every route except login, logout and me.
+- Blog CRUD.
+- `PATCH {"action":"publish_now"}`: scheduled posts only; 409 with the reason for drafts and live posts.
+- Every field checked on the server, with every problem listed.
+- HTML cleaned with `sanitize-html` (text tags and links only; the App Store card kept).
+- Game or brand names refused, including inside source addresses.
+- Duplicate slugs return a clear 409.
+- IndexNow is pinged after the response (`waitUntil`).
+- Unknown server errors return a generic message.
+
+**GA4 dashboard:**
+- `@google-analytics/data` with a service account.
+- Four reports run in parallel.
+- 501 naming the missing env vars.
+- Google's errors are logged, never shown.
+
+**Admin UI (`admin/ui`):**
+- Real URLs, with filters kept in the query string, so Back works.
+- Dashboard with range toggle and per-range caching.
+- Config-driven `ContentAdminList`: table from 1024 px, cards below, Last modified hidden under 1280 px, icon buttons with tooltips and aria-labels.
+- TipTap editor with every field in the brief, a Google preview with character counts, and a publish box with Publish now (confirms, saves edits, sets the date to now).
+- Signing in sets `nf-no-ga`: the site's GA script stops before loading anything (also on `/admin` paths) and the public header shows an Admin link. CSP hash updated; the test enforces it.
+- Checked in Chromium against the real API and the vercel.json headers:
+  - sign-in, tabs, search, Back, Publish now from the list and the editor;
+  - save with validation errors;
+  - no sideways scrolling and nothing under 32 px at 390, 1100, 1366 and 1536 px;
+  - no CSP violations.
+
+**Public blog:**
+- 9 posts per page at `/blog/page/N` (noindex, not in the sitemap). Old `?page=N` addresses 301, and pages past the end 404.
+- "In short" box, tags, disclaimer box.
+- BlogPosting, plus site-wide Organization and WebSite structured data on every page.
+- `/blog/feed.xml`, with 301s from `/blog/rss.xml` and `/feed.xml`.
+- robots.txt names the main search and AI crawlers. `/admin` and `/api/` stay disallowed.
+
+**Part B, the article writer is off numfall.store:**
+- New Vercel project `numfall-writer`:
+  - same repo, `APP_ROLE=writer`, no custom domain;
+  - noindex headers, a robots.txt that disallows everything, no public pages;
+  - the existing password login;
+  - Deployment Protection left off, because the database's scheduled calls have to reach `/api/tick`.
+- On numfall.store, `/api/writer` and `/api/tick` return **410 Gone** (noindex). A redirect to the homepage would be wrong, because these were APIs, never pages. `/admin` is now the new admin area.
+- The writer's Blog tab was removed (the blog is managed at numfall.store/admin) and its links point at www.numfall.store. No API keys are in its browser code; they stay in server functions.
+- ESLint added; `npm run build` runs typecheck, lint, tests, site and admin. 47 tests, passing with and without `APP_ROLE=writer`.
