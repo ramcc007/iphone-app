@@ -22,6 +22,7 @@
   "include": [
     "api/**/*.ts",
     "writer/**/*.ts",
+    "admin/**/*.ts",
     "tests/**/*.ts"
   ]
 }

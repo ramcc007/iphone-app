@@ -1,5 +1,7 @@
 <div id="consent" class="consent" role="dialog" aria-live="polite" aria-label="Cookie choice" hidden><p>We use Google Analytics cookies to count visits to this website (not the app). OK? <a href="/privacy#website">Details</a></p><div><button type="button" class="btn small" data-c="yes">Accept</button><button type="button" class="btn ghost small" data-c="no">No thanks</button></div></div>
-<script>(function(){var id='{{gaId}}',k='nf-consent',b=document.getElementById('consent');
+<script>(function(){var id='{{gaId}}',k='nf-consent',b=document.getElementById('consent'),adm=false;
+try{adm=localStorage.getItem('nf-no-ga')==='1';}catch(e){}
+if(adm||location.pathname.indexOf('/admin')===0){window['ga-disable-'+id]=true;try{if(localStorage.getItem('nf-admin')==='1'){var n=document.querySelector('.top nav');if(n&&!n.querySelector('.admin-link')){var l=document.createElement('a');l.href='/admin';l.className='admin-link';l.textContent='Admin';n.appendChild(l);}}}catch(e){}return;}
 function load(){if(window.gtag)return;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+id;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};gtag('js',new Date());gtag('config',id);}
 function get(){try{return localStorage.getItem(k);}catch(e){return null;}}
 function set(v){try{localStorage.setItem(k,v);}catch(e){}}
