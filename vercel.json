@@ -68,12 +68,8 @@
       "destination": "/api/page?r=llms"
     },
     {
-      "source": "/admin",
-      "destination": "/admin/index.html"
-    },
-    {
       "source": "/admin/:path*",
-      "destination": "/admin/index.html"
+      "destination": "/admin"
     }
   ],
   "headers": [
