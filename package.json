@@ -13,12 +13,18 @@
     "lint": "eslint --no-error-on-unmatched-pattern api writer admin tests"
   },
   "dependencies": {
+    "@google-analytics/data": "^7.3.0",
     "@vercel/functions": "^2.2.0",
-    "@vercel/og": "^0.8.5"
+    "@vercel/og": "^0.8.5",
+    "sanitize-html": "^2.18.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@tiptap/core": "^3.32.2",
+    "@tiptap/pm": "^3.32.2",
+    "@tiptap/starter-kit": "^3.32.2",
     "@types/node": "^22.10.0",
+    "@types/sanitize-html": "^2.16.2",
     "esbuild": "^0.25.0",
     "eslint": "^9.39.5",
     "globals": "^17.14.0",

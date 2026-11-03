@@ -73,6 +73,20 @@ interface PageOpts {
   noAnalytics?: boolean; // admin-only pages (previews) never load Google Analytics
 }
 
+// Site-wide structured data: the publisher and the website (merged into every page's JSON-LD graph).
+export function siteGraph(c: Record<string, string>): Record<string, unknown>[] {
+  const site = c.siteUrl;
+  return [
+    { '@type': 'Organization', '@id': `${site}/#org`, name: c.appName, url: `${site}/`, logo: { '@type': 'ImageObject', url: `${site}/icon-512.png` }, email: c.supportEmail, ...(c.appStoreUrl ? { sameAs: [c.appStoreUrl] } : {}) },
+    { '@type': 'WebSite', '@id': `${site}/#website`, name: c.appName, url: `${site}/`, inLanguage: 'en-US', publisher: { '@id': `${site}/#org` } },
+  ];
+}
+
+function withSiteGraph(c: Record<string, string>, ld: unknown): unknown {
+  const graph = ld && typeof ld === 'object' && '@graph' in (ld as object) ? ((ld as { '@graph': unknown[] })['@graph']) : ld ? [ld] : [];
+  return { '@context': 'https://schema.org', '@graph': [...siteGraph(c), ...graph.map(g => { const { '@context': _c, ...rest } = g as Record<string, unknown>; return rest; })] };
+}
+
 export function page(f: SiteFiles, o: PageOpts): string {
   const c = f.config;
   const ga = c.gaMeasurementId;
@@ -87,7 +101,7 @@ export function page(f: SiteFiles, o: PageOpts): string {
     ogImage: esc(o.ogImage ?? `${c.siteUrl}/og-image.png`),
     ogAlt: esc(o.ogAlt ?? `${c.appName}: ${c.tagline}`),
     extraHead: o.extraHead ?? '',
-    jsonLd: o.jsonLd ? `<script type="application/ld+json">${JSON.stringify(o.jsonLd).replace(/</g, '\\u003c')}</script>` : '',
+    jsonLd: `<script type="application/ld+json">${JSON.stringify(withSiteGraph(c, o.jsonLd)).replace(/</g, '\\u003c')}</script>`,
     analytics: ga && !o.noAnalytics ? f.analytics.replace(/\{\{gaId\}\}/g, ga) : '',
     content: o.content,
     year: String(new Date().getFullYear()),
@@ -195,6 +209,9 @@ export function articlePage(f: SiteFiles, p: PublicPost, live: Set<string>, rela
     ? `<section class="related"><h2>Related articles</h2><ul class="cards">${related.map(r => card(r)).join('')}</ul></section>`
     : '';
   const updated = '';
+  const takeaways = (p.key_takeaways ?? []).filter(Boolean);
+  const inShort = takeaways.length ? `<aside class="in-short" aria-labelledby="in-short-h"><h2 id="in-short-h" class="in-short-h">In short</h2><ul>${takeaways.map(t => `<li>${esc(t)}</li>`).join('')}</ul></aside>` : '';
+  const tags = p.tags?.length ? `<ul class="tags" aria-label="Tags">${p.tags.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
   const banner = preview ? `<div class="preview-banner" role="status">Preview: this article goes live on ${esc(fmtDate(preview.goLive))} at ${esc(new Date(preview.goLive).toISOString().slice(11, 16))} UTC. Visitors see a 404 until then.</div>` : '';
   const content = `${banner}<main class="post">
 <header class="post-head"><div class="narrow">
@@ -205,14 +222,16 @@ ${p.description ? `<p class="dek">${esc(p.description)}</p>` : ''}
 </div></header>
 <div class="narrow">
 <article class="prose">
+${inShort}
 ${toc}
 ${body}
-${appCard(p.slug, 'end')}
+${tags}
 ${faq}
 ${sources}
-<p class="disclosure">NumFall is made by the publisher of this site. Any health or brain-training points here are general information, not medical advice.</p>
+<aside class="disclaimer" aria-label="Disclaimer"><p><strong>Please note:</strong> NumFall is made by the publisher of this site. Any health or brain-training points here are general information, not medical advice.</p></aside>
 ${share(url, p.title, p.slug)}
 ${SHARE_SCRIPT}
+${appCard(p.slug, 'end')}
 </article>
 ${rel}
 <p class="back"><a href="/blog">← All articles</a></p>
@@ -222,14 +241,14 @@ ${rel}
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'Article',
+        '@type': 'BlogPosting',
         headline: p.title,
         description: p.description,
         image: og,
         datePublished: p.publish_at,
         dateModified: p.updated_at > p.publish_at ? p.updated_at : p.publish_at,
         author: { '@type': 'Person', name: p.author },
-        publisher: { '@type': 'Organization', name: 'NumFall', url: `${SITE}/`, logo: { '@type': 'ImageObject', url: `${SITE}/icon-512.png` } },
+        publisher: { '@id': `${SITE}/#org` },
         mainEntityOfPage: url,
         articleSection: p.category,
         keywords: p.tags.join(', '),
@@ -280,17 +299,17 @@ ${gridMark(p.slug, featured ? 4 : 3)}
 <span class="meta">${esc(p.author)} · ${fmtDate(p.publish_at)} · ${p.reading_minutes} min read</span></span></a></li>`;
 }
 
-export const PER_PAGE = 12;
+export const PER_PAGE = 9;
 
 export function indexPage(f: SiteFiles, posts: PublicPost[], pageNo: number, category: string | null): string {
   const cats = [...new Set(posts.map(p => p.category))].sort();
   const filtered = category ? posts.filter(p => catSlug(p.category) === category) : posts;
   const pages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-  const n = Math.min(Math.max(1, pageNo), pages);
+  const n = Math.max(1, pageNo);
   const shown = filtered.slice((n - 1) * PER_PAGE, n * PER_PAGE);
   const catName = category ? cats.find(c => catSlug(c) === category) : undefined;
   const base = category ? `/blog/category/${category}` : '/blog';
-  const href = (k: number) => (k > 1 ? `${base}?page=${k}` : base);
+  const href = (k: number) => (k > 1 ? `${base}/page/${k}` : base);
   const featured = !category && n === 1 && shown.length ? shown[0] : null;
   const rest = featured ? shown.slice(1) : shown;
   const nums = Array.from({ length: pages }, (_, i) => i + 1).filter(k => k === 1 || k === pages || Math.abs(k - n) <= 2);
@@ -316,6 +335,8 @@ ${pager}
       : 'Articles on solving number puzzles and logic grids, puzzle techniques, brain game habits and casual puzzle games for iPhone and iPad.',
     canonical: `${SITE}${href(n)}`,
     content,
+    // Page 2 onwards: crawlable links, but not indexed and not in the sitemap (owner's choice).
+    robots: n > 1 ? 'noindex, follow' : 'index, follow',
     extraHead: `${n > 1 ? `<link rel="prev" href="${SITE}${href(n - 1)}">\n` : ''}${n < pages ? `<link rel="next" href="${SITE}${href(n + 1)}">\n` : ''}`,
     jsonLd: {
       '@context': 'https://schema.org',
@@ -353,10 +374,10 @@ export function llms(f: SiteFiles, posts: PublicPost[]): string {
   const storeStatus = c.appStoreUrl ? `available on the App Store: ${c.appStoreUrl}` : 'coming soon to the App Store.';
   const base = f.llms.replace(/\{\{(\w+)\}\}/g, (m, k: string) => (k === 'storeStatus' ? storeStatus : k in c ? String(c[k]) : m));
   const list = posts.map(p => `- [${p.title}](${SITE}/blog/${p.slug}): ${p.description}`).join('\n');
-  return `${base.trimEnd()}\n- [Blog](${SITE}/blog): articles on number puzzles, logic puzzles and solving techniques\n- [RSS feed](${SITE}/blog/rss.xml): the latest articles\n\n## Articles\n\n${list || '- (none yet)'}\n`;
+  return `${base.trimEnd()}\n- [Blog](${SITE}/blog): articles on number puzzles, logic puzzles and solving techniques\n- [RSS feed](${SITE}/blog/feed.xml): the latest articles\n\n## Articles\n\n${list || '- (none yet)'}\n`;
 }
 
-// RSS 2.0 feed of the latest live articles: /blog/rss.xml
+// RSS 2.0 feed of the latest live articles: /blog/feed.xml (old /blog/rss.xml and /feed.xml redirect here)
 export function rss(f: SiteFiles, posts: PublicPost[], limit = 50): string {
   const x = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const items = posts.slice(0, limit).map(p => `    <item>
@@ -374,7 +395,7 @@ export function rss(f: SiteFiles, posts: PublicPost[], limit = 50): string {
   <channel>
     <title>NumFall blog</title>
     <link>${SITE}/blog</link>
-    <atom:link href="${SITE}/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <atom:link href="${SITE}/blog/feed.xml" rel="self" type="application/rss+xml"/>
     <description>Number puzzles, logic puzzles and solving techniques from ${x(String(f.config.appName ?? 'NumFall'))}.</description>
     <language>en-us</language>
     <lastBuildDate>${last}</lastBuildDate>

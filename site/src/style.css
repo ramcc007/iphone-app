@@ -192,3 +192,12 @@ html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 }
 /* Phone held sideways: the header scrolls away instead of covering a sixth of the screen. */
 @media (max-height:500px) and (orientation:landscape) { .top { position:static; } }
+
+/* Article extras (3 Nov 2026): In short box, tags, disclaimer box. */
+.prose .in-short { margin:0 0 26px; padding:18px 20px; border-radius:16px; background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--accent); }
+.prose .in-short-h { margin:0 0 8px; padding:0; border:0; font-size:16px; letter-spacing:.04em; text-transform:uppercase; color:var(--accent-soft); }
+.prose .in-short ul { margin:0; padding-left:20px; } .prose .in-short li { margin:0 0 .4em; color:var(--fg); }
+.prose .tags { list-style:none; display:flex; flex-wrap:wrap; gap:8px; padding:0; margin:26px 0 0; }
+.prose .tags li { margin:0; padding:4px 12px; border-radius:999px; background:var(--surface); border:1px solid var(--line); font-size:14px; color:var(--soft); }
+.prose .disclaimer { margin:28px 0 0; padding:14px 18px; border-radius:14px; border:1px solid var(--line); background:color-mix(in srgb, var(--surface) 70%, transparent); font-size:15px; line-height:1.6; }
+.prose .disclaimer p { margin:0; }

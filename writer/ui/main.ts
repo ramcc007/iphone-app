@@ -67,7 +67,7 @@ async function list(): Promise<void> {
 ${paused.length ? `<p class="note">${paused.map(([p, t]) => `${p === 'groq' ? 'Groq' : 'OpenRouter'} is paused until ${when(new Date(t.until).toISOString())} (${esc((t.reason ?? 'daily limit').slice(0, 160))}).`).join(' ')} ${paused.length >= 2 ? 'Articles carry on without the humanizer until one comes back.' : 'The other provider is used meanwhile, if it has a key.'}</p>` : ''}
 ${openErrors ? `<p class="note"><a href="#/errors">${openErrors} open error${openErrors === 1 ? '' : 's'}</a> in the error log.</p>` : ''}
 <p class="muted">${articles.length} articles · ${money(spend)} spent on these · the background job keeps working when this page is closed.</p>
-<p class="muted small">Search engines (IndexNow, every 12 hours): ${indexNow ? `last run ${when(indexNow.at)}, ${esc(indexNow.note)}` : 'not run yet'} · <a href="/sitemap.xml" target="_blank">sitemap</a> · <a href="/blog/rss.xml" target="_blank">RSS</a> · <a href="/llms.txt" target="_blank">llms.txt</a></p>
+<p class="muted small">Search engines (IndexNow, every 12 hours): ${indexNow ? `last run ${when(indexNow.at)}, ${esc(indexNow.note)}` : 'not run yet'} · <a href="/sitemap.xml" target="_blank">sitemap</a> · <a href="https://www.numfall.store/blog/feed.xml" target="_blank">RSS</a> · <a href="/llms.txt" target="_blank">llms.txt</a></p>
 <table class="list"><thead><tr><th>Article</th><th>Status</th><th>Human</th><th>Goes live</th><th>Cost</th></tr></thead><tbody>
 ${articles
   .map(a => {

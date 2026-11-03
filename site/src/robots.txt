@@ -1,4 +1,25 @@
+# Search engines and AI assistants are welcome on the public site. The admin area and APIs are private.
 User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+# Named crawlers (search and AI answer engines): same rules, listed so each one is explicitly allowed.
+User-agent: Googlebot
+User-agent: Google-Extended
+User-agent: Bingbot
+User-agent: DuckDuckBot
+User-agent: Applebot
+User-agent: Applebot-Extended
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: CCBot
 Allow: /
 Disallow: /admin
 Disallow: /api/

@@ -20,24 +20,36 @@
     "api/tick.ts": {
       "maxDuration": 300,
       "includeFiles": "site/site.config.json"
+    },
+    "api/admin.ts": {
+      "maxDuration": 30,
+      "includeFiles": "site/site.config.json"
     }
   },
   "rewrites": [
+    {
+      "source": "/api/admin/:path*",
+      "destination": "/api/admin?path=:path*"
+    },
     {
       "source": "/blog",
       "destination": "/api/page?r=blog"
     },
     {
-      "source": "/blog/rss.xml",
+      "source": "/blog/feed.xml",
       "destination": "/api/page?r=rss"
+    },
+    {
+      "source": "/blog/page/:n",
+      "destination": "/api/page?r=blog&pg=:n"
+    },
+    {
+      "source": "/blog/category/:cat/page/:n",
+      "destination": "/api/page?r=blog&cat=:cat&pg=:n"
     },
     {
       "source": "/blog/category/:cat",
       "destination": "/api/page?r=blog&cat=:cat"
-    },
-    {
-      "source": "/feed.xml",
-      "destination": "/api/page?r=rss"
     },
     {
       "source": "/blog/:slug",
@@ -119,6 +131,18 @@
           "value": "public, max-age=604800, stale-while-revalidate=86400"
         }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/blog/rss.xml",
+      "destination": "/blog/feed.xml",
+      "permanent": true
+    },
+    {
+      "source": "/feed.xml",
+      "destination": "/blog/feed.xml",
+      "permanent": true
     }
   ]
 }

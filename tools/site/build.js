@@ -33,8 +33,14 @@ const structuredData = (description) => {
     operatingSystem: 'iOS, iPadOS', applicationCategory: 'GameApplication', applicationSubCategory: 'Puzzle',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }, publisher: { '@type': 'Organization', name: cfg.appName, url: cfg.siteUrl + '/', logo: cfg.siteUrl + '/icon-512.png', email: cfg.supportEmail } };
   if (cfg.appStoreUrl) { app.downloadUrl = cfg.appStoreUrl; app.installUrl = cfg.appStoreUrl; app.sameAs = [cfg.appStoreUrl]; }
-  return { '@context': 'https://schema.org', '@graph': [{ '@type': 'WebSite', name: cfg.appName, url: cfg.siteUrl + '/', description: cfg.tagline }, app] };
+  app.publisher = { '@id': cfg.siteUrl + '/#org' };
+  return { '@context': 'https://schema.org', '@graph': [...siteGraph(), app] };
 };
+// Site-wide: the publisher and the website, on every page (same @ids as the blog pages).
+const siteGraph = () => [
+  { '@type': 'Organization', '@id': cfg.siteUrl + '/#org', name: cfg.appName, url: cfg.siteUrl + '/', logo: { '@type': 'ImageObject', url: cfg.siteUrl + '/icon-512.png' }, email: cfg.supportEmail, ...(cfg.appStoreUrl ? { sameAs: [cfg.appStoreUrl] } : {}) },
+  { '@type': 'WebSite', '@id': cfg.siteUrl + '/#website', name: cfg.appName, url: cfg.siteUrl + '/', inLanguage: 'en-US', description: cfg.tagline, publisher: { '@id': cfg.siteUrl + '/#org' } },
+];
 for (const f of pages) {
   let body = fs.readFileSync(path.join(SRC, 'pages', f), 'utf8');
   const meta = body.match(/^<!--\s*title:\s*(.*?)\s*\|\s*description:\s*(.*?)\s*-->\s*/);
@@ -49,7 +55,8 @@ for (const f of pages) {
   const title = plain(meta[1]), description = plain(meta[2]), notFound = f === '404.html';
   const fullTitle = title.includes(cfg.appName) ? title : title + ' | ' + cfg.appName;
   const urlPath = f === 'index.html' ? '/' : '/' + f.replace('.html', '');
-  const jsonLd = f === 'index.html' ? '<script type="application/ld+json">' + JSON.stringify(structuredData(description)).replace(/</g, '\\u003c') + '</script>' : '';
+  const ld = f === 'index.html' ? structuredData(description) : { '@context': 'https://schema.org', '@graph': siteGraph() };
+  const jsonLd = '<script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, '\\u003c') + '</script>';
   // Website analytics (Google Analytics 4), only after the visitor taps Accept. Declining loads nothing from Google.
   // The app itself collects nothing; this covers numfall.store only (see the privacy policy's "This website" section).
   const ga = cfg.gaMeasurementId;

@@ -1,7 +1,7 @@
 // One local HTTP server that stands in for Claude, Groq, GPTZero, the App Store lookup, the website and
 // Supabase (writer_api and the public posts table). The database part mirrors supabase/001_numfall_articles.sql.
 import { createServer, type IncomingMessage, type Server } from 'node:http';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import type { AddressInfo } from 'node:net';
 
 export interface Calls {
@@ -342,14 +342,14 @@ export class Fake {
           this.posts[i] = { ...this.posts[i], ...post, id, updated_at: new Date().toISOString() } as PostRow;
           return [200, this.posts[i]];
         }
-        const row = { excerpt: '', meta_title: '', sources: [], related: [], key_takeaways: [], ...post, id: `p${this.posts.length + 1}x`, updated_at: new Date().toISOString(), created_at: new Date().toISOString() } as unknown as PostRow;
+        const row = { excerpt: '', meta_title: '', sources: [], related: [], key_takeaways: [], ...post, id: randomUUID(), updated_at: new Date().toISOString(), created_at: new Date().toISOString() } as unknown as PostRow;
         this.posts.push(row);
         return [200, row];
       }
       case 'post_upsert_article': {
         if (!slugOk(post.slug)) return [400, { message: 'check constraint' }];
         const i = this.posts.findIndex(p => p.article_id === post.article_id);
-        const row = { excerpt: '', meta_title: '', sources: [], ...(i >= 0 ? { key_takeaways: this.posts[i].key_takeaways, created_at: this.posts[i].created_at } : { key_takeaways: [], created_at: new Date().toISOString() }), ...post, id: i >= 0 ? this.posts[i].id : `a${this.posts.length + 1}x`, updated_at: new Date().toISOString() } as unknown as PostRow;
+        const row = { excerpt: '', meta_title: '', sources: [], ...(i >= 0 ? { key_takeaways: this.posts[i].key_takeaways, created_at: this.posts[i].created_at } : { key_takeaways: [], created_at: new Date().toISOString() }), ...post, id: i >= 0 ? this.posts[i].id : randomUUID(), updated_at: new Date().toISOString() } as unknown as PostRow;
         if (i >= 0) this.posts[i] = row;
         else {
           if (this.posts.some(p => p.slug === post.slug)) return [409, { message: 'duplicate slug' }];

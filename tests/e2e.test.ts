@@ -157,7 +157,7 @@ test('scheduled posts 404 for visitors, preview for the admin, then go live with
   r = await pageApi.GET(url(`r=post&slug=${p.slug}`));
   assert.equal(r.status, 200);
   const html = await r.text();
-  for (const needle of ['"@type":"Article"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"', '"@type":"MobileApplication"', 'apple-itunes-app', 'class="app-card"', 'NumFall is made by the publisher of this site.', 'general information', `rel="canonical" href="https://www.numfall.store/blog/${p.slug}"`, `/og/${p.slug}.png`, 'class="sharebox"', 'class="byline-share"', 'wa.me', 'utm_source%3Dx', 'share-copy', 'Related articles']) {
+  for (const needle of ['"@type":"BlogPosting"', '"@type":"Organization"', '"@type":"WebSite"', 'class="disclaimer"', '"@type":"FAQPage"', '"@type":"BreadcrumbList"', '"@type":"MobileApplication"', 'apple-itunes-app', 'class="app-card"', 'NumFall is made by the publisher of this site.', 'general information', `rel="canonical" href="https://www.numfall.store/blog/${p.slug}"`, `/og/${p.slug}.png`, 'class="sharebox"', 'class="byline-share"', 'wa.me', 'utm_source%3Dx', 'share-copy', 'Related articles']) {
     assert.ok(html.includes(needle), needle);
   }
   assert.equal((html.match(/class="app-card"/g) ?? []).length, 2, 'app card mid-article and at the end');

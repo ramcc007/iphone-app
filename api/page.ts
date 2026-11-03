@@ -3,7 +3,7 @@
 // until its time; signed in as admin, the same URL shows a preview with the go-live time.
 import { isAdmin } from '../writer/server/auth';
 import { db } from '../writer/server/db';
-import { articlePage, catSlug, indexPage, llms, page, rss, siteFiles, sitemap, type PublicPost } from '../writer/site/blog';
+import { articlePage, catSlug, indexPage, llms, page, PER_PAGE, rss, siteFiles, sitemap, type PublicPost } from '../writer/site/blog';
 
 // Live posts only: the database applies the live rule (scheduled/published and publish_at <= now) on every call.
 const livePosts = () => db.liveList<PublicPost>();
@@ -36,7 +36,15 @@ export async function GET(req: Request): Promise<Response> {
       const posts = await livePosts();
       const cat = u.searchParams.get('cat') ?? u.searchParams.get('category');
       if (cat && !posts.some(p => catSlug(p.category) === cat)) return notFound();
-      return html(indexPage(f, posts, Number(u.searchParams.get('page') ?? 1) || 1, cat));
+      const base = cat ? `/blog/category/${cat}` : '/blog';
+      // Old ?page=N links move to /blog/page/N.
+      const old = u.searchParams.get('page');
+      if (old) return new Response(null, { status: 301, headers: { location: Number(old) > 1 ? `${base}/page/${Number(old)}` : base, 'cache-control': PUBLIC_CACHE } });
+      const n = Number(u.searchParams.get('pg') ?? 1);
+      const count = cat ? posts.filter(p => catSlug(p.category) === cat).length : posts.length;
+      if (!Number.isInteger(n) || n < 1 || (n > 1 && n > Math.ceil(count / PER_PAGE))) return notFound();
+      if (u.searchParams.get('pg') === '1') return new Response(null, { status: 301, headers: { location: base, 'cache-control': PUBLIC_CACHE } });
+      return html(indexPage(f, posts, n, cat));
     }
     if (r === 'post') {
       const slug = (u.searchParams.get('slug') ?? '').toLowerCase();
