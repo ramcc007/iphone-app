@@ -305,6 +305,67 @@ test('manual article waits for you; "post now" publishes it; rescan stays off by
   assert.equal(fake.posts.find(p => p.article_id === a.id)!.status, 'published');
 });
 
+test('Publish now: a scheduled post goes live at once with today as its date; its article shows live; IndexNow hears about it', async () => {
+  const s = await db.getSettings();
+  await runner.createBatch({ topics: ['How to solve a 6×6 logic grid', 'Hidden singles on a 4×4 grid'], mode: 'schedule', days: 5 }, s);
+  await drain(20);
+  const sched = fake.posts.filter(p => p.status === 'scheduled');
+  assert.equal(sched.length, 2, 'both scheduled');
+  const [p1, p2] = sched;
+  assert.ok(Date.parse(String(p1.publish_at)) > Date.now() + 3600_000, 'slot is in the future');
+  const page = (slug: string) => pageApi.GET(new Request(`https://www.numfall.store/api/page?r=post&slug=${slug}`));
+  assert.equal((await page(String(p1.slug))).status, 404, 'not visible before');
+  const c = await cookie();
+  const call = (body: Record<string, unknown>) => writerApi.POST(new Request('http://x/api/writer', { method: 'POST', headers: { cookie: c }, body: JSON.stringify(body) }));
+  assert.equal((await writerApi.POST(new Request('http://x/api/writer', { method: 'POST', body: JSON.stringify({ action: 'publish_now', id: p1.id }) }))).status, 401, 'admin only');
+
+  // From the Blog list (by post id).
+  const before = Date.now();
+  let r = await call({ action: 'publish_now', id: p1.id });
+  assert.equal(r.status, 200, await r.clone().text());
+  const out = (await r.json()) as { post: { status: string; publish_at: string }; indexNow: string };
+  assert.equal(out.post.status, 'published');
+  assert.ok(Date.parse(out.post.publish_at) >= before - 1000 && Date.parse(out.post.publish_at) <= Date.now() + 1000, 'date is now');
+  assert.equal(out.indexNow, 'sent to IndexNow');
+  assert.ok(fake.calls.indexnow.at(-1)!.urlList.includes(`https://www.numfall.store/blog/${p1.slug}`));
+  assert.equal((await page(String(p1.slug))).status, 200, 'visible at once');
+  const art = fake.articles.get(String(p1.article_id))!.data as unknown as import('../writer/shared/types').Article;
+  assert.equal(art.status, 'published');
+  assert.equal(art.options.publishAt, out.post.publish_at);
+  assert.equal(art.step, 'Live on the site (published early)');
+  const sm = await (await pageApi.GET(new Request('https://www.numfall.store/api/page?r=sitemap'))).text();
+  assert.ok(sm.includes(`/blog/${p1.slug}`), 'in the sitemap');
+
+  // Again: refused, nothing changes.
+  r = await call({ action: 'publish_now', id: p1.id });
+  assert.equal(r.status, 409);
+  assert.match(await r.text(), /already live/);
+
+  // From the article page (by article id).
+  r = await call({ action: 'publish_now', article_id: p2.article_id });
+  assert.equal(r.status, 200, await r.clone().text());
+  assert.equal(fake.posts.find(x => x.id === p2.id)!.status, 'published');
+  assert.equal((fake.articles.get(String(p2.article_id))!.data as unknown as { status: string }).status, 'published');
+
+  // A draft is not "published early".
+  const draft = await call({ action: 'blog_save', intent: 'draft', post: { title: 'Notes on a draft about grid puzzles', slug: 'notes-draft-grid-puzzles', html: '<p>' + 'word '.repeat(120) + '</p>' } });
+  const d = (await draft.json()) as { id: string };
+  r = await call({ action: 'publish_now', id: d.id });
+  assert.equal(r.status, 409);
+  assert.match(await r.text(), /Only scheduled posts/);
+});
+
+test('moving a scheduled post\'s date to now in the editor also marks its article live', async () => {
+  await runner.createBatch({ topics: ['How to solve a 6×6 logic grid'], mode: 'schedule', days: 5 }, await db.getSettings());
+  await drain(10);
+  const p = fake.posts.find(x => x.status === 'scheduled')!;
+  const c = await cookie();
+  const r = await writerApi.POST(new Request('http://x/api/writer', { method: 'POST', headers: { cookie: c }, body: JSON.stringify({ action: 'blog_save', intent: 'publish', post: { ...p, publish_at: new Date(Date.now() - 1000).toISOString() } }) }));
+  assert.equal(r.status, 200, await r.clone().text());
+  assert.equal(((await r.json()) as { status: string }).status, 'published');
+  assert.equal((fake.articles.get(String(p.article_id))!.data as unknown as { status: string }).status, 'published');
+});
+
 test('admin API and tick endpoint refuse callers without the cookie or secret', async () => {
   const r1 = await writerApi.GET(new Request('http://x/api/writer?action=list'));
   assert.equal(r1.status, 401);

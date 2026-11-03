@@ -65,7 +65,7 @@ async function list(): Promise<void> {
   const spend = articles.reduce((n, a) => n + (a.summary?.costUsd ?? 0), 0);
   app.innerHTML = `${nav('#/')}<main>
 ${paused.length ? `<p class="note">${paused.map(([p, t]) => `${p === 'groq' ? 'Groq' : 'OpenRouter'} is paused until ${when(new Date(t.until).toISOString())} (${esc((t.reason ?? 'daily limit').slice(0, 160))}).`).join(' ')} ${paused.length >= 2 ? 'Articles carry on without the humanizer until one comes back.' : 'The other provider is used meanwhile, if it has a key.'}</p>` : ''}
-${openErrors ? `<p class="note"><a href="#/errors">${openErrors} open error${openErrors === 1 ? '' : 's'}</a> in the error log. A scheduled check reviews and fixes them every 3 hours.</p>` : ''}
+${openErrors ? `<p class="note"><a href="#/errors">${openErrors} open error${openErrors === 1 ? '' : 's'}</a> in the error log.</p>` : ''}
 <p class="muted">${articles.length} articles · ${money(spend)} spent on these · the background job keeps working when this page is closed.</p>
 <p class="muted small">Search engines (IndexNow, every 12 hours): ${indexNow ? `last run ${when(indexNow.at)}, ${esc(indexNow.note)}` : 'not run yet'} · <a href="/sitemap.xml" target="_blank">sitemap</a> · <a href="/blog/rss.xml" target="_blank">RSS</a> · <a href="/llms.txt" target="_blank">llms.txt</a></p>
 <table class="list"><thead><tr><th>Article</th><th>Status</th><th>Human</th><th>Goes live</th><th>Cost</th></tr></thead><tbody>
@@ -134,13 +134,13 @@ async function one(id: string): Promise<void> {
   app.innerHTML = `${nav('')}<main class="detail">
 <p><a href="#/">← Articles</a></p>
 <h1>${esc(a.title ?? a.options.topic)}</h1>
-<p class="muted">${esc(a.options.author)} · ${STATUS[a.status] ?? a.status} · ${esc(a.step)} · ${money(a.usage.costUsd)}${a.options.publishAt ? ` · goes live ${when(a.options.publishAt)}` : ''}${a.slug && ['scheduled', 'published'].includes(a.status) ? ` · <a href="/blog/${a.slug}" target="_blank">View on site ↗</a>` : ''}</p>
+<p class="muted">${esc(a.options.author)} · ${STATUS[a.status] ?? a.status} · ${esc(a.step)} · ${money(a.usage.costUsd)}${a.options.publishAt ? ` · ${a.status === 'published' ? 'live since' : 'goes live'} ${when(a.options.publishAt)}` : ''}${a.slug && ['scheduled', 'published'].includes(a.status) ? ` · <a href="/blog/${a.slug}" target="_blank">View on site ↗</a>` : ''}</p>
 ${a.error ? `<p class="err">${esc(a.error)}</p>` : ''}
 <div class="actions">
 ${!done && !a.stopped ? '<button data-do="run">Run next steps here</button><button data-do="stop" class="ghost">Stop</button>' : ''}
 ${a.stopped || a.status === 'failed' ? '<button data-do="retry">Retry</button>' : ''}
 ${done && a.status === 'ready' ? '<button data-do="post">Post now</button><input type="datetime-local" id="at"><button data-do="schedule" class="ghost">Schedule</button>' : ''}
-${['scheduled', 'published'].includes(a.status) ? '<button data-do="unpublish" class="ghost">Take off the site</button>' : ''}
+${a.status === 'scheduled' ? '<button data-do="publishnow">Publish now</button>' : ''}${['scheduled', 'published'].includes(a.status) ? '<button data-do="unpublish" class="ghost">Take off the site</button>' : ''}
 ${done && a.status === 'ready' ? '<button data-do="edit" class="ghost">Edit text</button>' : ''}${['scheduled', 'published'].includes(a.status) ? '<a class="btn-link" href="#/blog?article=' + a.id + '">Edit in Blog</a>' : ''}
 <button data-do="delete" class="danger">Delete</button>
 </div>
@@ -165,6 +165,14 @@ ${a.faq.length ? `<h2>FAQ</h2>${a.faq.map(f => `<p><strong>${esc(f.q)}</strong><
       const act = b.dataset.do!;
       try {
         if (act === 'delete' && !confirm('Delete this article? If it is on the site, it is taken off.')) return;
+        if (act === 'publishnow') {
+          if (!confirm(`Publish "${a.title ?? a.options.topic}" now? It goes live immediately and its date changes to now instead of the scheduled time.`)) return;
+          b.disabled = true;
+          const r = await api<{ indexNow: string }>('publish_now', { article_id: id });
+          toast(`Live now (${r.indexNow}).`);
+          one(id);
+          return;
+        }
         if (act === 'edit') {
           const d = $('#editor') as HTMLDialogElement;
           d.showModal();
@@ -323,7 +331,9 @@ async function route(): Promise<void> {
     else if (h === '#/usage') await usage();
     else await list();
   } catch (e) {
-    app.innerHTML = `<main><p class="err">${esc((e as Error).message)}</p><button onclick="location.reload()">Reload</button></main>`;
+    // No inline onclick: the Content-Security-Policy blocks inline handlers.
+    app.innerHTML = `<main><p class="err">${esc((e as Error).message)}</p><button type="button" id="reload">Reload</button></main>`;
+    $('#reload').addEventListener('click', () => location.reload());
   }
 }
 
@@ -395,7 +405,7 @@ ${shown
   .map(r => `<tr><td><a href="#/blog/${r.id}"><strong>${esc(r.title)}</strong></a><div class="muted small">/blog/${esc(r.slug)} · ${esc(r.author)} · ${esc(r.category)}${r.article_id ? ' · written by the tool' : ''}</div></td>
 <td><span class="pill ${r.status === 'draft' ? 'ready' : r.status === 'unpublished' ? 'failed' : r.status}">${BLOG_STATUS[r.status]}</span></td>
 <td class="small">${r.status === 'draft' ? '<span class="muted">Not scheduled</span>' : when(r.publish_at)}</td><td class="small">${when(r.updated_at)}</td>
-<td class="small nowrap"><a href="/blog/${r.slug}" target="_blank">${r.status === 'published' ? 'View' : 'Preview'}</a> · <a href="#/blog/${r.id}">Edit</a> · <button class="link danger-text" data-del="${r.id}" data-title="${esc(r.title)}">Delete</button></td></tr>`)
+<td class="small nowrap"><a href="/blog/${r.slug}" target="_blank">${r.status === 'published' ? 'View' : 'Preview'}</a> · <a href="#/blog/${r.id}">Edit</a>${r.status === 'scheduled' ? ` · <button class="link" data-pubnow="${r.id}" data-title="${esc(r.title)}">Publish now</button>` : ''} · <button class="link danger-text" data-del="${r.id}" data-title="${esc(r.title)}">Delete</button></td></tr>`)
   .join('')}
 </tbody></table>${shown.length ? '' : '<p class="muted">No posts match.</p>'}</main>`;
   bindNav();
@@ -408,6 +418,20 @@ ${shown
   $('#cat').addEventListener('change', e => setQ('cat', (e.target as HTMLSelectElement).value));
   $('#sort').addEventListener('change', e => setQ('sort', (e.target as HTMLSelectElement).value === 'newest' ? '' : (e.target as HTMLSelectElement).value));
   $('#clear')?.addEventListener('click', () => (location.hash = '#/blog'));
+  app.querySelectorAll<HTMLButtonElement>('[data-pubnow]').forEach(b =>
+    b.addEventListener('click', async () => {
+      if (!confirm(`Publish "${b.dataset.title}" now? It goes live immediately and its date changes to now instead of the scheduled time.`)) return;
+      b.disabled = true;
+      try {
+        const r = await api<{ indexNow: string }>('publish_now', { id: b.dataset.pubnow });
+        toast(`Live now (${r.indexNow}).`);
+        blogList();
+      } catch (err) {
+        toast((err as Error).message, true);
+        b.disabled = false;
+      }
+    }),
+  );
   app.querySelectorAll<HTMLButtonElement>('[data-del]').forEach(b =>
     b.addEventListener('click', async () => {
       if (!confirm(`Delete "${b.dataset.title}" permanently? This cannot be undone.`)) return;
@@ -453,7 +477,7 @@ async function blogEditor(id: string): Promise<void> {
 <section class="card"><h2>Publish</h2><p>Status: <strong>${BLOG_STATUS[p.status]}</strong>${p.status === 'scheduled' ? `<br><span class="small muted">goes live ${when(p.publish_at)}</span>` : ''}</p>
 <label>Publish date (${esc(s.timeZone)}; future = scheduled)<input type="datetime-local" id="pubAt" value="${utcToLocalInput(p.publish_at, s.timeZone)}"></label>
 <div class="actions"><button type="button" class="ghost" data-save="draft">Save draft</button><button type="button" data-save="publish">${p.status === 'published' || p.status === 'scheduled' ? 'Update' : 'Publish'}</button>
-${p.status === 'published' || p.status === 'scheduled' ? '<button type="button" class="ghost" data-save="unpublish">Unpublish</button>' : ''}</div>
+${p.status === 'scheduled' ? '<button type="button" id="pubNow">Publish now</button>' : ''}${p.status === 'published' || p.status === 'scheduled' ? '<button type="button" class="ghost" data-save="unpublish">Unpublish</button>' : ''}</div>
 ${p.slug ? `<p><a href="/blog/${esc(p.slug)}" target="_blank">${p.status === 'published' ? 'View post ↗' : 'Preview ↗'}</a></p>` : ''}
 ${!isNew ? '<button type="button" class="link danger-text" id="del">Delete post</button>' : ''}</section>
 <section class="card"><h2>Author</h2><input id="author" list="authors" value="${esc(p.author)}"><datalist id="authors">${s.authors.map(a => `<option value="${esc(a)}">`).join('')}</datalist></section>
@@ -580,6 +604,12 @@ ${!isNew ? '<button type="button" class="link danger-text" id="del">Delete post<
       }
     }),
   );
+  // Publish now: saves any edits on screen with the publish date set to this minute, so it goes live at once.
+  $('#pubNow')?.addEventListener('click', () => {
+    if (!confirm(`Publish "${val('#title')}" now? It goes live immediately and its date changes to now instead of the scheduled time.`)) return;
+    ($('#pubAt') as HTMLInputElement).value = utcToLocalInput(new Date().toISOString(), s.timeZone);
+    ($('[data-save="publish"]') as HTMLButtonElement).click();
+  });
   $('#del')?.addEventListener('click', async () => {
     if (!confirm(`Delete "${p.title}" permanently? This cannot be undone.`)) return;
     await api('blog_delete', { id: p.id });
@@ -588,14 +618,14 @@ ${!isNew ? '<button type="button" class="link danger-text" id="del">Delete post<
 }
 
 // =====================================================================================================
-// Error log: every failure, newest first. The scheduled check marks them resolved with what it did.
+// Error log: every failure, newest first. Errors are marked resolved once handled.
 // =====================================================================================================
 async function errorsPage(): Promise<void> {
   const all = location.hash.includes('all');
   const rows = await api<{ id: number; at: string; article_id: string | null; title: string | null; stage: string | null; kind: string; message: string; resolved: boolean; resolved_at: string | null; resolution: string | null }[]>('errors', undefined, all ? {} : { open: '1' });
   app.innerHTML = `${nav('#/errors')}<main>
 <div class="headrow"><h1>Errors</h1><div>${all ? '<a href="#/errors">Open only</a>' : '<a href="#/errors?all">Show resolved too</a>'}${rows.some(r => !r.resolved) ? ' · <button class="link" id="resolveAll">Mark all open as resolved</button>' : ''}</div></div>
-<p class="muted small">Every failure is logged here. A scheduled check runs every 3 hours: it restarts stuck articles, fixes code where it can (tests must pass before anything goes live) and marks the errors it handled.</p>
+<p class="muted small">Every failure is logged here, newest first. Mark errors resolved once they are handled.</p>
 <table class="list"><thead><tr><th>When</th><th>Article</th><th>Kind</th><th>Message</th><th>Status</th></tr></thead><tbody>
 ${rows
   .map(r => `<tr${r.resolved ? ' class="muted"' : ''}><td class="small nowrap">${when(r.at)}</td><td>${r.article_id ? `<a href="#/a/${r.article_id}">${esc(r.title ?? r.article_id)}</a>` : '<span class="muted">(site)</span>'}<div class="muted small">${esc(r.stage ?? '')}</div></td>

@@ -2,7 +2,7 @@
 import type { Block } from './types';
 import { linkifyBare } from './links';
 
-export const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+export const escapeHtml = (s: string | null | undefined) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 // Allowed link targets: our own /blog/<slug>, the home page, and the App Store link.
 const SAFE_HREF = /^(?:\/blog\/[a-z0-9-]+|\/|https:\/\/www\.numfall\.store\/[a-z0-9/-]*|https:\/\/apps\.apple\.com\/[A-Za-z0-9/?=&._%-]+)$/;

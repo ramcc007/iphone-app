@@ -8,7 +8,7 @@ import { lastSubmission } from '../writer/server/indexnow';
 import { pauseInfo } from '../writer/server/humanizer';
 import { parseSection } from '../writer/server/steps';
 import { mergeSettings } from '../writer/shared/settings';
-import { saveBlogPost } from '../writer/server/blog';
+import { afterGoingLive, publishNow, saveBlogPost } from '../writer/server/blog';
 import type { Article, Block, Settings } from '../writer/shared/types';
 
 const RUN_BUDGET_MS = 240_000;
@@ -137,8 +137,16 @@ export async function POST(req: Request): Promise<Response> {
         await db.release(id, owner);
         return json(a);
       }
-      case 'blog_save':
-        return json(await saveBlogPost(body.post as Record<string, unknown>, String(body.intent ?? 'draft') as 'draft' | 'publish' | 'unpublish'));
+      case 'blog_save': {
+        const input = body.post as Record<string, unknown>;
+        const before = input?.id ? await db.blogGet(String(input.id)).catch(() => null) : null;
+        const saved = await saveBlogPost(input, String(body.intent ?? 'draft') as 'draft' | 'publish' | 'unpublish');
+        // Moved from scheduled to live (date set to now or earlier): same follow-up as Publish now.
+        if (before?.status === 'scheduled' && saved.status === 'published') await afterGoingLive(saved);
+        return json(saved);
+      }
+      case 'publish_now':
+        return json(await publishNow({ id: body.id ? String(body.id) : undefined, article_id: body.article_id ? String(body.article_id) : undefined }));
       case 'errors_resolve':
         return json(await db.resolveErrors((body.ids as number[]) ?? [], String(body.resolution ?? 'Marked resolved by you')));
       case 'blog_delete':

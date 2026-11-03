@@ -334,7 +334,7 @@ export class Fake {
       case 'post_upsert_article': {
         if (!slugOk(post.slug)) return [400, { message: 'check constraint' }];
         const i = this.posts.findIndex(p => p.article_id === post.article_id);
-        const row = { ...post, id: i >= 0 ? this.posts[i].id : `a${this.posts.length + 1}x`, updated_at: new Date().toISOString() } as PostRow;
+        const row = { excerpt: '', meta_title: '', sources: [], ...post, id: i >= 0 ? this.posts[i].id : `a${this.posts.length + 1}x`, updated_at: new Date().toISOString() } as unknown as PostRow;
         if (i >= 0) this.posts[i] = row;
         else {
           if (this.posts.some(p => p.slug === post.slug)) return [409, { message: 'duplicate slug' }];

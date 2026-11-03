@@ -332,3 +332,26 @@ Checked:
 - Layout shift: 0.
 - Blocking time: 0-30 ms.
 - Page weight: 35-68 KB.
+
+## 2026-11-03: "Publish now" for scheduled posts
+- **Owner's request:** publish any scheduled post ahead of its date.
+- **Where:** a **Publish now** button in three places:
+  - each scheduled row in **Blog**;
+  - the **Blog** editor of a scheduled post (saves any edits on screen too);
+  - the article page in **Articles**.
+  - Each asks for confirmation first.
+- **What it does** (`publish_now` in `api/writer.ts`, `publishNow` in `writer/server/blog.ts`):
+  - the post goes live at once and its publish date becomes now, so the site never shows a future date;
+  - the writer article it came from is marked live ("Live on the site (published early)");
+  - IndexNow is told straight away (free);
+  - the sitemap, RSS and llms.txt pick it up immediately because they are built live;
+  - the /blog list can take up to 5 minutes to refresh (CDN cache).
+  - Drafts and live posts are refused with a clear message.
+  - The editor path also covers moving a scheduled post's date to now or earlier and pressing Update. Before this, its article kept showing "Scheduled".
+- **No database change:** it uses the existing secret-checked `post_save` and article lease.
+- **Also fixed:**
+  - the admin's "Reload" button on its error screen used an inline `onclick`, which the 2 November Content-Security-Policy blocks; it is now a normal listener;
+  - the error-log text no longer mentions the 3-hour check (cancelled by the owner);
+  - a live article's page says "live since" instead of "goes live";
+  - `escapeHtml` tolerates a missing value.
+- **Tests:** 38 passing (2 new: Publish now from the list and from the article page, refusals and IndexNow; date moved to now in the editor). The three buttons were also checked end to end in Chromium against the real admin bundle.

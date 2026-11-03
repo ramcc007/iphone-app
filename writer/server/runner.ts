@@ -373,4 +373,20 @@ export async function unpublish(id: string, owner: string): Promise<Article> {
   }
 }
 
+// A scheduled article's post went live early (Publish now): the article shows as live from that moment.
+export async function markArticleLive(id: string, at: string, owner = 'publish-now'): Promise<void> {
+  const a = await db.claim(id, owner, 60);
+  if (!a) throw new Error('another runner is working on this article right now');
+  try {
+    if (a.status !== 'scheduled') return;
+    a.status = 'published';
+    a.options.publishAt = at;
+    a.publishedAt = at;
+    a.step = 'Live on the site (published early)';
+    await save(a, owner);
+  } finally {
+    await db.release(id, owner).catch(() => undefined);
+  }
+}
+
 export { save as saveArticle };
