@@ -98,7 +98,8 @@ export class Fake {
     if (u.pathname === '/rest/v1/rpc/writer_api') return this.rpc(body);
     if (u.pathname === '/rest/v1/rpc/writer_blog_api') return this.blogRpc(body);
     if (u.pathname === '/rest/v1/rpc/writer_errors_api') return this.errorsRpc(body);
-    if (u.pathname === '/rest/v1/posts') return this.publicPosts(u);
+    // 005: the publishable key can no longer read the table directly.
+    if (u.pathname === '/rest/v1/posts') return [401, { code: '42501', message: 'permission denied for table posts' }];
     return [404, { error: 'no route' }];
   }
 
@@ -285,8 +286,18 @@ export class Fake {
         return [200, [...this.posts].sort((x, y) => y.publish_at.localeCompare(x.publish_at)).map(p => ({ article_id: p.article_id, slug: p.slug, title: p.title, headings: p.headings, tags: p.tags, category: p.category, status: p.status, publish_at: p.publish_at }))];
       case 'sweep': {
         let n = 0;
-        for (const p of this.posts) if (p.status === 'scheduled' && Date.parse(p.publish_at) <= now) (p.status = 'published'), n++;
-        for (const r of this.articles.values()) if (r.status === 'scheduled' && r.publish_at && Date.parse(r.publish_at) <= now) ((r.status = 'published'), ((r.data as { status: string }).status = 'published'));
+        for (const p of this.posts) {
+          if (p.status === 'scheduled' && Date.parse(p.publish_at) <= now) {
+            p.status = 'published';
+            n++;
+          }
+        }
+        for (const r of this.articles.values()) {
+          if (r.status === 'scheduled' && r.publish_at && Date.parse(r.publish_at) <= now) {
+            r.status = 'published';
+            (r.data as { status: string }).status = 'published';
+          }
+        }
         return [200, { published: n }];
       }
       default:
@@ -318,6 +329,10 @@ export class Fake {
         return [200, [...this.posts].sort((x, y) => y.publish_at.localeCompare(x.publish_at)).map(({ html: _h, faq: _f, ...rest }) => rest)];
       case 'post_get':
         return [200, this.posts.find(p => p.id === id) ?? null];
+      case 'live_list':
+        return [200, this.liveRows().map(({ html: _h, faq: _f, ...rest }) => rest)];
+      case 'live_get':
+        return [200, this.liveRows().find(p => p.slug === a.slug) ?? null];
       case 'post_save': {
         if (!slugOk(post.slug)) return [400, { message: 'new row violates check constraint "posts_slug_check"' }];
         if (this.posts.some(p => p.slug === post.slug && p.id !== id)) return [409, { message: 'duplicate key value violates unique constraint "posts_slug_key"' }];
@@ -327,14 +342,14 @@ export class Fake {
           this.posts[i] = { ...this.posts[i], ...post, id, updated_at: new Date().toISOString() } as PostRow;
           return [200, this.posts[i]];
         }
-        const row = { excerpt: '', meta_title: '', sources: [], related: [], ...post, id: `p${this.posts.length + 1}x`, updated_at: new Date().toISOString() } as unknown as PostRow;
+        const row = { excerpt: '', meta_title: '', sources: [], related: [], key_takeaways: [], ...post, id: `p${this.posts.length + 1}x`, updated_at: new Date().toISOString(), created_at: new Date().toISOString() } as unknown as PostRow;
         this.posts.push(row);
         return [200, row];
       }
       case 'post_upsert_article': {
         if (!slugOk(post.slug)) return [400, { message: 'check constraint' }];
         const i = this.posts.findIndex(p => p.article_id === post.article_id);
-        const row = { excerpt: '', meta_title: '', sources: [], ...post, id: i >= 0 ? this.posts[i].id : `a${this.posts.length + 1}x`, updated_at: new Date().toISOString() } as unknown as PostRow;
+        const row = { excerpt: '', meta_title: '', sources: [], ...(i >= 0 ? { key_takeaways: this.posts[i].key_takeaways, created_at: this.posts[i].created_at } : { key_takeaways: [], created_at: new Date().toISOString() }), ...post, id: i >= 0 ? this.posts[i].id : `a${this.posts.length + 1}x`, updated_at: new Date().toISOString() } as unknown as PostRow;
         if (i >= 0) this.posts[i] = row;
         else {
           if (this.posts.some(p => p.slug === post.slug)) return [409, { message: 'duplicate slug' }];
@@ -353,11 +368,9 @@ export class Fake {
   }
 
   // ---------- Supabase: public posts (row security: live posts only) ----------
-  private publicPosts(u: URL): [number, unknown] {
+  // The live rule, as in writer_blog_api live_list / live_get.
+  liveRows(): PostRow[] {
     const now = Date.now();
-    let rows = this.posts.filter(p => ['scheduled', 'published'].includes(p.status) && Date.parse(p.publish_at) <= now);
-    const slug = u.searchParams.get('slug');
-    if (slug?.startsWith('eq.')) rows = rows.filter(p => p.slug === slug.slice(3));
-    return [200, rows.sort((x, y) => y.publish_at.localeCompare(x.publish_at))];
+    return this.posts.filter(p => ['scheduled', 'published'].includes(p.status) && Date.parse(p.publish_at) <= now).sort((x, y) => y.publish_at.localeCompare(x.publish_at));
   }
 }

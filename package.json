@@ -9,16 +9,21 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "build:site": "node tools/site/build.js",
     "build:admin": "node tools/site/build-admin.mjs",
-    "build": "npm run typecheck && npm test && npm run build:site && npm run build:admin"
+    "build": "npm run typecheck && npm run lint && npm test && npm run build:site && npm run build:admin",
+    "lint": "eslint --no-error-on-unmatched-pattern api writer admin tests"
   },
   "dependencies": {
     "@vercel/functions": "^2.2.0",
     "@vercel/og": "^0.8.5"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@types/node": "^22.10.0",
     "esbuild": "^0.25.0",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
     "tsx": "^4.19.0",
-    "typescript": "~5.9.0"
+    "typescript": "~5.9.0",
+    "typescript-eslint": "^8.72.1"
   }
 }

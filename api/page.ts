@@ -5,19 +5,8 @@ import { isAdmin } from '../writer/server/auth';
 import { db } from '../writer/server/db';
 import { articlePage, catSlug, indexPage, llms, page, rss, siteFiles, sitemap, type PublicPost } from '../writer/site/blog';
 
-const COLS = 'slug,title,description,excerpt,meta_title,author,category,tags,html,faq,sources,related,reading_minutes,publish_at,updated_at,status';
-const LIST_COLS = 'slug,title,description,excerpt,author,category,tags,related,reading_minutes,publish_at,updated_at,status';
-
-async function rest<T>(query: string): Promise<T> {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
-  if (!url || !key) return [] as T;
-  const r = await fetch(`${url}/rest/v1/${query}`, { headers: { apikey: key, authorization: `Bearer ${key}` }, signal: AbortSignal.timeout(10_000) });
-  if (!r.ok) throw new Error(`posts query failed: ${r.status}`);
-  return (await r.json()) as T;
-}
-
-const livePosts = () => rest<PublicPost[]>(`posts?select=${LIST_COLS}&order=publish_at.desc&limit=5000`);
+// Live posts only: the database applies the live rule (scheduled/published and publish_at <= now) on every call.
+const livePosts = () => db.liveList<PublicPost>();
 
 const PUBLIC_CACHE = 'public, max-age=0, s-maxage=300, stale-while-revalidate=600';
 const html = (body: string, status = 200, cache = PUBLIC_CACHE) => new Response(body, { status, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': cache } });
@@ -52,9 +41,9 @@ export async function GET(req: Request): Promise<Response> {
     if (r === 'post') {
       const slug = (u.searchParams.get('slug') ?? '').toLowerCase();
       if (!/^[a-z0-9]+(-[a-z0-9]+){2,5}$/.test(slug)) return notFound();
-      const [rows, all] = await Promise.all([rest<PublicPost[]>(`posts?select=${COLS}&slug=eq.${slug}&limit=1`), livePosts()]);
+      const [row, all] = await Promise.all([db.liveGet<PublicPost>(slug), livePosts()]);
       const live = new Set(all.map(p => p.slug));
-      let p = rows[0];
+      let p = row ?? undefined;
       let preview: { goLive: string } | undefined;
       if (!p && isAdmin(req)) {
         const row = (await db.postAdmin(slug).catch(() => null)) as PublicPost | null;

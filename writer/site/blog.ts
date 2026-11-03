@@ -21,6 +21,7 @@ export interface PublicPost {
   excerpt?: string;
   meta_title?: string;
   sources?: { name: string; url: string }[];
+  key_takeaways?: string[];
   publish_at: string;
   updated_at: string;
   status: string;

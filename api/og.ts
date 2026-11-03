@@ -1,17 +1,13 @@
 // Open Graph / Twitter image per article: /og/<slug>.png (1200 × 630), drawn from the live post's title.
 import { ImageResponse } from '@vercel/og';
+import { db } from '../writer/server/db';
 
 type El = { type: string; props: Record<string, unknown> };
 const h = (type: string, style: Record<string, unknown>, children?: unknown): El => ({ type, props: { style, children } });
 
 async function title(slug: string): Promise<string | null> {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  const r = await fetch(`${url}/rest/v1/posts?select=title,category&slug=eq.${slug}&limit=1`, { headers: { apikey: key, authorization: `Bearer ${key}` } });
-  if (!r.ok) return null;
-  const rows = (await r.json()) as { title: string; category: string }[];
-  return rows[0] ? `${rows[0].category}\n${rows[0].title}` : null;
+  const row = await db.liveGet<{ title: string; category: string }>(slug).catch(() => null);
+  return row ? `${row.category}\n${row.title}` : null;
 }
 
 export async function GET(req: Request): Promise<Response> {

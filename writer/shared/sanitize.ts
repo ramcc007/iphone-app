@@ -61,6 +61,7 @@ export function sanitizeHtml(input: string): string {
   return out
     .join('')
     .replace(/<\/__skip_a>/g, '')
+    // eslint-disable-next-line no-control-regex -- NUL-delimited placeholder set by this file, never user text
     .replace(/\u0000APPCARD\u0000/g, '<!--app-card-->')
     .replace(/<p>\s*(?:<br>)?\s*<\/p>/g, '')
     .trim();

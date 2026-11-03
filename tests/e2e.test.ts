@@ -121,7 +121,7 @@ test('a scheduled batch is written one after another, scanned once, cleaned, and
   assert.ok(mine.every(p => !(p.headings as string[]).includes('Rows first before boxes')));
   // The noted sentence was verified with one web search and kept.
   assert.ok(fake.calls.claude.some(c => c.step === 'verify'));
-  assert.ok(mine.some(p => String(p.html).includes("two rows and three columns")), mine.map(p => p.html).join("\n----\n") + JSON.stringify([...fake.articles.values()].map(r => (r.data as any).cleanReport)));
+  assert.ok(mine.some(p => String(p.html).includes("two rows and three columns")), mine.map(p => p.html).join("\n----\n") + JSON.stringify([...fake.articles.values()].map(r => (r.data as { cleanReport?: unknown }).cleanReport)));
   // Internal link only to the live article.
   assert.ok(mine.every(p => !String(p.html).includes('not-live-yet-post')));
   assert.ok(mine.some(p => String(p.html).includes('href="/blog/an-existing-live-post"')));

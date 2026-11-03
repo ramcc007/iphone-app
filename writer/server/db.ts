@@ -1,5 +1,5 @@
-// The writer's only door to the database: public.writer_api(secret, op, args) over PostgREST with the
-// publishable key. The key can read nothing but live posts; the secret opens only this function.
+// The only door to the database: secret-checked functions (writer_api, writer_blog_api, writer_errors_api) over
+// PostgREST with the publishable key. The key alone can read nothing (005); the secret opens only these functions.
 import type { Article, PostIndexEntry, Settings } from '../shared/types';
 import { mergeSettings } from '../shared/settings';
 import { HttpError, env } from './http';
@@ -93,6 +93,9 @@ export const db = {
   // Blog manager (writer_blog_api): every post, by id, including hand-written ones.
   blogList: () => api<BlogRow[]>('post_list', {}, 'writer_blog_api'),
   blogGet: (id: string) => api<BlogPost | null>('post_get', { id }, 'writer_blog_api'),
+  // Public pages: live posts only (status scheduled/published and publish_at <= now, checked by the database on every call).
+  liveList: <T = Record<string, unknown>>() => api<T[]>('live_list', {}, 'writer_blog_api'),
+  liveGet: <T = Record<string, unknown>>(slug: string) => api<T | null>('live_get', { slug }, 'writer_blog_api'),
   blogSave: (post: Partial<BlogPost>) => api<BlogPost>('post_save', { post }, 'writer_blog_api'),
   blogDelete: (id: string) => api<{ deleted: boolean }>('post_delete', { id }, 'writer_blog_api'),
   // Error log (writer_errors_api). Logging never throws: a failed log write must not stop the work.
@@ -130,6 +133,7 @@ export interface BlogRow {
   status: BlogStatus;
   publish_at: string;
   updated_at: string;
+  created_at?: string;
   word_count: number;
 }
 export interface BlogPost extends BlogRow {
@@ -140,4 +144,5 @@ export interface BlogPost extends BlogRow {
   headings: string[];
   related: string[];
   reading_minutes: number;
+  key_takeaways?: string[];
 }

@@ -21,16 +21,8 @@ const indexNowKey = (): string => {
   return cfg.indexNowKey ?? '';
 };
 
-async function livePosts(): Promise<{ slug: string; publish_at: string; updated_at: string }[]> {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
-  if (!url || !key) return [];
-  const r = await fetch(`${url}/rest/v1/posts?select=slug,publish_at,updated_at&order=publish_at.desc&limit=10000`, { headers: { apikey: key, authorization: `Bearer ${key}` } });
-  if (!r.ok) throw new Error(`posts query failed: ${r.status}`);
-  return (await r.json()) as { slug: string; publish_at: string; updated_at: string }[];
-}
+const livePosts = () => db.liveList<{ slug: string; publish_at: string; updated_at: string }>();
 
-// Pages that changed since the last submission. The first run sends everything live.
 export function changedUrls(posts: { slug: string; publish_at: string; updated_at: string }[], since: string | null, staticPages: string[]): string[] {
   const t = since ? Date.parse(since) : 0;
   const changed = posts.filter(p => Math.max(Date.parse(p.publish_at), Date.parse(p.updated_at)) > t).map(p => `${SITE}/blog/${p.slug}`);

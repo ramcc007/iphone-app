@@ -45,7 +45,7 @@ function rng(seed: string): () => number {
 
 const split = (t: string) => t.split(/(?<=[.!?])\s+(?=[A-Z"])/);
 // Quotes, links, numbers-heavy sentences and the NumFall App Store sentence stay as written.
-const unsafe = (s: string) => /["\[\]()]|https?:|\d/.test(s);
+const unsafe = (s: string) => /["[\]()]|https?:|\d/.test(s);
 
 export function addSlips(body: Block[], faq: Faq[], seed: string, level: SlipLevel): { body: Block[]; faq: Faq[]; count: number } {
   if (level === 'off') return { body, faq, count: 0 };

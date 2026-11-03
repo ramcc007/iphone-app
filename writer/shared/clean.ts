@@ -77,6 +77,8 @@ export function englishShare(t: string): number {
   if (!ws.length) return 1;
   return ws.filter(w => FUNCTION_WORDS.has(w)).length / ws.length;
 }
+// Script ranges, not characters: the Indic ranges include combining marks on purpose.
+// eslint-disable-next-line no-misleading-character-class
 const NON_LATIN = /[\u0370-\u03FF\u0400-\u04FF\u0590-\u05FF\u0600-\u06FF\u0900-\u0DFF\u0E00-\u0FFF\u1100-\u11FF\u3040-\u30FF\u3400-\u9FFF\uAC00-\uD7AF]/;
 export function isNonEnglish(t: string): boolean {
   if (NON_LATIN.test(t)) return true;
