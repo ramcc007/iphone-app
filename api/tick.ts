@@ -6,10 +6,12 @@ import { isTick } from '../writer/server/auth';
 import { json } from '../writer/server/http';
 import { tick } from '../writer/server/runner';
 import { submitToIndexNow } from '../writer/server/indexnow';
+import { gone, isWriterRole } from '../writer/server/role';
 
 const BUDGET_MS = 270_000;
 
 export async function POST(req: Request): Promise<Response> {
+  if (!isWriterRole()) return gone();
   if (!isTick(req)) return json({ error: 'Not allowed.' }, 401);
   // Every 12 hours: submit new and changed pages to IndexNow search engines.
   if (new URL(req.url).searchParams.get('job') === 'submit') return json(await submitToIndexNow());

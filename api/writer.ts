@@ -8,7 +8,8 @@ import { lastSubmission } from '../writer/server/indexnow';
 import { pauseInfo } from '../writer/server/humanizer';
 import { parseSection } from '../writer/server/steps';
 import { mergeSettings } from '../writer/shared/settings';
-import { afterGoingLive, publishNow, saveBlogPost } from '../writer/server/blog';
+import { publishNow } from '../writer/server/blog';
+import { gone, isWriterRole } from '../writer/server/role';
 import type { Article, Block, Settings } from '../writer/shared/types';
 
 const RUN_BUDGET_MS = 240_000;
@@ -24,6 +25,7 @@ const keys = () => ({
 });
 
 export async function GET(req: Request): Promise<Response> {
+  if (!isWriterRole()) return gone();
   try {
     const u = new URL(req.url);
     const action = u.searchParams.get('action');
@@ -52,13 +54,6 @@ export async function GET(req: Request): Promise<Response> {
         return json(await db.postsIndex());
       case 'errors':
         return json(await db.errors(u.searchParams.get('open') === '1'));
-      case 'blog_list':
-        return json(await db.blogList());
-      case 'blog_get': {
-        const p = await db.blogGet(u.searchParams.get('id') ?? '');
-        if (!p) throw new HttpError(404, 'Post not found.');
-        return json(p);
-      }
       default:
         throw new HttpError(404, 'Unknown action.');
     }
@@ -78,6 +73,7 @@ function markdownToBlocks(md: string): Block[] {
 }
 
 export async function POST(req: Request): Promise<Response> {
+  if (!isWriterRole()) return gone();
   try {
     const body = await readJson<Record<string, unknown> & { action?: string }>(req);
     if (body.action === 'login') {
@@ -137,20 +133,10 @@ export async function POST(req: Request): Promise<Response> {
         await db.release(id, owner);
         return json(a);
       }
-      case 'blog_save': {
-        const input = body.post as Record<string, unknown>;
-        const before = input?.id ? await db.blogGet(String(input.id)).catch(() => null) : null;
-        const saved = await saveBlogPost(input, String(body.intent ?? 'draft') as 'draft' | 'publish' | 'unpublish');
-        // Moved from scheduled to live (date set to now or earlier): same follow-up as Publish now.
-        if (before?.status === 'scheduled' && saved.status === 'published') await afterGoingLive(saved);
-        return json(saved);
-      }
       case 'publish_now':
         return json(await publishNow({ id: body.id ? String(body.id) : undefined, article_id: body.article_id ? String(body.article_id) : undefined }));
       case 'errors_resolve':
         return json(await db.resolveErrors((body.ids as number[]) ?? [], String(body.resolution ?? 'Marked resolved by you')));
-      case 'blog_delete':
-        return json(await db.blogDelete(String(body.id ?? '')));
       case 'settings': {
         const s = mergeSettings(body.settings as Partial<Settings>);
         return json(await db.putSettings(s));

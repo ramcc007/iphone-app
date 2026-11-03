@@ -1,6 +1,7 @@
 // Open Graph / Twitter image per article: /og/<slug>.png (1200 × 630), drawn from the live post's title.
 import { ImageResponse } from '@vercel/og';
 import { db } from '../writer/server/db';
+import { isWriterRole } from '../writer/server/role';
 
 type El = { type: string; props: Record<string, unknown> };
 const h = (type: string, style: Record<string, unknown>, children?: unknown): El => ({ type, props: { style, children } });
@@ -11,6 +12,7 @@ async function title(slug: string): Promise<string | null> {
 }
 
 export async function GET(req: Request): Promise<Response> {
+  if (isWriterRole()) return new Response('Not found', { status: 404 });
   const slug = (new URL(req.url).searchParams.get('slug') ?? '').replace(/\.png$/, '');
   if (!/^[a-z0-9]+(-[a-z0-9]+){2,5}$/.test(slug)) return new Response('Not found', { status: 404 });
   const t = await title(slug);

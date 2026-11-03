@@ -31,8 +31,8 @@ const toast = (msg: string, bad = false) => {
 };
 
 function nav(active: string): string {
-  const links = [['#/', 'Articles'], ['#/new', 'New batch'], ['#/blog', 'Blog'], ['#/errors', 'Errors'], ['#/settings', 'Settings'], ['#/usage', 'Usage']];
-  return `<header class="bar"><strong>NumFall Writer</strong><nav>${links.map(([h, l]) => `<a href="${h}"${active === h ? ' class="on"' : ''}>${l}</a>`).join('')}<a href="/blog" target="_blank">Blog ↗</a><button id="logout" class="link">Sign out</button></nav></header>`;
+  const links = [['#/', 'Articles'], ['#/new', 'New batch'], ['#/errors', 'Errors'], ['#/settings', 'Settings'], ['#/usage', 'Usage']];
+  return `<header class="bar"><strong>NumFall Writer</strong><nav>${links.map(([h, l]) => `<a href="${h}"${active === h ? ' class="on"' : ''}>${l}</a>`).join('')}<a href="https://www.numfall.store/blog" target="_blank">Blog ↗</a><button id="logout" class="link">Sign out</button></nav></header>`;
 }
 
 function bindNav(): void {
@@ -57,6 +57,8 @@ function login(): void {
 }
 
 // ---------- articles ----------
+// The blog itself is managed in the numfall.store admin; this tool only writes and posts articles.
+const SITE_ADMIN = 'https://www.numfall.store/admin';
 const STATUS: Record<string, string> = { queued: 'Waiting', generating: 'Writing', checking: 'Checking', publishing: 'Posting', ready: 'Ready', scheduled: 'Scheduled', published: 'Live', failed: 'Stopped' };
 
 async function list(): Promise<void> {
@@ -67,7 +69,7 @@ async function list(): Promise<void> {
 ${paused.length ? `<p class="note">${paused.map(([p, t]) => `${p === 'groq' ? 'Groq' : 'OpenRouter'} is paused until ${when(new Date(t.until).toISOString())} (${esc((t.reason ?? 'daily limit').slice(0, 160))}).`).join(' ')} ${paused.length >= 2 ? 'Articles carry on without the humanizer until one comes back.' : 'The other provider is used meanwhile, if it has a key.'}</p>` : ''}
 ${openErrors ? `<p class="note"><a href="#/errors">${openErrors} open error${openErrors === 1 ? '' : 's'}</a> in the error log.</p>` : ''}
 <p class="muted">${articles.length} articles · ${money(spend)} spent on these · the background job keeps working when this page is closed.</p>
-<p class="muted small">Search engines (IndexNow, every 12 hours): ${indexNow ? `last run ${when(indexNow.at)}, ${esc(indexNow.note)}` : 'not run yet'} · <a href="/sitemap.xml" target="_blank">sitemap</a> · <a href="https://www.numfall.store/blog/feed.xml" target="_blank">RSS</a> · <a href="/llms.txt" target="_blank">llms.txt</a></p>
+<p class="muted small">Search engines (IndexNow, every 12 hours): ${indexNow ? `last run ${when(indexNow.at)}, ${esc(indexNow.note)}` : 'not run yet'} · <a href="https://www.numfall.store/sitemap.xml" target="_blank">sitemap</a> · <a href="https://www.numfall.store/blog/feed.xml" target="_blank">RSS</a> · <a href="https://www.numfall.store/llms.txt" target="_blank">llms.txt</a></p>
 <table class="list"><thead><tr><th>Article</th><th>Status</th><th>Human</th><th>Goes live</th><th>Cost</th></tr></thead><tbody>
 ${articles
   .map(a => {
@@ -134,14 +136,14 @@ async function one(id: string): Promise<void> {
   app.innerHTML = `${nav('')}<main class="detail">
 <p><a href="#/">← Articles</a></p>
 <h1>${esc(a.title ?? a.options.topic)}</h1>
-<p class="muted">${esc(a.options.author)} · ${STATUS[a.status] ?? a.status} · ${esc(a.step)} · ${money(a.usage.costUsd)}${a.options.publishAt ? ` · ${a.status === 'published' ? 'live since' : 'goes live'} ${when(a.options.publishAt)}` : ''}${a.slug && ['scheduled', 'published'].includes(a.status) ? ` · <a href="/blog/${a.slug}" target="_blank">View on site ↗</a>` : ''}</p>
+<p class="muted">${esc(a.options.author)} · ${STATUS[a.status] ?? a.status} · ${esc(a.step)} · ${money(a.usage.costUsd)}${a.options.publishAt ? ` · ${a.status === 'published' ? 'live since' : 'goes live'} ${when(a.options.publishAt)}` : ''}${a.slug && ['scheduled', 'published'].includes(a.status) ? ` · <a href="https://www.numfall.store/blog/${a.slug}" target="_blank">View on site ↗</a>` : ''}</p>
 ${a.error ? `<p class="err">${esc(a.error)}</p>` : ''}
 <div class="actions">
 ${!done && !a.stopped ? '<button data-do="run">Run next steps here</button><button data-do="stop" class="ghost">Stop</button>' : ''}
 ${a.stopped || a.status === 'failed' ? '<button data-do="retry">Retry</button>' : ''}
 ${done && a.status === 'ready' ? '<button data-do="post">Post now</button><input type="datetime-local" id="at"><button data-do="schedule" class="ghost">Schedule</button>' : ''}
 ${a.status === 'scheduled' ? '<button data-do="publishnow">Publish now</button>' : ''}${['scheduled', 'published'].includes(a.status) ? '<button data-do="unpublish" class="ghost">Take off the site</button>' : ''}
-${done && a.status === 'ready' ? '<button data-do="edit" class="ghost">Edit text</button>' : ''}${['scheduled', 'published'].includes(a.status) ? '<a class="btn-link" href="#/blog?article=' + a.id + '">Edit in Blog</a>' : ''}
+${done && a.status === 'ready' ? '<button data-do="edit" class="ghost">Edit text</button>' : ''}${['scheduled', 'published'].includes(a.status) ? '<a class="btn-link" target="_blank" rel="noopener" href="' + SITE_ADMIN + '/blog?article=' + a.id + '">Edit in Blog</a>' : ''}
 <button data-do="delete" class="danger">Delete</button>
 </div>
 <section class="grid2">
@@ -323,8 +325,6 @@ async function route(): Promise<void> {
     settings ??= await api<Settings>('settings');
     const h = location.hash || '#/';
     if (h.startsWith('#/a/')) await one(h.slice(4));
-    else if (h === '#/blog' || h.startsWith('#/blog?')) await blogList();
-    else if (h.startsWith('#/blog/')) await blogEditor(h.slice(7));
     else if (h === '#/new') newBatch();
     else if (h === '#/settings') await settingsPage();
     else if (h.startsWith('#/errors')) await errorsPage();
@@ -355,267 +355,6 @@ setInterval(async () => {
 
 window.addEventListener('hashchange', route);
 route();
-
-// =====================================================================================================
-// Blog manager: every post on numfall.store/blog, written by the tool or by hand.
-// =====================================================================================================
-type BlogStatus = 'draft' | 'scheduled' | 'published' | 'unpublished';
-interface BlogRow { id: string; article_id: string | null; slug: string; title: string; excerpt: string; description: string; author: string; category: string; tags: string[]; status: BlogStatus; publish_at: string; updated_at: string; word_count: number }
-interface BlogPost extends BlogRow { meta_title: string; html: string; faq: { q: string; a: string }[]; sources: { name: string; url: string }[] }
-
-const BLOG_STATUS: Record<BlogStatus, string> = { published: 'Published', scheduled: 'Scheduled', draft: 'Draft', unpublished: 'Unpublished' };
-const CATEGORIES = ['How-to and techniques', 'Number puzzles', 'Brain and habits', 'Casual gaming', 'NumFall guides'];
-const slugifyUi = (t: string) => t.toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-
-async function blogList(): Promise<void> {
-  const q = new URLSearchParams(location.hash.split('?')[1] ?? '');
-  const rows = await api<BlogRow[]>('blog_list');
-  if (q.get('article')) {
-    const hit = rows.find(r => r.article_id === q.get('article'));
-    if (hit) return void (location.hash = `#/blog/${hit.id}`);
-  }
-  const tab = (q.get('status') ?? 'all') as BlogStatus | 'all';
-  const search = (q.get('q') ?? '').toLowerCase();
-  const cat = q.get('cat') ?? '';
-  const sort = q.get('sort') ?? 'newest';
-  const counts = { all: rows.length, published: 0, scheduled: 0, draft: 0, unpublished: 0 } as Record<string, number>;
-  rows.forEach(r => counts[r.status]++);
-  let shown = rows.filter(r => (tab === 'all' || r.status === tab) && (!cat || r.category === cat) && (!search || `${r.title} ${r.slug} ${r.author}`.toLowerCase().includes(search)));
-  shown = shown.sort((a, b) =>
-    sort === 'oldest' ? a.publish_at.localeCompare(b.publish_at) : sort === 'modified' ? b.updated_at.localeCompare(a.updated_at) : sort === 'title' ? a.title.localeCompare(b.title) : b.publish_at.localeCompare(a.publish_at),
-  );
-  const next = rows.filter(r => r.status === 'scheduled').sort((a, b) => a.publish_at.localeCompare(b.publish_at))[0];
-  const setQ = (k: string, v: string) => {
-    const n = new URLSearchParams(q);
-    if (v) n.set(k, v);
-    else n.delete(k);
-    location.hash = `#/blog${n.toString() ? `?${n}` : ''}`;
-  };
-  const cats = [...new Set([...CATEGORIES, ...rows.map(r => r.category)])].sort();
-  app.innerHTML = `${nav('#/blog')}<main>
-<div class="headrow"><h1>Blog</h1><a class="button" href="#/blog/new">New post</a></div>
-<p class="muted">${counts.published} published · ${counts.scheduled} scheduled${next ? ` · next goes live <strong>${when(next.publish_at)}</strong>` : ''} · ${counts.draft} drafts</p>
-<div class="tabs" role="tablist">${(['all', 'published', 'scheduled', 'draft', 'unpublished'] as const).map(t => `<button role="tab" data-tab="${t}" aria-selected="${t === tab}">${t === 'all' ? 'All' : BLOG_STATUS[t]} <span>${counts[t]}</span></button>`).join('')}</div>
-<div class="filters"><input type="search" id="q" placeholder="Search title, slug or author" value="${esc(q.get('q') ?? '')}">
-<select id="cat" aria-label="Category"><option value="">All categories</option>${cats.map(c => `<option${c === cat ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select>
-<select id="sort" aria-label="Sort"><option value="newest"${sort === 'newest' ? ' selected' : ''}>Newest first</option><option value="oldest"${sort === 'oldest' ? ' selected' : ''}>Oldest first</option><option value="modified"${sort === 'modified' ? ' selected' : ''}>Last modified</option><option value="title"${sort === 'title' ? ' selected' : ''}>Title A-Z</option></select>
-${q.toString() ? '<button class="ghost" id="clear">Clear filters</button>' : ''}</div>
-<table class="list"><thead><tr><th>Title</th><th>Status</th><th>Publish date</th><th>Last modified</th><th>Actions</th></tr></thead><tbody>
-${shown
-  .map(r => `<tr><td><a href="#/blog/${r.id}"><strong>${esc(r.title)}</strong></a><div class="muted small">/blog/${esc(r.slug)} · ${esc(r.author)} · ${esc(r.category)}${r.article_id ? ' · written by the tool' : ''}</div></td>
-<td><span class="pill ${r.status === 'draft' ? 'ready' : r.status === 'unpublished' ? 'failed' : r.status}">${BLOG_STATUS[r.status]}</span></td>
-<td class="small">${r.status === 'draft' ? '<span class="muted">Not scheduled</span>' : when(r.publish_at)}</td><td class="small">${when(r.updated_at)}</td>
-<td class="small nowrap"><a href="/blog/${r.slug}" target="_blank">${r.status === 'published' ? 'View' : 'Preview'}</a> · <a href="#/blog/${r.id}">Edit</a>${r.status === 'scheduled' ? ` · <button class="link" data-pubnow="${r.id}" data-title="${esc(r.title)}">Publish now</button>` : ''} · <button class="link danger-text" data-del="${r.id}" data-title="${esc(r.title)}">Delete</button></td></tr>`)
-  .join('')}
-</tbody></table>${shown.length ? '' : '<p class="muted">No posts match.</p>'}</main>`;
-  bindNav();
-  app.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(b => b.addEventListener('click', () => setQ('status', b.dataset.tab === 'all' ? '' : b.dataset.tab!)));
-  let timer: ReturnType<typeof setTimeout>;
-  $('#q').addEventListener('input', e => {
-    clearTimeout(timer);
-    timer = setTimeout(() => setQ('q', (e.target as HTMLInputElement).value.trim()), 400);
-  });
-  $('#cat').addEventListener('change', e => setQ('cat', (e.target as HTMLSelectElement).value));
-  $('#sort').addEventListener('change', e => setQ('sort', (e.target as HTMLSelectElement).value === 'newest' ? '' : (e.target as HTMLSelectElement).value));
-  $('#clear')?.addEventListener('click', () => (location.hash = '#/blog'));
-  app.querySelectorAll<HTMLButtonElement>('[data-pubnow]').forEach(b =>
-    b.addEventListener('click', async () => {
-      if (!confirm(`Publish "${b.dataset.title}" now? It goes live immediately and its date changes to now instead of the scheduled time.`)) return;
-      b.disabled = true;
-      try {
-        const r = await api<{ indexNow: string }>('publish_now', { id: b.dataset.pubnow });
-        toast(`Live now (${r.indexNow}).`);
-        blogList();
-      } catch (err) {
-        toast((err as Error).message, true);
-        b.disabled = false;
-      }
-    }),
-  );
-  app.querySelectorAll<HTMLButtonElement>('[data-del]').forEach(b =>
-    b.addEventListener('click', async () => {
-      if (!confirm(`Delete "${b.dataset.title}" permanently? This cannot be undone.`)) return;
-      try {
-        await api('blog_delete', { id: b.dataset.del });
-        toast('Deleted.');
-        blogList();
-      } catch (err) {
-        toast((err as Error).message, true);
-      }
-    }),
-  );
-}
-
-// datetime-local value for an ISO time, shown in the owner's time zone.
-function utcToLocalInput(iso: string, tz: string): string {
-  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(new Date(iso)).map(x => [x.type, x.value]));
-  return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;
-}
-
-async function blogEditor(id: string): Promise<void> {
-  const isNew = id === 'new';
-  const s = settings!;
-  const p: BlogPost = isNew
-    ? { id: '', article_id: null, slug: '', title: '', excerpt: '', description: '', author: s.authors[0] ?? '', category: CATEGORIES[0], tags: [], status: 'draft', publish_at: new Date().toISOString(), updated_at: '', word_count: 0, meta_title: '', html: '<p></p>', faq: [], sources: [] }
-    : await api<BlogPost>('blog_get', undefined, { id });
-  let slugTouched = !isNew;
-  let tags = [...p.tags];
-  let faq = p.faq.map(x => ({ ...x }));
-  let sources = p.sources.map(x => ({ ...x }));
-  const tb = (cmd: string, label: string, arg = '') => `<button type="button" class="tb" data-cmd="${cmd}" data-arg="${arg}" title="${label}" aria-label="${label}">${label}</button>`;
-  app.innerHTML = `${nav('#/blog')}<main class="editor">
-<p><a href="#/blog">← All posts</a></p>
-<div class="edgrid"><div class="edmain">
-<input id="title" class="title-in" placeholder="Add title" value="${esc(p.title)}">
-<div class="card rich"><div class="toolbar">${tb('formatBlock', 'Paragraph', 'p')}${tb('formatBlock', 'H2', 'h2')}${tb('formatBlock', 'H3', 'h3')}<span class="sep"></span>${tb('bold', 'B')}${tb('italic', 'I')}${tb('underline', 'U')}${tb('strikeThrough', 'S')}<span class="sep"></span>${tb('insertUnorderedList', '• List')}${tb('insertOrderedList', '1. List')}${tb('formatBlock', 'Quote', 'blockquote')}${tb('insertHorizontalRule', 'Divider')}${tb('createLink', 'Link')}${tb('unlink', 'Unlink')}<span class="sep"></span>${tb('undo', 'Undo')}${tb('redo', 'Redo')}<button type="button" class="tb" id="htmlToggle">HTML</button></div>
-<div id="body" class="prose-ed" contenteditable="true">${p.html}</div><textarea id="bodyHtml" class="html-ed" hidden></textarea></div>
-<section class="card"><h2>Excerpt</h2><textarea id="excerpt" rows="3" maxlength="400" placeholder="Short summary shown on the blog list">${esc(p.excerpt)}</textarea></section>
-<section class="card"><h2>FAQ <span class="muted small">(adds FAQ rich-result markup)</span></h2><div id="faq"></div><button type="button" class="link" id="addFaq">+ Add question</button></section>
-<section class="card"><h2>Sources <span class="muted small">(shown at the bottom)</span></h2><div id="sources"></div><button type="button" class="link" id="addSrc">+ Add source</button></section>
-</div>
-<aside class="edside">
-<section class="card"><h2>Publish</h2><p>Status: <strong>${BLOG_STATUS[p.status]}</strong>${p.status === 'scheduled' ? `<br><span class="small muted">goes live ${when(p.publish_at)}</span>` : ''}</p>
-<label>Publish date (${esc(s.timeZone)}; future = scheduled)<input type="datetime-local" id="pubAt" value="${utcToLocalInput(p.publish_at, s.timeZone)}"></label>
-<div class="actions"><button type="button" class="ghost" data-save="draft">Save draft</button><button type="button" data-save="publish">${p.status === 'published' || p.status === 'scheduled' ? 'Update' : 'Publish'}</button>
-${p.status === 'scheduled' ? '<button type="button" id="pubNow">Publish now</button>' : ''}${p.status === 'published' || p.status === 'scheduled' ? '<button type="button" class="ghost" data-save="unpublish">Unpublish</button>' : ''}</div>
-${p.slug ? `<p><a href="/blog/${esc(p.slug)}" target="_blank">${p.status === 'published' ? 'View post ↗' : 'Preview ↗'}</a></p>` : ''}
-${!isNew ? '<button type="button" class="link danger-text" id="del">Delete post</button>' : ''}</section>
-<section class="card"><h2>Author</h2><input id="author" list="authors" value="${esc(p.author)}"><datalist id="authors">${s.authors.map(a => `<option value="${esc(a)}">`).join('')}</datalist></section>
-<section class="card"><h2>Category</h2><input id="category" list="cats" value="${esc(p.category)}"><datalist id="cats">${CATEGORIES.map(c => `<option value="${esc(c)}">`).join('')}</datalist></section>
-<section class="card"><h2>Tags</h2><div id="tags" class="tagrow"></div><input id="tagIn" placeholder="Type a tag, press Enter"></section>
-<section class="card"><h2>SEO</h2>
-<label>URL slug<input id="slug" value="${esc(p.slug)}"></label>${p.status === 'published' ? '<p class="small note">Changing the slug of a live post changes its URL and can lose search ranking.</p>' : ''}
-<label>Meta title <span class="small muted" id="mtCount"></span><input id="metaTitle" maxlength="120" placeholder="${esc(p.title)}" value="${esc(p.meta_title)}"></label>
-<label>Meta description <span class="small muted" id="mdCount"></span><textarea id="metaDesc" rows="3" maxlength="320">${esc(p.description)}</textarea></label>
-<div class="serp"><div class="small muted" id="serpUrl"></div><div class="serp-t" id="serpTitle"></div><div class="small" id="serpDesc"></div></div></section>
-</aside></div></main>`;
-  bindNav();
-  const body = $('#body');
-  const bodyHtml = $<HTMLTextAreaElement>('#bodyHtml');
-  const val = (sel: string) => ($(sel) as HTMLInputElement).value.trim();
-  const currentHtml = () => (bodyHtml.hidden ? body.innerHTML : bodyHtml.value);
-  app.querySelectorAll<HTMLButtonElement>('.tb[data-cmd]').forEach(b =>
-    b.addEventListener('mousedown', e => {
-      e.preventDefault();
-      if (!bodyHtml.hidden) return;
-      const cmd = b.dataset.cmd!;
-      if (cmd === 'createLink') {
-        const url = prompt('Link address (https://… or /blog/…)');
-        if (url) document.execCommand('createLink', false, url);
-        return;
-      }
-      document.execCommand(cmd, false, b.dataset.arg ? `<${b.dataset.arg}>` : undefined);
-    }),
-  );
-  $('#htmlToggle').addEventListener('click', () => {
-    if (bodyHtml.hidden) {
-      bodyHtml.value = body.innerHTML;
-      body.hidden = true;
-      bodyHtml.hidden = false;
-    } else {
-      body.innerHTML = bodyHtml.value;
-      bodyHtml.hidden = true;
-      body.hidden = false;
-    }
-  });
-  const renderTags = () => {
-    $('#tags').innerHTML = tags.map((t, i) => `<span class="tag">${esc(t)} <button type="button" data-tag="${i}" aria-label="Remove ${esc(t)}">×</button></span>`).join('');
-    app.querySelectorAll<HTMLButtonElement>('[data-tag]').forEach(b => b.addEventListener('click', () => ((tags = tags.filter((_, j) => j !== +b.dataset.tag!)), renderTags())));
-  };
-  const addTag = (t: string) => {
-    const v = t.replace(/,$/, '').trim();
-    if (v && !tags.includes(v)) tags.push(v);
-    ($('#tagIn') as HTMLInputElement).value = '';
-    renderTags();
-  };
-  $('#tagIn').addEventListener('keydown', e => {
-    if ((e as KeyboardEvent).key === 'Enter') {
-      e.preventDefault();
-      addTag((e.target as HTMLInputElement).value);
-    }
-  });
-  $('#tagIn').addEventListener('input', e => (e.target as HTMLInputElement).value.endsWith(',') && addTag((e.target as HTMLInputElement).value));
-  const renderFaq = () => {
-    $('#faq').innerHTML = faq.map((f, i) => `<div class="rep"><input data-fq="${i}" placeholder="Question" value="${esc(f.q)}"><textarea data-fa="${i}" rows="3" placeholder="Answer">${esc(f.a)}</textarea><button type="button" class="link danger-text" data-frm="${i}">Remove</button></div>`).join('');
-    app.querySelectorAll<HTMLInputElement>('[data-fq]').forEach(x => x.addEventListener('input', () => (faq[+x.dataset.fq!].q = x.value)));
-    app.querySelectorAll<HTMLTextAreaElement>('[data-fa]').forEach(x => x.addEventListener('input', () => (faq[+x.dataset.fa!].a = x.value)));
-    app.querySelectorAll<HTMLButtonElement>('[data-frm]').forEach(x => x.addEventListener('click', () => ((faq = faq.filter((_, j) => j !== +x.dataset.frm!)), renderFaq())));
-  };
-  const renderSrc = () => {
-    $('#sources').innerHTML = sources.map((x, i) => `<div class="rep row3"><input data-sn="${i}" placeholder="Name, e.g. Frontiers in Psychology" maxlength="80" value="${esc(x.name)}"><input data-su="${i}" placeholder="https://" value="${esc(x.url)}"><button type="button" class="link danger-text" data-srm="${i}">Remove</button></div>`).join('');
-    app.querySelectorAll<HTMLInputElement>('[data-sn]').forEach(x => x.addEventListener('input', () => (sources[+x.dataset.sn!].name = x.value)));
-    app.querySelectorAll<HTMLInputElement>('[data-su]').forEach(x => x.addEventListener('input', () => (sources[+x.dataset.su!].url = x.value)));
-    app.querySelectorAll<HTMLButtonElement>('[data-srm]').forEach(x => x.addEventListener('click', () => ((sources = sources.filter((_, j) => j !== +x.dataset.srm!)), renderSrc())));
-    ($('#addSrc') as HTMLButtonElement).hidden = sources.length >= 8;
-  };
-  $('#addFaq').addEventListener('click', () => (faq.push({ q: '', a: '' }), renderFaq()));
-  $('#addSrc').addEventListener('click', () => (sources.push({ name: '', url: 'https://' }), renderSrc()));
-  const serp = () => {
-    const title = val('#metaTitle') || val('#title');
-    const full = `${title} | NumFall`.length <= 60 ? `${title} | NumFall` : title;
-    const desc = val('#metaDesc') || val('#excerpt');
-    $('#mtCount').textContent = `(${full.length}/60)`;
-    $('#mtCount').className = `small ${full.length > 60 ? 'err' : 'muted'}`;
-    $('#mdCount').textContent = `(${desc.length}/155)`;
-    $('#mdCount').className = `small ${desc.length > 155 ? 'err' : 'muted'}`;
-    $('#serpUrl').textContent = `numfall.store › blog › ${val('#slug') || slugifyUi(val('#title'))}`;
-    $('#serpTitle').textContent = full || 'Post title';
-    $('#serpDesc').textContent = desc || 'Meta description appears here.';
-  };
-  $('#title').addEventListener('input', () => {
-    if (!slugTouched) ($('#slug') as HTMLInputElement).value = slugifyUi(val('#title')).split('-').slice(0, 6).join('-');
-    serp();
-  });
-  $('#slug').addEventListener('input', () => ((slugTouched = true), serp()));
-  ['#metaTitle', '#metaDesc', '#excerpt'].forEach(sel => $(sel).addEventListener('input', serp));
-  renderTags();
-  renderFaq();
-  renderSrc();
-  serp();
-  app.querySelectorAll<HTMLButtonElement>('[data-save]').forEach(b =>
-    b.addEventListener('click', async () => {
-      b.disabled = true;
-      try {
-        const saved = await api<BlogPost>('blog_save', {
-          intent: b.dataset.save,
-          post: {
-            id: p.id || undefined,
-            article_id: p.article_id,
-            title: val('#title'),
-            slug: val('#slug'),
-            html: currentHtml(),
-            excerpt: val('#excerpt'),
-            description: val('#metaDesc'),
-            meta_title: val('#metaTitle'),
-            author: val('#author'),
-            category: val('#category'),
-            tags,
-            faq,
-            sources,
-            publish_at: val('#pubAt') ? localInputToUtc(val('#pubAt'), s.timeZone) : '',
-          },
-        });
-        toast(saved.status === 'draft' ? 'Draft saved.' : saved.status === 'scheduled' ? `Scheduled for ${when(saved.publish_at)}.` : saved.status === 'unpublished' ? 'Taken off the site.' : 'Published.');
-        if (isNew) location.hash = `#/blog/${saved.id}`;
-        else blogEditor(saved.id);
-      } catch (err) {
-        toast((err as Error).message, true);
-        b.disabled = false;
-      }
-    }),
-  );
-  // Publish now: saves any edits on screen with the publish date set to this minute, so it goes live at once.
-  $('#pubNow')?.addEventListener('click', () => {
-    if (!confirm(`Publish "${val('#title')}" now? It goes live immediately and its date changes to now instead of the scheduled time.`)) return;
-    ($('#pubAt') as HTMLInputElement).value = utcToLocalInput(new Date().toISOString(), s.timeZone);
-    ($('[data-save="publish"]') as HTMLButtonElement).click();
-  });
-  $('#del')?.addEventListener('click', async () => {
-    if (!confirm(`Delete "${p.title}" permanently? This cannot be undone.`)) return;
-    await api('blog_delete', { id: p.id });
-    location.hash = '#/blog';
-  });
-}
 
 // =====================================================================================================
 // Error log: every failure, newest first. Errors are marked resolved once handled.

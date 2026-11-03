@@ -2,6 +2,7 @@
 // Visitors only ever see live posts (the database's row security enforces it). A scheduled post returns 404
 // until its time; signed in as admin, the same URL shows a preview with the go-live time.
 import { isAdmin } from '../writer/server/auth';
+import { isWriterRole } from '../writer/server/role';
 import { db } from '../writer/server/db';
 import { articlePage, catSlug, indexPage, llms, page, PER_PAGE, rss, siteFiles, sitemap, type PublicPost } from '../writer/site/blog';
 
@@ -25,6 +26,7 @@ function notFound(): Response {
 }
 
 export async function GET(req: Request): Promise<Response> {
+  if (isWriterRole()) return new Response('Not found', { status: 404, headers: { 'x-robots-tag': 'noindex' } });
   const u = new URL(req.url);
   const r = u.searchParams.get('r');
   try {

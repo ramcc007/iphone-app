@@ -4,3 +4,10 @@
 export const appRole = (): 'site' | 'writer' => (process.env.APP_ROLE === 'writer' ? 'writer' : 'site');
 export const isSiteRole = () => appRole() === 'site';
 export const isWriterRole = () => appRole() === 'writer';
+
+// The article writer's old addresses on numfall.store: gone for good (410), never indexed.
+export const gone = () =>
+  new Response(JSON.stringify({ error: 'The article writer has moved off numfall.store.' }), {
+    status: 410,
+    headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=3600', 'x-robots-tag': 'noindex' },
+  });

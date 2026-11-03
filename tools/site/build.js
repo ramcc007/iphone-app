@@ -78,6 +78,15 @@ for (const f of pages) {
 }
 if (process.argv.includes('--check')) { console.log('Site builds: ' + pages.length + ' pages. Still to fill in: ' + (new Set(placeholders).size ? [...new Set(placeholders)].join('; ') : 'nothing')); process.exit(0); }
 fs.rmSync(DIST, { recursive: true, force: true }); fs.mkdirSync(DIST, { recursive: true });
+// The article-writer project (APP_ROLE=writer, numfall-writer.vercel.app) serves no public pages: the tool lives at
+// /admin (tools/site/build-admin.mjs), the root sends you there, and nothing is indexed.
+if (process.env.APP_ROLE === 'writer') {
+  fs.writeFileSync(path.join(DIST, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
+  fs.writeFileSync(path.join(DIST, 'index.html'), '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta http-equiv="refresh" content="0; url=/admin"><title>NumFall Writer</title><a href="/admin">NumFall Writer</a>\n');
+  fs.copyFileSync(path.join(SRC, 'favicon.svg'), path.join(DIST, 'favicon.svg'));
+  console.log('Writer project: no public pages; the tool is at /admin.');
+  process.exit(0);
+}
 for (const f of pages) fs.writeFileSync(path.join(DIST, f), out[f]);
 fs.copyFileSync(path.join(SRC, 'style.css'), path.join(DIST, 'style.css'));
 fs.copyFileSync(path.join(SRC, 'favicon.svg'), path.join(DIST, 'favicon.svg'));

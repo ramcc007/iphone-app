@@ -1,6 +1,6 @@
 // The whole flow against fake Claude, Groq, GPTZero and Supabase servers.
 import { test, before, after, beforeEach } from 'node:test';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { Fake } from './fakes/server';
@@ -15,11 +15,22 @@ let tickApi: typeof import('../api/tick');
 before(async () => {
   await fake.start();
   Object.assign(process.env, fake.env(), { LOGIN_DELAY_MS: '0' });
+  delete process.env.APP_ROLE; // tests start as the site; writer calls switch role (asWriter)
   runner = await import('../writer/server/runner');
   db = (await import('../writer/server/db')).db;
   pageApi = await import('../api/page');
-  writerApi = await import('../api/writer');
-  tickApi = await import('../api/tick');
+  // The writer and tick endpoints only answer on the writer project (APP_ROLE=writer); public pages on the site.
+  const asWriter = <M extends Record<string, unknown>>(m: M): M =>
+    Object.fromEntries(Object.entries(m).map(([k, f]) => [k, typeof f === 'function' ? async (r: Request) => {
+      process.env.APP_ROLE = 'writer';
+      try {
+        return await (f as (r: Request) => Promise<Response>)(r);
+      } finally {
+        delete process.env.APP_ROLE;
+      }
+    } : f])) as M;
+  writerApi = asWriter(await import('../api/writer'));
+  tickApi = asWriter(await import('../api/tick'));
 });
 after(() => fake.stop());
 
@@ -348,8 +359,8 @@ test('Publish now: a scheduled post goes live at once with today as its date; it
   assert.equal((fake.articles.get(String(p2.article_id))!.data as unknown as { status: string }).status, 'published');
 
   // A draft is not "published early".
-  const draft = await call({ action: 'blog_save', intent: 'draft', post: { title: 'Notes on a draft about grid puzzles', slug: 'notes-draft-grid-puzzles', html: '<p>' + 'word '.repeat(120) + '</p>' } });
-  const d = (await draft.json()) as { id: string };
+  const d = { id: randomUUID(), article_id: null, slug: 'notes-draft-grid-puzzles', title: 'Notes on a draft', status: 'draft', publish_at: new Date().toISOString(), updated_at: new Date().toISOString(), headings: [], tags: [], category: 'Number puzzles' };
+  fake.posts.push(d);
   r = await call({ action: 'publish_now', id: d.id });
   assert.equal(r.status, 409);
   assert.match(await r.text(), /Only scheduled posts/);
@@ -360,10 +371,30 @@ test('moving a scheduled post\'s date to now in the editor also marks its articl
   await drain(10);
   const p = fake.posts.find(x => x.status === 'scheduled')!;
   const c = await cookie();
-  const r = await writerApi.POST(new Request('http://x/api/writer', { method: 'POST', headers: { cookie: c }, body: JSON.stringify({ action: 'blog_save', intent: 'publish', post: { ...p, publish_at: new Date(Date.now() - 1000).toISOString() } }) }));
+  // The numfall.store admin editor (PUT /api/admin/blog/:id) with the date moved to now.
+  const adminApi = await import('../api/admin');
+  const r = await adminApi.PUT(new Request(`https://www.numfall.store/api/admin?path=blog/${p.id}`, { method: 'PUT', headers: { cookie: c }, body: JSON.stringify({ intent: 'publish', post: { ...p, content_html: p.html, publish_at: new Date(Date.now() - 1000).toISOString() } }) }));
   assert.equal(r.status, 200, await r.clone().text());
   assert.equal(((await r.json()) as { status: string }).status, 'published');
   assert.equal((fake.articles.get(String(p.article_id))!.data as unknown as { status: string }).status, 'published');
+});
+
+test('the writer and tick endpoints are gone (410) on numfall.store; public pages are not served by the writer project', async () => {
+  const writerMod = await import('../api/writer');
+  const tickMod = await import('../api/tick');
+  delete process.env.APP_ROLE;
+  for (const r of [await writerMod.GET(new Request('https://www.numfall.store/api/writer?action=me')), await writerMod.POST(new Request('https://www.numfall.store/api/writer', { method: 'POST', body: '{}' })), await tickMod.POST(new Request('https://www.numfall.store/api/tick', { method: 'POST' }))]) {
+    assert.equal(r.status, 410);
+    assert.equal(r.headers.get('x-robots-tag'), 'noindex');
+  }
+  process.env.APP_ROLE = 'writer';
+  try {
+    assert.equal((await pageApi.GET(new Request('https://numfall-writer.vercel.app/api/page?r=blog'))).status, 404);
+    const adminMod = await import('../api/admin');
+    assert.equal((await adminMod.GET(new Request('https://numfall-writer.vercel.app/api/admin?path=me'))).status, 404);
+  } finally {
+    delete process.env.APP_ROLE;
+  }
 });
 
 test('admin API and tick endpoint refuse callers without the cookie or secret', async () => {
@@ -418,67 +449,6 @@ test('RSS feed lists live articles; IndexNow gets everything once, then only new
   fake.posts.push({ ...fake.posts[0], article_id: 'new', slug: 'brand-new-live-post', publish_at: t, updated_at: t });
   await submitToIndexNow(new Date(Date.now() + 5000));
   assert.deepEqual(fake.calls.indexnow[1].urlList, ['https://www.numfall.store/blog', 'https://www.numfall.store/blog/brand-new-live-post']);
-});
-
-test('blog manager: drafts stay private, publish and schedule work, HTML is cleaned, delete removes', async () => {
-  const c = await cookie();
-  const call = async (body: Record<string, unknown>) => {
-    const r = await writerApi.POST(new Request('http://x/api/writer', { method: 'POST', headers: { cookie: c }, body: JSON.stringify(body) }));
-    return { status: r.status, json: (await r.json()) as Record<string, unknown> };
-  };
-  const words = Array.from({ length: 130 }, (_, i) => `word${i}`).join(' ');
-  const post = {
-    title: 'Pencil marks on a 6×6 grid',
-    slug: 'pencil-marks-six-grid',
-    html: `<h2>First steps</h2><p onclick="x()">Solvers note candidates. ${words}</p><script>alert(1)</script><img src=x onerror=alert(1)><p><a href="javascript:alert(1)">bad</a> <a href="/blog/an-existing-live-post">good</a> https://apps.apple.com/app/id6820579220</p>`,
-    excerpt: 'How solvers use pencil marks.',
-    description: 'How solvers use pencil marks on a 6×6 grid.',
-    meta_title: 'Pencil marks on 6×6 grids',
-    author: 'Emily Carter',
-    category: 'How-to and techniques',
-    tags: ['6x6', 'notes'],
-    faq: [{ q: 'what are pencil marks', a: 'Small notes of possible numbers. See https://www.numfall.store/ for the app.' }],
-    sources: [{ name: 'Example', url: 'https://example.org/a' }, { name: 'Bad', url: 'javascript:1' }],
-  };
-  // Draft: saved, never public.
-  const d = await call({ action: 'blog_save', intent: 'draft', post });
-  assert.equal(d.status, 200, JSON.stringify(d.json));
-  assert.equal(d.json.status, 'draft');
-  const html = String(d.json.html);
-  assert.ok(!/script|onclick|onerror|<img|javascript/i.test(html), html);
-  assert.ok(html.includes('<a href="/blog/an-existing-live-post">good</a>'));
-  assert.equal((d.json.sources as unknown[]).length, 1);
-  assert.deepEqual(d.json.headings, ['First steps']);
-  let r = await pageApi.GET(new Request('https://www.numfall.store/api/page?r=post&slug=pencil-marks-six-grid'));
-  assert.equal(r.status, 404, 'drafts are not public');
-
-  // Publish now: public, with TOC-ready headings, sources, linked bare URLs, meta title.
-  const pub = await call({ action: 'blog_save', intent: 'publish', post: { ...post, id: d.json.id, publish_at: new Date(Date.now() - 1000).toISOString() } });
-  assert.equal(pub.json.status, 'published');
-  r = await pageApi.GET(new Request('https://www.numfall.store/api/page?r=post&slug=pencil-marks-six-grid'));
-  assert.equal(r.status, 200);
-  const page = await r.text();
-  assert.match(page, /<title>Pencil marks on 6×6 grids \| NumFall<\/title>/);
-  assert.match(page, /<h2 id="first-steps">First steps<\/h2>/);
-  assert.match(page, /class="sources"[\s\S]*example\.org\/a/);
-  assert.match(page, /<a href="https:\/\/apps\.apple\.com\/app\/id6820579220"[^>]*>NumFall on the App Store<\/a>/, 'bare App Store address became a link');
-  assert.match(page, /<a href="https:\/\/www\.numfall\.store\/">numfall\.store<\/a>/, 'bare address in the FAQ became a link');
-  const cat = await (await pageApi.GET(new Request('https://www.numfall.store/api/page?r=blog&cat=how-to-and-techniques'))).text();
-  assert.ok(cat.includes('/blog/pencil-marks-six-grid') && cat.includes('class="gridmark'));
-
-  // Future date: scheduled, 404 for visitors.
-  const sch = await call({ action: 'blog_save', intent: 'publish', post: { ...post, id: d.json.id, publish_at: new Date(Date.now() + 86400_000).toISOString() } });
-  assert.equal(sch.json.status, 'scheduled');
-  // Duplicate slug and bad slug are refused with a plain message.
-  const dup = await call({ action: 'blog_save', intent: 'draft', post: { ...post, slug: 'an-existing-live-post' } });
-  assert.equal(dup.status, 409);
-  const bad = await call({ action: 'blog_save', intent: 'draft', post: { ...post, slug: 'two-words' } });
-  assert.equal(bad.status, 400);
-  // List and delete.
-  const list = (await (await writerApi.GET(new Request('http://x/api/writer?action=blog_list', { headers: { cookie: c } }))).json()) as { id: string }[];
-  assert.ok(list.some(x => x.id === d.json.id));
-  await call({ action: 'blog_delete', id: d.json.id });
-  assert.ok(!fake.posts.some(p => p.id === d.json.id));
 });
 
 test('a cut-off links answer does not stop the article: it carries on without internal links', async () => {
