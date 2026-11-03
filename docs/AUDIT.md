@@ -355,3 +355,4 @@ Checked:
   - a live article's page says "live since" instead of "goes live";
   - `escapeHtml` tolerates a missing value.
 - **Tests:** 38 passing (2 new: Publish now from the list and from the article page, refusals and IndexNow; date moved to now in the editor). The three buttons were also checked end to end in Chromium against the real admin bundle.
+- **Deploy note:** the first production build failed on Vercel and production stayed on the previous version. One new test assumed the next scheduled slot is always more than an hour away, which depends on the time of day. It now only checks that the slot is in the future, and passes under UTC, New York, Kolkata and Auckland clocks. The second build is live.
